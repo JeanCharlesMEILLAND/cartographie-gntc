@@ -60,10 +60,9 @@ export default function Home() {
       if (r.freq < minFrequency) return false;
 
       // Operator filter: at least one operator must be active
-      if (activeOperators.size > 0) {
-        const hasActiveOp = r.operators.some((op) => activeOperators.has(op));
-        if (!hasActiveOp) return false;
-      }
+      // If no operators selected ("Aucun"), hide all routes
+      const hasActiveOp = r.operators.some((op) => activeOperators.has(op));
+      if (!hasActiveOp) return false;
 
       // Country filter
       if (country === 'france') {
