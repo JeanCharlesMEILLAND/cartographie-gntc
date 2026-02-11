@@ -32,14 +32,28 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
         // Try rail geometry first (both key orders)
         const key1 = `${route.from}||${route.to}`;
         const key2 = `${route.to}||${route.from}`;
-        const railPoints = railGeometries?.[key1] || railGeometries?.[key2];
+        let railPoints = railGeometries?.[key1] || railGeometries?.[key2];
 
-        const points = railPoints || getBezierPoints(
-          route.fromLat,
-          route.fromLon,
-          route.toLat,
-          route.toLon
-        );
+        let points: [number, number][];
+        if (railPoints && railPoints.length > 0) {
+          // Snap first/last points to the platform marker positions
+          // so the route visually connects to the blue dot
+          points = [...railPoints];
+          points[0] = [route.fromLat, route.fromLon];
+          points[points.length - 1] = [route.toLat, route.toLon];
+          // If key2 matched, the direction is reversed
+          if (!railGeometries?.[key1] && railGeometries?.[key2]) {
+            points[0] = [route.toLat, route.toLon];
+            points[points.length - 1] = [route.fromLat, route.fromLon];
+          }
+        } else {
+          points = getBezierPoints(
+            route.fromLat,
+            route.fromLon,
+            route.toLat,
+            route.toLon
+          );
+        }
 
         const mainOp = route.operators[0] || 'unknown';
         const style = getRouteStyle(route.freq, mainOp);
