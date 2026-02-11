@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #060a14;
+  --panel: rgba(8, 14, 30, 0.95);
+  --border: rgba(70, 120, 255, 0.1);
+  --blue: #5b9aff;
+  --cyan: #38d9f5;
+  --purple: #a78bfa;
+  --orange: #f59e42;
+  --muted: #5e6d8f;
+  --text: #d6ddf0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  background: var(--bg) !important;
+  width: 100%;
+  height: 100%;
+}
+
+.leaflet-control-zoom a {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(6, 10, 20, 0.8) !important;
+  color: var(--muted) !important;
+  font-size: 10px !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--blue) !important;
+}
+
+/* Glass panel effect */
+.glass-panel {
+  background: var(--panel);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+}
+
+/* Marker glow */
+.marker-france {
+  background: radial-gradient(circle, #38d9f5 0%, #5b9aff 100%);
+  border: 2px solid #38d9f5;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(56, 217, 245, 0.5);
+}
+
+.marker-foreign {
+  background: radial-gradient(circle, #c4b5fd 0%, #a78bfa 100%);
+  border: 2px solid #a78bfa;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.4);
+}
+
+.marker-hub {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(56, 217, 245, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(56, 217, 245, 0.9), 0 0 40px rgba(56, 217, 245, 0.3);
+  }
+}
+
+/* Route animation */
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.route-animated {
+  animation: dash-flow 1.5s linear infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--blue);
+}
