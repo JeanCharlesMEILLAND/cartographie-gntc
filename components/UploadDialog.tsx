@@ -75,7 +75,7 @@ export default function UploadDialog({ open, onClose, onUploadSuccess }: UploadD
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Dialog */}
-      <div className="relative glass-panel rounded-xl w-[480px] max-w-[90vw] shadow-2xl">
+      <div className="relative glass-panel rounded-xl w-[480px] max-w-[95vw] mx-4 sm:mx-0 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-sm font-display font-semibold text-blue uppercase tracking-wider">

@@ -124,20 +124,20 @@ export default function Home() {
   return (
     <div className="h-screen w-screen overflow-hidden relative">
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-[1000] h-[50px] glass-panel flex items-center justify-between px-4">
-        <div className="flex items-center gap-3">
+      <header className="absolute top-0 left-0 right-0 z-[1000] h-[50px] glass-panel flex items-center justify-between px-2 sm:px-4">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue to-cyan flex items-center justify-center">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue to-cyan flex items-center justify-center flex-shrink-0">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M2 12H14M4 8H12M6 4H10" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </div>
-            <div>
-              <h1 className="text-sm font-display font-bold text-text leading-tight">
+            <div className="min-w-0">
+              <h1 className="text-xs sm:text-sm font-display font-bold text-text leading-tight truncate">
                 Transport Combiné 2026
               </h1>
-              <p className="text-[10px] text-muted leading-tight">OTC / GNTC</p>
+              <p className="text-[10px] text-muted leading-tight hidden sm:block">OTC / GNTC</p>
             </div>
           </div>
         </div>
@@ -153,13 +153,13 @@ export default function Home() {
         {/* Upload button */}
         <button
           onClick={() => setUploadOpen(true)}
-          className="flex items-center gap-1.5 text-xs text-blue hover:text-cyan transition-colors px-3 py-1.5 rounded-md border border-border hover:border-blue/30"
+          className="flex items-center gap-1.5 text-xs text-blue hover:text-cyan transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-blue/30 flex-shrink-0"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 10V2M7 2L4 5M7 2L10 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M2 9V11C2 11.55 2.45 12 3 12H11C11.55 12 12 11.55 12 11V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          Importer Excel
+          <span className="hidden sm:inline">Importer Excel</span>
         </button>
       </header>
 

@@ -34,7 +34,7 @@ export default function InfoCard({ platforms, routes }: InfoCardProps) {
   })).sort((a, b) => b.freq - a.freq);
 
   return (
-    <div className="absolute bottom-4 right-4 z-[1000] glass-panel rounded-lg w-[320px] max-h-[400px] overflow-y-auto">
+    <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[1000] glass-panel rounded-lg w-auto sm:w-[320px] max-h-[50vh] sm:max-h-[400px] overflow-y-auto">
       {/* Header */}
       <div className="flex items-start justify-between p-3 border-b border-border">
         <div>
