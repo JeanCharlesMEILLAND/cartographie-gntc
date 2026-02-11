@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer as LeafletMap, TileLayer } from 'react-leaflet';
+import { MapContainer as LeafletMap, TileLayer, ZoomControl } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
 import { Platform, AggregatedRoute } from '@/lib/types';
 import FranceBorder from './FranceBorder';
@@ -21,7 +21,7 @@ const TILE_URLS: Record<string, string> = {
   'carto-dark': 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
   'carto-light': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
   'voyager': 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-  'osm': 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  'osm': 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
   'topo': 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
 };
 
@@ -36,7 +36,7 @@ export default function MapInner({ platforms, routes, majorHubs, railGeometries 
       zoom={6}
       className="w-full h-full"
       preferCanvas={true}
-      zoomControl={true}
+      zoomControl={false}
     >
       <TileLayer
         key={tileStyle}
@@ -44,6 +44,7 @@ export default function MapInner({ platforms, routes, majorHubs, railGeometries 
         attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
         maxZoom={19}
       />
+      <ZoomControl position="topright" />
       <FranceBorder />
       <RailwayOverlay />
       <RouteLayer routes={routes} railGeometries={railGeometries} />

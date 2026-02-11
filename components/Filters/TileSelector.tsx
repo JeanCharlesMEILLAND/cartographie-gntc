@@ -6,7 +6,7 @@ const TILES = [
   { value: 'carto-dark', label: 'CartoDB Dark' },
   { value: 'carto-light', label: 'CartoDB Positron' },
   { value: 'voyager', label: 'CartoDB Voyager' },
-  { value: 'osm', label: 'OpenStreetMap' },
+  { value: 'osm', label: 'OSM France' },
   { value: 'topo', label: 'OpenTopoMap' },
 ];
 
