@@ -41,6 +41,11 @@ body {
   border-color: var(--border) !important;
 }
 
+/* Push zoom control above the legend */
+.leaflet-bottom.leaflet-right .leaflet-control-zoom {
+  margin-bottom: 120px;
+}
+
 .leaflet-control-attribution {
   background: rgba(6, 10, 20, 0.8) !important;
   color: var(--muted) !important;

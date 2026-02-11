@@ -44,7 +44,7 @@ export default function MapInner({ platforms, routes, majorHubs, railGeometries 
         attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
         maxZoom={19}
       />
-      <ZoomControl position="topright" />
+      <ZoomControl position="bottomright" />
       <FranceBorder />
       <RailwayOverlay />
       <RouteLayer routes={routes} railGeometries={railGeometries} />
