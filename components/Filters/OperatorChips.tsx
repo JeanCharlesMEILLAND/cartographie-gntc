@@ -30,7 +30,7 @@ export default function OperatorChips() {
           </button>
         </div>
       </div>
-      <div className="flex flex-wrap gap-1 max-h-[200px] overflow-y-auto pr-1">
+      <div className="flex flex-wrap gap-1 max-h-[320px] overflow-y-auto pr-1">
         {allOperators.map((op) => {
           const active = activeOperators.has(op);
           const color = getOperatorColor(op);

@@ -8,10 +8,10 @@ import { getOperatorColor } from '@/lib/colors';
 
 interface RouteLayerProps {
   routes: AggregatedRoute[];
+  railGeometries?: Record<string, [number, number][]>;
 }
 
 function getRouteStyle(freq: number, operator: string) {
-  // Only use orange for very intense routes (>150/sem)
   const color = freq > 150 ? '#f59e42' : getOperatorColor(operator);
 
   if (freq > 150) return { weight: 4, color, opacity: 0.8 };
@@ -21,7 +21,7 @@ function getRouteStyle(freq: number, operator: string) {
   return { weight: 1.2, color: getOperatorColor(operator), opacity: 0.18 };
 }
 
-export default function RouteLayer({ routes }: RouteLayerProps) {
+export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
   const { showRoutes, animateFlux } = useFilterStore();
 
   if (!showRoutes) return null;
@@ -29,12 +29,18 @@ export default function RouteLayer({ routes }: RouteLayerProps) {
   return (
     <>
       {routes.map((route, i) => {
-        const points = getBezierPoints(
+        // Try rail geometry first (both key orders)
+        const key1 = `${route.from}||${route.to}`;
+        const key2 = `${route.to}||${route.from}`;
+        const railPoints = railGeometries?.[key1] || railGeometries?.[key2];
+
+        const points = railPoints || getBezierPoints(
           route.fromLat,
           route.fromLon,
           route.toLat,
           route.toLon
         );
+
         const mainOp = route.operators[0] || 'unknown';
         const style = getRouteStyle(route.freq, mainOp);
 

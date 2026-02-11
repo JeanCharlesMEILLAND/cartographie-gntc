@@ -14,6 +14,7 @@ interface MapInnerProps {
   platforms: Platform[];
   routes: AggregatedRoute[];
   majorHubs: Platform[];
+  railGeometries?: Record<string, [number, number][]>;
 }
 
 const TILE_URLS: Record<string, string> = {
@@ -24,7 +25,7 @@ const TILE_URLS: Record<string, string> = {
   'topo': 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
 };
 
-export default function MapInner({ platforms, routes, majorHubs }: MapInnerProps) {
+export default function MapInner({ platforms, routes, majorHubs, railGeometries }: MapInnerProps) {
   const tileStyle = useFilterStore((s) => s.tileStyle);
 
   const tileUrl = TILE_URLS[tileStyle] || TILE_URLS['carto-dark'];
@@ -45,7 +46,7 @@ export default function MapInner({ platforms, routes, majorHubs }: MapInnerProps
       />
       <FranceBorder />
       <RailwayOverlay />
-      <RouteLayer routes={routes} />
+      <RouteLayer routes={routes} railGeometries={railGeometries} />
       <PlatformMarkers platforms={platforms} routes={routes} />
       <HubLabels platforms={majorHubs} />
     </LeafletMap>

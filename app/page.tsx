@@ -13,6 +13,7 @@ import UploadDialog from '@/components/UploadDialog';
 
 export default function Home() {
   const [data, setData] = useState<TransportData | null>(null);
+  const [railGeometries, setRailGeometries] = useState<Record<string, [number, number][]>>({});
   const [loading, setLoading] = useState(true);
   const [uploadOpen, setUploadOpen] = useState(false);
 
@@ -40,6 +41,11 @@ export default function Home() {
 
   useEffect(() => {
     fetchData();
+    // Load rail geometries
+    fetch('/rail-geometries.json')
+      .then((res) => res.ok ? res.json() : {})
+      .then((geo) => setRailGeometries(geo))
+      .catch(() => {});
   }, [fetchData]);
 
   // Filter platforms by country
@@ -167,6 +173,7 @@ export default function Home() {
         platforms={filteredPlatforms}
         routes={filteredRoutes}
         majorHubs={majorHubs}
+        railGeometries={railGeometries}
       />
 
       {/* Filter Panel */}

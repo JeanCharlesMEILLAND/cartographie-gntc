@@ -16,12 +16,13 @@ interface MapContainerProps {
   platforms: Platform[];
   routes: AggregatedRoute[];
   majorHubs: Platform[];
+  railGeometries?: Record<string, [number, number][]>;
 }
 
-export default function MapContainer({ platforms, routes, majorHubs }: MapContainerProps) {
+export default function MapContainer({ platforms, routes, majorHubs, railGeometries }: MapContainerProps) {
   return (
     <div className="absolute inset-0">
-      <MapInner platforms={platforms} routes={routes} majorHubs={majorHubs} />
+      <MapInner platforms={platforms} routes={routes} majorHubs={majorHubs} railGeometries={railGeometries} />
     </div>
   );
 }
