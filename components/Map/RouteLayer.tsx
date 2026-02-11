@@ -11,12 +11,14 @@ interface RouteLayerProps {
 }
 
 function getRouteStyle(freq: number, operator: string) {
-  const color = freq > 80 ? '#f59e42' : getOperatorColor(operator);
+  // Only use orange for very intense routes (>150/sem)
+  const color = freq > 150 ? '#f59e42' : getOperatorColor(operator);
 
-  if (freq > 80) return { weight: 4, color, opacity: 0.85 };
-  if (freq > 30) return { weight: 3, color, opacity: 0.65 };
-  if (freq > 10) return { weight: 2, color, opacity: 0.4 };
-  return { weight: 1.2, color, opacity: 0.2 };
+  if (freq > 150) return { weight: 4, color, opacity: 0.8 };
+  if (freq > 80) return { weight: 3, color: getOperatorColor(operator), opacity: 0.6 };
+  if (freq > 30) return { weight: 2.5, color: getOperatorColor(operator), opacity: 0.45 };
+  if (freq > 10) return { weight: 1.8, color: getOperatorColor(operator), opacity: 0.3 };
+  return { weight: 1.2, color: getOperatorColor(operator), opacity: 0.18 };
 }
 
 export default function RouteLayer({ routes }: RouteLayerProps) {

@@ -182,8 +182,8 @@ export default function Home() {
       {/* Info Card */}
       <InfoCard platforms={data?.platforms || []} routes={filteredRoutes} />
 
-      {/* Unmatched platforms warning */}
-      {data && data.unmatchedPlatforms.length > 0 && (
+      {/* Unmatched platforms warning - only show if significant */}
+      {data && data.unmatchedPlatforms.length > 3 && (
         <div className="absolute top-[60px] left-1/2 -translate-x-1/2 z-[1000] glass-panel rounded-md px-3 py-1.5">
           <span className="text-xs text-orange">
             Plateformes non géocodées ({data.unmatchedPlatforms.length}) :{' '}
