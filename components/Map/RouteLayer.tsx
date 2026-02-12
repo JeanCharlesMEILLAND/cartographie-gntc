@@ -22,7 +22,7 @@ function getRouteStyle(freq: number, operator: string) {
 }
 
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
-  const { showRoutes, animateFlux } = useFilterStore();
+  const { showRoutes, animateFlux, selectedPlatform } = useFilterStore();
 
   if (!showRoutes) return null;
 
@@ -58,12 +58,20 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
         const mainOp = route.operators[0] || 'unknown';
         const style = getRouteStyle(route.freq, mainOp);
 
+        // Highlight connected routes when a platform is selected
+        const isConnected = selectedPlatform
+          ? route.from === selectedPlatform || route.to === selectedPlatform
+          : false;
+        const dimmed = selectedPlatform && !isConnected;
+
         return (
           <Polyline
             key={`${route.from}-${route.to}-${i}`}
             positions={points}
             pathOptions={{
               ...style,
+              opacity: dimmed ? 0.08 : isConnected ? 1 : style.opacity,
+              weight: isConnected ? style.weight + 1.5 : dimmed ? 1 : style.weight,
               dashArray: animateFlux ? '8 12' : undefined,
               className: animateFlux ? 'route-animated' : undefined,
             }}

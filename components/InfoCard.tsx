@@ -23,20 +23,30 @@ export default function InfoCard({ platforms, routes }: InfoCardProps) {
   );
 
   const totalFreq = connected.reduce((sum, r) => sum + r.freq, 0);
-  const allOps = new Set<string>();
-  connected.forEach((r) => r.operators.forEach((op) => allOps.add(op)));
 
-  // Destinations
-  const destinations = connected.map((r) => ({
-    name: r.from === selectedPlatform ? r.to : r.from,
-    freq: r.freq,
-    operators: r.operators,
-  })).sort((a, b) => b.freq - a.freq);
+  // Build per-operator breakdown
+  const operatorMap = new Map<string, { dest: string; freq: number }[]>();
+  for (const r of connected) {
+    const dest = r.from === selectedPlatform ? r.to : r.from;
+    for (const op of r.operators) {
+      if (!operatorMap.has(op)) operatorMap.set(op, []);
+      operatorMap.get(op)!.push({ dest, freq: r.freq });
+    }
+  }
+
+  // Sort operators by total frequency
+  const operatorEntries = [...operatorMap.entries()]
+    .map(([op, dests]) => ({
+      op,
+      dests: dests.sort((a, b) => b.freq - a.freq),
+      total: dests.reduce((s, d) => s + d.freq, 0),
+    }))
+    .sort((a, b) => b.total - a.total);
 
   return (
-    <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[1000] glass-panel rounded-lg w-auto sm:w-[320px] max-h-[50vh] sm:max-h-[400px] overflow-y-auto">
+    <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[1000] glass-panel rounded-lg w-auto sm:w-[340px] max-h-[60vh] sm:max-h-[500px] overflow-y-auto">
       {/* Header */}
-      <div className="flex items-start justify-between p-3 border-b border-border">
+      <div className="flex items-start justify-between p-3 border-b border-border sticky top-0 glass-panel z-10">
         <div>
           <h3 className="text-sm font-display font-semibold text-text">
             {platform.site}
@@ -87,40 +97,44 @@ export default function InfoCard({ platforms, routes }: InfoCardProps) {
             <div className="text-[10px] text-muted">liaisons</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-mono font-bold text-purple">{allOps.size}</div>
+            <div className="text-lg font-mono font-bold text-purple">{operatorEntries.length}</div>
             <div className="text-[10px] text-muted">opérateurs</div>
           </div>
         </div>
 
-        {/* Destinations */}
-        {destinations.length > 0 && (
-          <div>
-            <span className="text-[10px] text-muted uppercase tracking-wider">
-              Destinations ({destinations.length})
-            </span>
-            <div className="mt-1 space-y-0.5 max-h-[200px] overflow-y-auto">
-              {destinations.map((d, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedPlatform(d.name)}
-                  className="flex items-center justify-between text-xs py-1 px-1.5 w-full text-left rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors"
-                >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <div
-                      className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: getOperatorColor(d.operators[0] || '') }}
-                    />
-                    <span className="text-text truncate">{d.name}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                    <span className="font-mono text-cyan">{d.freq}/s</span>
-                    <span className="text-[9px] text-muted truncate max-w-[60px]">{d.operators[0]}</span>
-                  </div>
-                </button>
-              ))}
+        {/* Operators with their destinations */}
+        {operatorEntries.map(({ op, dests, total }) => {
+          const color = getOperatorColor(op);
+          return (
+            <div key={op} className="space-y-1">
+              {/* Operator header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className="text-xs font-semibold text-text">{op}</span>
+                </div>
+                <span className="text-[10px] font-mono text-muted">{total} t/sem</span>
+              </div>
+
+              {/* Destinations for this operator */}
+              <div className="ml-4 space-y-0.5">
+                {dests.map((d, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedPlatform(d.dest)}
+                    className="flex items-center justify-between text-xs py-0.5 px-1.5 w-full text-left rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors"
+                  >
+                    <span className="text-text truncate">{d.dest}</span>
+                    <span className="font-mono text-cyan flex-shrink-0 ml-2">{d.freq}/s</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })}
       </div>
     </div>
   );

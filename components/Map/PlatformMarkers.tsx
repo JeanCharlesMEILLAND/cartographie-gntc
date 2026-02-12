@@ -28,7 +28,7 @@ function getMarkerSize(volume: number): number {
 }
 
 export default function PlatformMarkers({ platforms, routes }: PlatformMarkersProps) {
-  const { showPlatforms, setSelectedPlatform } = useFilterStore();
+  const { showPlatforms, selectedPlatform, setSelectedPlatform } = useFilterStore();
   const [zoom, setZoom] = useState(6);
 
   useMapEvents({
@@ -37,6 +37,16 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
 
   if (!showPlatforms) return null;
 
+  // If a platform is selected, find connected platform names
+  const connectedSites = new Set<string>();
+  if (selectedPlatform) {
+    connectedSites.add(selectedPlatform);
+    for (const r of routes) {
+      if (r.from === selectedPlatform) connectedSites.add(r.to);
+      if (r.to === selectedPlatform) connectedSites.add(r.from);
+    }
+  }
+
   return (
     <>
       {platforms.map((platform) => {
@@ -44,34 +54,50 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
         const size = getMarkerSize(volume);
         const isFrance = platform.pays?.toLowerCase() === 'france';
         const isHub = volume > 30;
+        const isBigHub = volume > 80;
 
-        // Name label (shown at zoom >= 7, or always for hubs at zoom >= 6)
-        const showName = zoom >= 8 || (isHub && zoom >= 6);
+        // Is this platform highlighted (selected or connected)?
+        const isHighlighted = selectedPlatform
+          ? connectedSites.has(platform.site)
+          : true;
+        const isSelected = platform.site === selectedPlatform;
+
+        // Name labels: big hubs at zoom >= 7, smaller hubs at zoom >= 9, all at zoom >= 10
+        // When a platform is selected, always show connected names at zoom >= 7
+        const showName =
+          zoom >= 10 ||
+          (isHub && zoom >= 9) ||
+          (isBigHub && zoom >= 7) ||
+          (isHighlighted && selectedPlatform && zoom >= 7);
 
         const labelIcon = showName ? L.divIcon({
           className: 'platform-label',
           html: `<span style="
-            color: #d6ddf0;
-            font-size: ${isHub ? '11px' : '9px'};
-            font-weight: ${isHub ? '700' : '500'};
+            color: ${isSelected ? '#38d9f5' : '#d6ddf0'};
+            font-size: ${isBigHub || isSelected ? '11px' : isHub ? '10px' : '9px'};
+            font-weight: ${isBigHub || isSelected ? '700' : '500'};
             text-shadow: 0 0 4px #060a14, 0 0 8px #060a14, 0 0 12px #060a14;
             white-space: nowrap;
             pointer-events: none;
+            opacity: ${isHighlighted ? '1' : '0.3'};
           ">${platform.site}</span>`,
           iconSize: [0, 0],
           iconAnchor: [0, -12],
         }) : null;
 
+        const dimmed = selectedPlatform && !isHighlighted;
+
         return (
           <span key={platform.site}>
             <CircleMarker
               center={[platform.lat, platform.lon]}
-              radius={size}
+              radius={isSelected ? size + 3 : size}
               pathOptions={{
                 fillColor: isFrance ? '#38d9f5' : '#a78bfa',
-                color: isFrance ? '#38d9f5' : '#a78bfa',
-                fillOpacity: 0.7,
-                weight: 2,
+                color: isSelected ? '#ffffff' : (isFrance ? '#38d9f5' : '#a78bfa'),
+                fillOpacity: dimmed ? 0.15 : 0.7,
+                weight: isSelected ? 3 : 2,
+                opacity: dimmed ? 0.2 : 1,
                 className: isHub ? 'marker-hub' : undefined,
               }}
               eventHandlers={{
