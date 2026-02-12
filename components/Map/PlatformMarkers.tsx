@@ -22,9 +22,9 @@ function getTrainVolume(platformName: string, routes: AggregatedRoute[]): number
 }
 
 function getMarkerSize(volume: number): number {
-  if (volume <= 0) return 6;
-  if (volume > 200) return 16;
-  return 6 + (volume / 200) * 10;
+  if (volume <= 0) return 8;
+  if (volume > 200) return 18;
+  return 8 + (volume / 200) * 10;
 }
 
 export default function PlatformMarkers({ platforms, routes }: PlatformMarkersProps) {
@@ -99,7 +99,10 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
                 className: isHub ? 'marker-hub' : undefined,
               }}
               eventHandlers={{
-                click: () => setSelectedPlatform(platform.site),
+                click: (e) => {
+                  L.DomEvent.stopPropagation(e);
+                  setSelectedPlatform(platform.site);
+                },
               }}
             >
               <Tooltip direction="top" offset={[0, -size]} opacity={0.95}>

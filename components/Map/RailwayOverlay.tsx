@@ -1,20 +1,34 @@
 'use client';
 
-import { TileLayer } from 'react-leaflet';
+import { useEffect, useState } from 'react';
+import { GeoJSON as GeoJSONLayer } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
+import type { FeatureCollection } from 'geojson';
 
 export default function RailwayOverlay() {
-  const { showRailway, railwayStyle } = useFilterStore();
+  const showRailway = useFilterStore((s) => s.showRailway);
+  const [geoData, setGeoData] = useState<FeatureCollection | null>(null);
 
-  if (!showRailway) return null;
+  useEffect(() => {
+    if (!showRailway || geoData) return;
+    fetch('/sncf-rfn.geojson')
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => { if (data) setGeoData(data); })
+      .catch(() => {});
+  }, [showRailway, geoData]);
+
+  if (!showRailway || !geoData) return null;
 
   return (
-    <TileLayer
-      url={`https://{s}.tiles.openrailwaymap.org/${railwayStyle}/{z}/{x}/{y}.png`}
-      attribution='&copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>'
-      opacity={0.4}
-      maxZoom={19}
-      subdomains={['a', 'b', 'c']}
+    <GeoJSONLayer
+      key="sncf-rfn"
+      data={geoData}
+      style={{
+        color: '#6b7db3',
+        weight: 1,
+        opacity: 0.35,
+      }}
+      interactive={false}
     />
   );
 }

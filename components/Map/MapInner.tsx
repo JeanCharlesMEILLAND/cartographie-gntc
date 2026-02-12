@@ -1,8 +1,16 @@
 'use client';
 
-import { MapContainer as LeafletMap, TileLayer, ZoomControl } from 'react-leaflet';
+import { MapContainer as LeafletMap, TileLayer, ZoomControl, useMapEvents } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
 import { Platform, AggregatedRoute } from '@/lib/types';
+
+function MapClickHandler() {
+  const setSelectedPlatform = useFilterStore((s) => s.setSelectedPlatform);
+  useMapEvents({
+    click: () => setSelectedPlatform(null),
+  });
+  return null;
+}
 import FranceBorder from './FranceBorder';
 import RailwayOverlay from './RailwayOverlay';
 import RouteLayer from './RouteLayer';
@@ -48,6 +56,7 @@ export default function MapInner({ platforms, routes, railGeometries }: MapInner
         className={DARK_TILES.has(tileStyle) ? 'dark-tiles' : undefined}
       />
       <ZoomControl position="bottomright" />
+      <MapClickHandler />
       <FranceBorder />
       <RailwayOverlay />
       <RouteLayer routes={routes} railGeometries={railGeometries} />
