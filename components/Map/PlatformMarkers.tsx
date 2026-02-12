@@ -62,13 +62,11 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
           : true;
         const isSelected = platform.site === selectedPlatform;
 
-        // Name labels: big hubs at zoom >= 6, hubs at zoom >= 7, all at zoom >= 8
-        // When a platform is selected, show connected names at zoom >= 7
-        const showName =
-          zoom >= 8 ||
-          (isHub && zoom >= 7) ||
-          (isBigHub && zoom >= 6) ||
-          (isHighlighted && selectedPlatform && zoom >= 7);
+        // When a platform is selected, only show labels for connected platforms
+        // Otherwise: big hubs at zoom >= 6, hubs at zoom >= 7, all at zoom >= 8
+        const showName = selectedPlatform
+          ? isHighlighted && zoom >= 6
+          : zoom >= 8 || (isHub && zoom >= 7) || (isBigHub && zoom >= 6);
 
         const labelIcon = showName ? L.divIcon({
           className: 'platform-label',

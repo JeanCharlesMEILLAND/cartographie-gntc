@@ -5,7 +5,7 @@ import { getOperatorColor } from '@/lib/colors';
 import clsx from 'clsx';
 
 export default function OperatorChips() {
-  const { allOperators, activeOperators, visibleOperators, toggleOperator, selectAllOperators, clearOperators } =
+  const { allOperators, activeOperators, visibleOperators, selectedPlatformOperators, toggleOperator, selectAllOperators, clearOperators } =
     useFilterStore();
 
   return (
@@ -34,6 +34,11 @@ export default function OperatorChips() {
         {allOperators.map((op) => {
           const active = activeOperators.has(op);
           const hasRoutes = visibleOperators.has(op);
+          // When a platform is selected, highlight only operators serving it
+          const servesSelected = selectedPlatformOperators
+            ? selectedPlatformOperators.has(op)
+            : true;
+          const highlighted = hasRoutes && servesSelected;
           const color = getOperatorColor(op);
           return (
             <button
@@ -41,18 +46,18 @@ export default function OperatorChips() {
               onClick={() => toggleOperator(op)}
               className={clsx(
                 'text-[11px] px-2 py-0.5 rounded-full border transition-all',
-                active && hasRoutes
+                active && highlighted
                   ? ''
-                  : active && !hasRoutes
+                  : active && !highlighted
                     ? 'opacity-30'
                     : 'text-muted border-border opacity-40 hover:opacity-70'
               )}
               style={
                 active
                   ? {
-                      backgroundColor: hasRoutes ? `${color}22` : `${color}0a`,
-                      borderColor: hasRoutes ? `${color}88` : `${color}33`,
-                      color: hasRoutes ? color : `${color}66`,
+                      backgroundColor: highlighted ? `${color}22` : `${color}0a`,
+                      borderColor: highlighted ? `${color}88` : `${color}33`,
+                      color: highlighted ? color : `${color}66`,
                     }
                   : undefined
               }

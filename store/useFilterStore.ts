@@ -22,6 +22,9 @@ interface FilterState {
   // Operators with visible routes (after frequency filter)
   visibleOperators: Set<string>;
 
+  // Operators serving the selected platform
+  selectedPlatformOperators: Set<string> | null;
+
   // Selected platform for InfoCard
   selectedPlatform: string | null;
 
@@ -38,6 +41,7 @@ interface FilterState {
   setTileStyle: (style: string) => void;
   setRailwayStyle: (style: 'standard' | 'maxspeed' | 'signals' | 'electrification') => void;
   setSelectedPlatform: (name: string | null) => void;
+  setSelectedPlatformOperators: (ops: Set<string> | null) => void;
   setPanelCollapsed: (collapsed: boolean) => void;
   setAllOperators: (operators: string[]) => void;
   setVisibleOperators: (ops: Set<string>) => void;
@@ -57,6 +61,7 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   showFranceBorder: true,
 
   visibleOperators: new Set<string>(),
+  selectedPlatformOperators: null,
 
   tileStyle: 'osm-dark',
   railwayStyle: 'standard',
@@ -93,6 +98,8 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   setRailwayStyle: (style) => set({ railwayStyle: style }),
 
   setSelectedPlatform: (name) => set({ selectedPlatform: name }),
+
+  setSelectedPlatformOperators: (ops) => set({ selectedPlatformOperators: ops }),
 
   setPanelCollapsed: (collapsed) => set({ panelCollapsed: collapsed }),
 

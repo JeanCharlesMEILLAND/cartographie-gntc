@@ -21,8 +21,10 @@ export default function Home() {
     country,
     activeOperators,
     minFrequency,
+    selectedPlatform,
     setAllOperators,
     setVisibleOperators,
+    setSelectedPlatformOperators,
   } = useFilterStore();
 
   const fetchData = useCallback(async () => {
@@ -70,6 +72,21 @@ export default function Home() {
     });
     setVisibleOperators(ops);
   }, [data, minFrequency, setVisibleOperators]);
+
+  // Compute operators serving the selected platform
+  useEffect(() => {
+    if (!selectedPlatform || !data) {
+      setSelectedPlatformOperators(null);
+      return;
+    }
+    const ops = new Set<string>();
+    data.routes.forEach((r) => {
+      if (r.from === selectedPlatform || r.to === selectedPlatform) {
+        r.operators.forEach((op) => ops.add(op));
+      }
+    });
+    setSelectedPlatformOperators(ops);
+  }, [data, selectedPlatform, setSelectedPlatformOperators]);
 
   // Filter routes by operators, frequency, and country
   const filteredRoutes = useMemo<AggregatedRoute[]>(() => {
