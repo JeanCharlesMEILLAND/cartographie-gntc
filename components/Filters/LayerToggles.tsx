@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useFilterStore } from '@/store/useFilterStore';
 import clsx from 'clsx';
 
-type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification' | 'animateFlux' | 'showFranceBorder';
+type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification';
 
 const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showRoutes', label: 'Liaisons' },
