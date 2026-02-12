@@ -62,7 +62,8 @@ export default function Home() {
   const filteredRoutes = useMemo<AggregatedRoute[]>(() => {
     if (!data) return [];
     return data.routes.filter((r) => {
-      // Frequency filter
+      // Hide routes with no frequency data, and apply min frequency filter
+      if (r.freq <= 0) return false;
       if (r.freq < minFrequency) return false;
 
       // Operator filter: at least one operator must be active
