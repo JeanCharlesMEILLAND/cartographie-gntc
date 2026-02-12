@@ -6,7 +6,6 @@ import { useFilterStore } from '@/store/useFilterStore';
 import MapContainer from '@/components/Map/MapContainer';
 import FilterPanel from '@/components/Filters/FilterPanel';
 import KPIBar from '@/components/Dashboard/KPIBar';
-import RailBadge from '@/components/Dashboard/RailBadge';
 import CO2Badge from '@/components/Dashboard/CO2Badge';
 import InfoCard from '@/components/InfoCard';
 import Legend from '@/components/Legend';
@@ -277,7 +276,6 @@ export default function Home() {
 
       {/* Right-side badges */}
       <div className="absolute top-[54px] sm:top-[60px] right-2 sm:right-4 z-[999] flex flex-col gap-1.5 sm:gap-2">
-        <RailBadge />
         <CO2Badge routes={filteredRoutes} />
       </div>
 

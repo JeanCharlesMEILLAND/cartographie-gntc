@@ -15,8 +15,25 @@ function formatNum(n: number): string {
 export default function CO2Badge({ routes }: CO2BadgeProps) {
   const stats = useMemo(() => computeCO2Stats(routes), [routes]);
   const [expanded, setExpanded] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
   if (routes.length === 0) return null;
+
+  if (hidden) {
+    return (
+      <button
+        onClick={() => setHidden(false)}
+        className="glass-panel rounded-md px-2 py-1 text-[9px] text-muted hover:text-text transition-colors flex items-center gap-1"
+        title="Afficher bilan CO2"
+      >
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+          <path d="M6 1C3.24 1 1 3.24 1 6s2.24 5 5 5 5-2.24 5-5S8.76 1 6 1z" stroke="#7dc243" strokeWidth="1" />
+          <path d="M4 6.5L5.5 8L8 4.5" stroke="#7dc243" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        CO2
+      </button>
+    );
+  }
 
   // Equivalences parlantes
   const treesEquiv = Math.round(stats.co2SavedPerYear / 0.025);
@@ -41,6 +58,15 @@ export default function CO2Badge({ routes }: CO2BadgeProps) {
         >
           <path d="M2 3l2 2 2-2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" className="text-muted" />
         </svg>
+        <button
+          onClick={(e) => { e.stopPropagation(); setHidden(true); }}
+          className="ml-auto sm:ml-0 text-muted hover:text-text transition-colors flex-shrink-0"
+          title="Masquer"
+        >
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
+            <path d="M2 2l6 6M8 2l-6 6" />
+          </svg>
+        </button>
       </div>
 
       {/* Mobile: single compact line / Desktop: detailed lines */}
