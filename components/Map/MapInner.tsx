@@ -2,7 +2,7 @@
 
 import { MapContainer as LeafletMap, TileLayer, ZoomControl, useMapEvents } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
-import { Platform, AggregatedRoute } from '@/lib/types';
+import { Platform, AggregatedRoute, Service } from '@/lib/types';
 
 function MapClickHandler() {
   const setSelectedPlatform = useFilterStore((s) => s.setSelectedPlatform);
@@ -17,6 +17,7 @@ import TrackTypeLayer from './TrackTypeLayer';
 import ElectrificationLayer from './ElectrificationLayer';
 import ITELayer from './ITELayer';
 import RouteLayer from './RouteLayer';
+import TrainMarkers from './TrainMarkers';
 import PlatformMarkers from './PlatformMarkers';
 import 'leaflet/dist/leaflet.css';
 
@@ -24,6 +25,8 @@ interface MapInnerProps {
   platforms: Platform[];
   routes: AggregatedRoute[];
   railGeometries?: Record<string, [number, number][]>;
+  services?: Service[];
+  allPlatforms?: Platform[];
 }
 
 const TILE_URLS: Record<string, string> = {
@@ -38,7 +41,7 @@ const TILE_URLS: Record<string, string> = {
 // Tiles that need CSS darkening filter
 const DARK_TILES = new Set(['osm-dark']);
 
-export default function MapInner({ platforms, routes, railGeometries }: MapInnerProps) {
+export default function MapInner({ platforms, routes, railGeometries, services, allPlatforms }: MapInnerProps) {
   const tileStyle = useFilterStore((s) => s.tileStyle);
 
   const tileUrl = TILE_URLS[tileStyle] || TILE_URLS['carto-dark'];
@@ -66,6 +69,9 @@ export default function MapInner({ platforms, routes, railGeometries }: MapInner
       <ElectrificationLayer />
       <RouteLayer routes={routes} railGeometries={railGeometries} />
       <ITELayer />
+      {services && allPlatforms && (
+        <TrainMarkers services={services} platforms={allPlatforms} railGeometries={railGeometries} />
+      )}
       <PlatformMarkers platforms={platforms} routes={routes} />
     </LeafletMap>
   );

@@ -10,7 +10,9 @@ import RailBadge from '@/components/Dashboard/RailBadge';
 import InfoCard from '@/components/InfoCard';
 import Legend from '@/components/Legend';
 import SearchPanel from '@/components/Search/SearchPanel';
+import TimeControl from '@/components/Clock/TimeControl';
 import { useSearchStore } from '@/store/useSearchStore';
+import { dayTimeToMinutes, getTrainProgress } from '@/lib/trainClock';
 
 export default function Home() {
   const [data, setData] = useState<TransportData | null>(null);
@@ -26,6 +28,10 @@ export default function Home() {
     setAllOperators,
     setVisibleOperators,
     setSelectedPlatformOperators,
+    showClock,
+    toggleClock,
+    clockDay,
+    clockTime,
   } = useFilterStore();
 
   const fetchData = useCallback(async () => {
@@ -159,6 +165,20 @@ export default function Home() {
     ? new Set(kpiRoutes.flatMap((r) => [r.from, r.to])).size
     : visiblePlatforms.length;
 
+  // Train count for the clock
+  const clockTrainCount = useMemo(() => {
+    if (!showClock || !data) return 0;
+    const dayIndex: Record<string, number> = { Lu: 0, Ma: 1, Me: 2, Je: 3, Ve: 4, Sa: 5, Di: 6 };
+    const currentMinutes = (dayIndex[clockDay] ?? 0) * 24 * 60 + clockTime;
+    let count = 0;
+    for (const svc of data.services) {
+      const depMin = dayTimeToMinutes(svc.dayDep, svc.timeDep);
+      const arrMin = dayTimeToMinutes(svc.dayArr, svc.timeArr);
+      if (getTrainProgress(depMin, arrMin, currentMinutes) !== null) count++;
+    }
+    return count;
+  }, [showClock, data, clockDay, clockTime]);
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-bg">
@@ -212,6 +232,23 @@ export default function Home() {
             <span className="hidden sm:inline">Planificateur</span>
           </button>
 
+          {/* Clock button */}
+          <button
+            onClick={toggleClock}
+            className={`flex items-center gap-1.5 text-xs transition-colors px-2 sm:px-3 py-1.5 rounded-md border flex-shrink-0 ${
+              showClock
+                ? 'text-cyan border-cyan/30 bg-cyan/10'
+                : 'text-blue hover:text-cyan border-border hover:border-blue/30'
+            }`}
+            title="Horloge réseau"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
+              <circle cx="7" cy="7" r="5.5" />
+              <path d="M7 4v3l2 1.5" />
+            </svg>
+            <span className="hidden sm:inline">Horloge</span>
+          </button>
+
           {/* Admin button */}
           <a
             href="/admin"
@@ -231,6 +268,8 @@ export default function Home() {
         platforms={visiblePlatforms}
         routes={filteredRoutes}
         railGeometries={railGeometries}
+        services={data?.services}
+        allPlatforms={data?.platforms}
       />
 
       {/* Filter Panel */}
@@ -247,6 +286,9 @@ export default function Home() {
 
       {/* Info Card */}
       <InfoCard platforms={data?.platforms || []} routes={filteredRoutes} services={data?.services || []} />
+
+      {/* Train Clock */}
+      <TimeControl trainCount={clockTrainCount} />
 
       {/* Unmatched platforms warning - only show if significant */}
       {data && data.unmatchedPlatforms.length > 3 && (

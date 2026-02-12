@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Platform, AggregatedRoute } from '@/lib/types';
+import { Platform, AggregatedRoute, Service } from '@/lib/types';
 
 const MapInner = dynamic(() => import('./MapInner'), {
   ssr: false,
@@ -16,12 +16,14 @@ interface MapContainerProps {
   platforms: Platform[];
   routes: AggregatedRoute[];
   railGeometries?: Record<string, [number, number][]>;
+  services?: Service[];
+  allPlatforms?: Platform[];
 }
 
-export default function MapContainer({ platforms, routes, railGeometries }: MapContainerProps) {
+export default function MapContainer({ platforms, routes, railGeometries, services, allPlatforms }: MapContainerProps) {
   return (
     <div className="absolute inset-0">
-      <MapInner platforms={platforms} routes={routes} railGeometries={railGeometries} />
+      <MapInner platforms={platforms} routes={routes} railGeometries={railGeometries} services={services} allPlatforms={allPlatforms} />
     </div>
   );
 }
