@@ -81,9 +81,10 @@ for (const name of workbook.SheetNames) {
 
 const operatorSet = new Set();
 
-// Step 1: Deduplicate by operator + directed pair → take freq once per service
-// Each row in Excel = 1 departure day. "Fréquence Hebdo" = total trains/week for that service.
-const serviceMap = new Map();
+// Step 1: Group by operator + directed pair, count rows per group
+// Each row = 1 departure day. If "Fréquence Hebdo" is filled, use it (take once).
+// If empty (e.g. Naviland Cargo), frequency = number of rows (departure days).
+const serviceGroups = new Map();
 
 if (fluxSheet) {
   const rows = XLSX.utils.sheet_to_json(fluxSheet);
@@ -93,7 +94,8 @@ if (fluxSheet) {
     const fromName = (row['Plateforme Exp'] || '').toString().trim();
     const toName = (row['Plateforme Dest'] || '').toString().trim();
     const operator = (row['Opérateur'] || row['Operateur'] || '').toString().trim();
-    const freq = Number(row['Fréquence Hebdo'] || row['Frequence Hebdo'] || 0);
+    const rawFreq = row['Fréquence Hebdo'] ?? row['Frequence Hebdo'];
+    const hasFreq = rawFreq !== undefined && rawFreq !== null && rawFreq !== '';
 
     if (!fromName || !toName) continue;
     if (operator) operatorSet.add(operator);
@@ -105,15 +107,25 @@ if (fluxSheet) {
     if (!toCoords) unmatchedSet.add(toName);
     if (!fromCoords || !toCoords) continue;
 
-    // Key by operator + directed pair (take freq once per service)
     const serviceKey = `${operator}||${fromName}||${toName}`;
-    if (!serviceMap.has(serviceKey)) {
-      serviceMap.set(serviceKey, {
+    if (!serviceGroups.has(serviceKey)) {
+      serviceGroups.set(serviceKey, {
         from: fromName, to: toName,
-        fromCoords, toCoords, operator, freq,
+        fromCoords, toCoords, operator,
+        explicitFreq: hasFreq ? Number(rawFreq) : null,
+        rowCount: 0,
       });
     }
+    serviceGroups.get(serviceKey).rowCount++;
   }
+}
+
+// Build serviceMap with correct frequency
+const serviceMap = new Map();
+for (const [key, svc] of serviceGroups) {
+  // If freq was filled in Excel, use it. Otherwise count departure rows.
+  const freq = svc.explicitFreq !== null ? svc.explicitFreq : svc.rowCount;
+  serviceMap.set(key, { ...svc, freq });
 }
 
 // Step 2: Aggregate by platform pair (both directions merged), summing across operators

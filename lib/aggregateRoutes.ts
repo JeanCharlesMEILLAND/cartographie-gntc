@@ -6,16 +6,17 @@ export function aggregateRoutes(
 ): { routes: AggregatedRoute[]; unmatchedPlatforms: string[] } {
   const unmatched = new Set<string>();
 
-  // Step 1: Deduplicate by operator + directed pair → take freq once per service
-  // Each row in Excel = 1 departure day. "Fréquence Hebdo" = total trains/week for that service.
-  // So we take the frequency ONCE per (operator, from, to) group, not sum every row.
-  const serviceMap = new Map<string, {
+  // Step 1: Group by operator + directed pair, count rows per group.
+  // Each row = 1 departure day. If "Fréquence Hebdo" is filled, use it (take once).
+  // If empty (e.g. Naviland Cargo), frequency = number of rows (departure days).
+  const serviceGroups = new Map<string, {
     from: string;
     to: string;
     fromCoords: [number, number];
     toCoords: [number, number];
     operator: string;
-    freq: number;
+    explicitFreq: number | null;
+    rowCount: number;
   }>();
 
   for (const flux of fluxes) {
@@ -29,21 +30,43 @@ export function aggregateRoutes(
     if (!toCoords) unmatched.add(toName);
     if (!fromCoords || !toCoords) continue;
 
-    // Key by operator + directed pair (operator A→B is different from operator B→A)
     const serviceKey = `${flux.operateur?.trim() || ''}||${fromName}||${toName}`;
-    const existing = serviceMap.get(serviceKey);
+    const existing = serviceGroups.get(serviceKey);
 
     if (!existing) {
-      serviceMap.set(serviceKey, {
+      serviceGroups.set(serviceKey, {
         from: fromName,
         to: toName,
         fromCoords,
         toCoords,
         operator: flux.operateur?.trim() || '',
-        freq: flux.frequenceHebdo || 0,
+        explicitFreq: flux.frequenceHebdo > 0 ? flux.frequenceHebdo : null,
+        rowCount: 1,
       });
+    } else {
+      existing.rowCount++;
     }
-    // If already exists, skip (same service, different departure day)
+  }
+
+  // Build service map with correct frequency
+  const serviceMap = new Map<string, {
+    from: string;
+    to: string;
+    fromCoords: [number, number];
+    toCoords: [number, number];
+    operator: string;
+    freq: number;
+  }>();
+
+  for (const [key, svc] of serviceGroups) {
+    serviceMap.set(key, {
+      from: svc.from,
+      to: svc.to,
+      fromCoords: svc.fromCoords,
+      toCoords: svc.toCoords,
+      operator: svc.operator,
+      freq: svc.explicitFreq !== null ? svc.explicitFreq : svc.rowCount,
+    });
   }
 
   // Step 2: Aggregate by platform pair (both directions merged), summing across operators
