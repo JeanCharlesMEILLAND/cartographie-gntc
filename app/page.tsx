@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { TransportData, Platform, AggregatedRoute } from '@/lib/types';
 import { useFilterStore } from '@/store/useFilterStore';
 import MapContainer from '@/components/Map/MapContainer';
@@ -18,6 +18,8 @@ export default function Home() {
   const [data, setData] = useState<TransportData | null>(null);
   const [railGeometries, setRailGeometries] = useState<Record<string, [number, number][]>>({});
   const [loading, setLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [loadStep, setLoadStep] = useState('Initialisation...');
   const { searchOpen, setSearchOpen } = useSearchStore();
 
   const {
@@ -34,29 +36,63 @@ export default function Home() {
     clockTime,
   } = useFilterStore();
 
-  const fetchData = useCallback(async () => {
-    try {
-      const res = await fetch('/api/data');
-      const json: TransportData = await res.json();
-      setData(json);
-      if (json.operators.length > 0) {
-        setAllOperators(json.operators);
-      }
-    } catch (err) {
-      console.error('Failed to fetch data:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [setAllOperators]);
-
   useEffect(() => {
-    fetchData();
-    // Load rail geometries
-    fetch('/rail-geometries.json')
-      .then((res) => res.ok ? res.json() : {})
-      .then((geo) => setRailGeometries(geo))
-      .catch(() => {});
-  }, [fetchData]);
+    let cancelled = false;
+
+    async function loadAll() {
+      try {
+        // Step 1: Fetch transport data
+        setLoadStep('Chargement des données...');
+        setLoadProgress(10);
+        const res = await fetch('/api/data');
+        if (cancelled) return;
+        setLoadProgress(30);
+        setLoadStep('Traitement des plateformes...');
+
+        const json: TransportData = await res.json();
+        if (cancelled) return;
+        setData(json);
+        if (json.operators.length > 0) {
+          setAllOperators(json.operators);
+        }
+        setLoadProgress(50);
+
+        // Step 2: Fetch rail geometries
+        setLoadStep('Chargement du réseau ferré...');
+        setLoadProgress(55);
+        try {
+          const geoRes = await fetch('/rail-geometries.json');
+          if (cancelled) return;
+          setLoadProgress(75);
+          setLoadStep('Construction de la carte...');
+          if (geoRes.ok) {
+            const geo = await geoRes.json();
+            if (cancelled) return;
+            setRailGeometries(geo);
+          }
+        } catch {
+          // Rail geometries are optional
+        }
+        setLoadProgress(90);
+
+        // Step 3: Finalize
+        setLoadStep('Prêt !');
+        setLoadProgress(100);
+        await new Promise((r) => setTimeout(r, 400));
+        if (cancelled) return;
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch data:', err);
+        if (!cancelled) {
+          setLoadStep('Erreur de chargement');
+          setLoading(false);
+        }
+      }
+    }
+
+    loadAll();
+    return () => { cancelled = true; };
+  }, [setAllOperators]);
 
   // Filter platforms by country
   const filteredPlatforms = useMemo<Platform[]>(() => {
@@ -181,10 +217,54 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-bg">
+      <div className="h-screen flex flex-col items-center justify-center bg-bg">
+        {/* Animated network graph */}
+        <svg width="340" height="160" viewBox="0 0 340 160" fill="none" className="mb-6">
+          {/* Track lines - draw themselves */}
+          <path d="M 30,100 C 60,100 80,60 120,60" className="loading-track" stroke="#587bbd" strokeWidth="2" strokeLinecap="round" fill="none" />
+          <path d="M 120,60 C 160,60 180,100 220,100" className="loading-track loading-track-2" stroke="#587bbd" strokeWidth="2" strokeLinecap="round" fill="none" />
+          <path d="M 220,100 C 260,100 280,60 310,60" className="loading-track loading-track-3" stroke="#587bbd" strokeWidth="2" strokeLinecap="round" fill="none" />
+          <path d="M 120,60 L 170,30" className="loading-track loading-track-4" stroke="#587bbd" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5" />
+          <path d="M 220,100 L 260,130" className="loading-track loading-track-5" stroke="#8b6db5" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5" />
+
+          {/* Platform nodes - pop in */}
+          <circle cx="30" cy="100" r="0" fill="#7dc243" className="loading-node loading-node-1" />
+          <circle cx="120" cy="60" r="0" fill="#7dc243" className="loading-node loading-node-2" />
+          <circle cx="220" cy="100" r="0" fill="#7dc243" className="loading-node loading-node-3" />
+          <circle cx="310" cy="60" r="0" fill="#7dc243" className="loading-node loading-node-4" />
+          <circle cx="170" cy="30" r="0" fill="#8b6db5" className="loading-node loading-node-5" />
+          <circle cx="260" cy="130" r="0" fill="#8b6db5" className="loading-node loading-node-6" />
+
+          {/* Hub pulse on main node */}
+          <circle cx="120" cy="60" r="4.5" fill="none" stroke="#7dc243" strokeWidth="1" className="loading-pulse" />
+          <circle cx="220" cy="100" r="4.5" fill="none" stroke="#7dc243" strokeWidth="1" className="loading-pulse" style={{ animationDelay: '2s' }} />
+
+          {/* Moving train dot */}
+          <circle r="4" fill="#587bbd" stroke="#fff" strokeWidth="1.5" className="loading-train" />
+        </svg>
+
+        {/* Text */}
         <div className="text-center">
-          <div className="text-cyan text-lg animate-pulse mb-2">Chargement...</div>
-          <div className="text-muted text-xs">Transport Combiné</div>
+          <h1 className="text-xl font-display font-bold gntc-gradient loading-title mb-1">
+            Transport Combiné
+          </h1>
+          <p className="text-xs text-muted loading-subtitle">
+            OTC / GNTC
+          </p>
+        </div>
+
+        {/* Progress bar + percentage */}
+        <div className="mt-6 w-52 loading-bar-container">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] text-muted">{loadStep}</span>
+            <span className="text-[11px] font-mono font-bold gntc-gradient">{loadProgress}%</span>
+          </div>
+          <div className="w-full h-[4px] rounded-full bg-[rgba(88,123,189,0.12)] overflow-hidden">
+            <div
+              className="h-full rounded-full gntc-gradient-bg transition-all duration-500 ease-out"
+              style={{ width: `${loadProgress}%` }}
+            />
+          </div>
         </div>
       </div>
     );
