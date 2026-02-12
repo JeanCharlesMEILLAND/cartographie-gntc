@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { FeatureCollection, Feature } from 'geojson';
 
+export const dynamic = 'force-dynamic';
+
 const ITE_URL = 'https://www.data.gouv.fr/api/1/datasets/r/a31e504f-ad5c-4b78-916e-f9ed30d789b7';
 const REGIME_URL = 'https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/regime-dexploitation-des-lignes/exports/geojson';
 const ELEC_URL = 'https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/liste-des-lignes-electrifiees/exports/geojson';
