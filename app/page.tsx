@@ -185,7 +185,7 @@ export default function Home() {
       <div className="h-screen flex items-center justify-center bg-bg">
         <div className="text-center">
           <div className="text-cyan text-lg animate-pulse mb-2">Chargement...</div>
-          <div className="text-muted text-xs">Transport Combiné 2026</div>
+          <div className="text-muted text-xs">Transport Combiné</div>
         </div>
       </div>
     );
@@ -200,7 +200,7 @@ export default function Home() {
           <img src="/logo-gntc.jpg" alt="GNTC" className="h-8 sm:h-9 flex-shrink-0" />
           <div className="min-w-0">
             <h1 className="text-xs sm:text-sm font-display font-bold leading-tight truncate gntc-gradient">
-              Transport Combiné 2026
+              Transport Combiné
             </h1>
             <p className="text-[10px] text-muted leading-tight hidden sm:block">OTC / GNTC</p>
           </div>
@@ -230,7 +230,7 @@ export default function Home() {
               <path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
               <circle cx="2" cy="7" r="1.5" stroke="currentColor" strokeWidth="1" />
             </svg>
-            <span className="hidden sm:inline">Planificateur</span>
+            <span className="text-[9px] sm:text-xs"><span className="sm:hidden">Trajet</span><span className="hidden sm:inline">Planificateur</span></span>
           </button>
 
           {/* Live traffic button */}
@@ -246,7 +246,7 @@ export default function Home() {
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
               <path d="M2 10V8M5 10V5M8 10V3M11 10V6" />
             </svg>
-            <span className="hidden sm:inline">Trafic live</span>
+            <span className="text-[9px] sm:text-xs"><span className="sm:hidden">Live</span><span className="hidden sm:inline">Trafic live</span></span>
           </button>
 
           {/* Admin button */}
