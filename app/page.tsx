@@ -276,7 +276,7 @@ export default function Home() {
       <FilterPanel />
 
       {/* Right-side badges */}
-      <div className="absolute top-[60px] right-4 z-[999] flex flex-col gap-2">
+      <div className="absolute top-[54px] sm:top-[60px] right-2 sm:right-4 z-[999] flex flex-col gap-1.5 sm:gap-2">
         <RailBadge />
         <CO2Badge routes={filteredRoutes} />
       </div>

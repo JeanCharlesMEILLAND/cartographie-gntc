@@ -1,12 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { useFilterStore } from '@/store/useFilterStore';
 
 export default function Legend() {
   const [visible, setVisible] = useState(false);
+  const showClock = useFilterStore((s) => s.showClock);
+  const selectedPlatform = useFilterStore((s) => s.selectedPlatform);
+
+  // Hide legend toggle on mobile when InfoCard is open
+  const hiddenOnMobile = selectedPlatform ? 'hidden sm:block' : '';
 
   return (
-    <div className="absolute bottom-4 right-4 z-[1000]">
+    <div className={`absolute ${showClock ? 'bottom-[72px] sm:bottom-[60px]' : 'bottom-4'} right-2 sm:right-4 z-[1000] ${hiddenOnMobile}`}>
       {/* Toggle button */}
       <button
         onClick={() => setVisible(!visible)}
@@ -18,7 +24,7 @@ export default function Legend() {
       {visible && (
         <div className="glass-panel rounded-lg p-3">
           <div className="space-y-1.5">
-            {/* Route intensity (color = operator, thickness = frequency) */}
+            {/* Route intensity */}
             <div className="space-y-0.5">
               <div className="flex items-center gap-1.5 text-[10px]">
                 <div className="w-5 h-[4px] rounded-full bg-blue flex-shrink-0" />
