@@ -22,6 +22,7 @@ export default function Home() {
     activeOperators,
     minFrequency,
     setAllOperators,
+    setVisibleOperators,
   } = useFilterStore();
 
   const fetchData = useCallback(async () => {
@@ -57,6 +58,18 @@ export default function Home() {
       return true;
     });
   }, [data, country]);
+
+  // Compute which operators have routes passing the frequency filter
+  useEffect(() => {
+    if (!data) return;
+    const ops = new Set<string>();
+    data.routes.forEach((r) => {
+      if (r.freq >= minFrequency) {
+        r.operators.forEach((op) => ops.add(op));
+      }
+    });
+    setVisibleOperators(ops);
+  }, [data, minFrequency, setVisibleOperators]);
 
   // Filter routes by operators, frequency, and country
   const filteredRoutes = useMemo<AggregatedRoute[]>(() => {

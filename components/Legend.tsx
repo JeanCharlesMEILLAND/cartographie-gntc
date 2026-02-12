@@ -18,22 +18,22 @@ export default function Legend() {
       {visible && (
         <div className="glass-panel rounded-lg p-3">
           <div className="space-y-1.5">
-            {/* Route intensity */}
+            {/* Route intensity (color = operator, thickness = frequency) */}
             <div className="space-y-0.5">
               <div className="flex items-center gap-1.5 text-[10px]">
-                <div className="w-5 h-[3px] rounded-full bg-orange flex-shrink-0" />
+                <div className="w-5 h-[4px] rounded-full bg-blue flex-shrink-0" />
                 <span className="text-muted">&gt;30 trains/sem</span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px]">
-                <div className="w-5 h-[2.5px] rounded-full bg-blue flex-shrink-0 opacity-65" />
+                <div className="w-5 h-[3px] rounded-full bg-blue flex-shrink-0 opacity-85" />
                 <span className="text-muted">16–30 trains/sem</span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px]">
-                <div className="w-5 h-[2px] rounded-full bg-blue flex-shrink-0 opacity-50" />
+                <div className="w-5 h-[2.5px] rounded-full bg-blue flex-shrink-0 opacity-65" />
                 <span className="text-muted">9–15 trains/sem</span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px]">
-                <div className="w-5 h-[1.5px] rounded-full bg-blue flex-shrink-0 opacity-20" />
+                <div className="w-5 h-[1.5px] rounded-full bg-blue flex-shrink-0 opacity-40" />
                 <span className="text-muted">1–8 trains/sem</span>
               </div>
             </div>

@@ -19,6 +19,9 @@ interface FilterState {
   tileStyle: string;
   railwayStyle: 'standard' | 'maxspeed' | 'signals' | 'electrification';
 
+  // Operators with visible routes (after frequency filter)
+  visibleOperators: Set<string>;
+
   // Selected platform for InfoCard
   selectedPlatform: string | null;
 
@@ -37,6 +40,7 @@ interface FilterState {
   setSelectedPlatform: (name: string | null) => void;
   setPanelCollapsed: (collapsed: boolean) => void;
   setAllOperators: (operators: string[]) => void;
+  setVisibleOperators: (ops: Set<string>) => void;
 }
 
 export const useFilterStore = create<FilterState>((set, get) => ({
@@ -51,6 +55,8 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   showRailway: false,
   animateFlux: false,
   showFranceBorder: true,
+
+  visibleOperators: new Set<string>(),
 
   tileStyle: 'osm-dark',
   railwayStyle: 'standard',
@@ -92,4 +98,6 @@ export const useFilterStore = create<FilterState>((set, get) => ({
 
   setAllOperators: (operators) =>
     set({ allOperators: operators, activeOperators: new Set(operators) }),
+
+  setVisibleOperators: (ops) => set({ visibleOperators: ops }),
 }));

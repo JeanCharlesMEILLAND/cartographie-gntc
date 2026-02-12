@@ -5,7 +5,7 @@ import { getOperatorColor } from '@/lib/colors';
 import clsx from 'clsx';
 
 export default function OperatorChips() {
-  const { allOperators, activeOperators, toggleOperator, selectAllOperators, clearOperators } =
+  const { allOperators, activeOperators, visibleOperators, toggleOperator, selectAllOperators, clearOperators } =
     useFilterStore();
 
   return (
@@ -33,6 +33,7 @@ export default function OperatorChips() {
       <div className="flex flex-wrap gap-1 max-h-[320px] overflow-y-auto pr-1">
         {allOperators.map((op) => {
           const active = activeOperators.has(op);
+          const hasRoutes = visibleOperators.has(op);
           const color = getOperatorColor(op);
           return (
             <button
@@ -40,16 +41,18 @@ export default function OperatorChips() {
               onClick={() => toggleOperator(op)}
               className={clsx(
                 'text-[11px] px-2 py-0.5 rounded-full border transition-all',
-                active
-                  ? 'text-white'
-                  : 'text-muted border-border opacity-40 hover:opacity-70'
+                active && hasRoutes
+                  ? ''
+                  : active && !hasRoutes
+                    ? 'opacity-30'
+                    : 'text-muted border-border opacity-40 hover:opacity-70'
               )}
               style={
                 active
                   ? {
-                      backgroundColor: `${color}22`,
-                      borderColor: `${color}88`,
-                      color: color,
+                      backgroundColor: hasRoutes ? `${color}22` : `${color}0a`,
+                      borderColor: hasRoutes ? `${color}88` : `${color}33`,
+                      color: hasRoutes ? color : `${color}66`,
                     }
                   : undefined
               }
