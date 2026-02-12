@@ -81,10 +81,19 @@ for (const name of workbook.SheetNames) {
 
 const operatorSet = new Set();
 
+function excelTimeToString(fraction) {
+  if (!fraction && fraction !== 0) return '';
+  const totalMinutes = Math.round(fraction * 24 * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+}
+
 // Step 1: Group by operator + directed pair, count rows per group
 // Each row = 1 departure day. If "Fréquence Hebdo" is filled, use it (take once).
 // If empty (e.g. Naviland Cargo), frequency = number of rows (departure days).
 const serviceGroups = new Map();
+const services = [];
 
 if (fluxSheet) {
   const rows = XLSX.utils.sheet_to_json(fluxSheet);
@@ -99,6 +108,22 @@ if (fluxSheet) {
 
     if (!fromName || !toName) continue;
     if (operator) operatorSet.add(operator);
+
+    // Build service entry
+    services.push({
+      operator,
+      from: fromName,
+      to: toName,
+      dayDep: (row['Jour Départ'] || row['Jour Depart'] || '').toString().trim(),
+      timeDep: excelTimeToString(row['HLR Départ'] || row['HLR Depart']),
+      dayArr: (row['Jour Arrivée'] || row['Jour Arrivee'] || '').toString().trim(),
+      timeArr: excelTimeToString(row['MAD Arrivée'] || row['MAD Arrivee']),
+      acceptsCM: (row['Accepte caisses mobiles'] || '').toString().trim(),
+      acceptsCont: (row['Accepte conteneurs'] || '').toString().trim(),
+      acceptsSemiPre: (row['Accepte semi-remorques préhensibles'] || row['Accepte semi-remorques prehensibles'] || '').toString().trim(),
+      acceptsSemiNon: (row['Accepte semi-remorques non-préhensibles'] || row['Accepte semi-remorques non-prehensibles'] || '').toString().trim(),
+      acceptsP400: (row['Accepte semi-remorque type P400'] || '').toString().trim(),
+    });
 
     const fromCoords = geocode(fromName);
     const toCoords = geocode(toName);
@@ -155,6 +180,7 @@ const routes = Array.from(routeMap.values()).map(r => ({
 const data = {
   platforms,
   routes,
+  services,
   operators: Array.from(operatorSet).sort(),
   unmatchedPlatforms: Array.from(unmatchedSet),
   uploadedAt: new Date().toISOString(),

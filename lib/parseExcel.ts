@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { Platform, RawFlux, RawPlatform, AggregatedRoute } from './types';
+import { Platform, RawFlux, RawPlatform, AggregatedRoute, Service } from './types';
 import { geocodePlatform } from './geocode';
 import { aggregateRoutes } from './aggregateRoutes';
 
@@ -78,9 +78,18 @@ function mapRow<T>(row: Record<string, unknown>, mapping: Record<string, keyof T
   return result;
 }
 
+function excelTimeToString(fraction: number): string {
+  if (!fraction && fraction !== 0) return '';
+  const totalMinutes = Math.round(fraction * 24 * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+}
+
 export async function parseTransportExcel(buffer: Buffer): Promise<{
   platforms: Platform[];
   routes: AggregatedRoute[];
+  services: Service[];
   operators: string[];
   unmatchedPlatforms: string[];
 }> {
@@ -146,6 +155,22 @@ export async function parseTransportExcel(buffer: Buffer): Promise<{
     }
   }
 
+  // 2b. Build services array (individual train services with schedules)
+  const services: Service[] = rawFluxes.map((flux) => ({
+    operator: flux.operateur,
+    from: flux.plateformeExp,
+    to: flux.plateformeDest,
+    dayDep: flux.jourDepart,
+    timeDep: excelTimeToString(Number(flux.hlrDepart)),
+    dayArr: flux.jourArrivee,
+    timeArr: excelTimeToString(Number(flux.madArrivee)),
+    acceptsCM: flux.accepteCaissesMobiles,
+    acceptsCont: flux.accepteConteneurs,
+    acceptsSemiPre: flux.accepteSemiPrehensibles,
+    acceptsSemiNon: flux.accepteSemiNonPrehensibles,
+    acceptsP400: flux.accepteSemiP400,
+  }));
+
   // 3. Geocode platforms
   const platforms: Platform[] = [];
   const unmatchedFromPlatforms = new Set<string>();
@@ -186,6 +211,7 @@ export async function parseTransportExcel(buffer: Buffer): Promise<{
   return {
     platforms,
     routes,
+    services,
     operators: Array.from(operatorSet).sort(),
     unmatchedPlatforms: Array.from(allUnmatched),
   };

@@ -1,16 +1,31 @@
 'use client';
 
+import { useState } from 'react';
 import { useFilterStore } from '@/store/useFilterStore';
-import { Platform, AggregatedRoute } from '@/lib/types';
+import { Platform, AggregatedRoute, Service } from '@/lib/types';
 import { getOperatorColor } from '@/lib/colors';
 
 interface InfoCardProps {
   platforms: Platform[];
   routes: AggregatedRoute[];
+  services: Service[];
 }
 
-export default function InfoCard({ platforms, routes }: InfoCardProps) {
+const DAY_ORDER: Record<string, number> = { Lu: 1, Ma: 2, Me: 3, Je: 4, Ve: 5, Sa: 6, Di: 7 };
+
+function MaterialBadge({ label, value }: { label: string; value: string }) {
+  if (!value || value === 'Non' || value === 'Non communiqué' || value === 'non communiqué') return null;
+  const isOui = value === 'Oui';
+  return (
+    <span className="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded bg-[rgba(56,217,245,0.1)] text-cyan border border-cyan/20">
+      {label}{!isOui && `: ${value}`}
+    </span>
+  );
+}
+
+export default function InfoCard({ platforms, routes, services }: InfoCardProps) {
   const { selectedPlatform, setSelectedPlatform } = useFilterStore();
+  const [expandedDest, setExpandedDest] = useState<string | null>(null);
 
   if (!selectedPlatform) return null;
 
@@ -24,13 +39,26 @@ export default function InfoCard({ platforms, routes }: InfoCardProps) {
 
   const totalFreq = connected.reduce((sum, r) => sum + r.freq, 0);
 
-  // Build per-operator breakdown
-  const operatorMap = new Map<string, { dest: string; freq: number }[]>();
+  // Services for this platform
+  const platformServices = services.filter(
+    (s) => s.from === selectedPlatform || s.to === selectedPlatform
+  );
+
+  // Build per-operator breakdown with service details
+  const operatorMap = new Map<string, { dest: string; freq: number; services: Service[] }[]>();
   for (const r of connected) {
     const dest = r.from === selectedPlatform ? r.to : r.from;
     for (const op of r.operators) {
       if (!operatorMap.has(op)) operatorMap.set(op, []);
-      operatorMap.get(op)!.push({ dest, freq: r.freq });
+      // Find services for this operator+destination
+      const destServices = platformServices.filter(
+        (s) =>
+          s.operator === op &&
+          ((s.from === selectedPlatform && s.to === dest) ||
+            (s.to === selectedPlatform && s.from === dest))
+      ).sort((a, b) => (DAY_ORDER[a.dayDep] || 8) - (DAY_ORDER[b.dayDep] || 8));
+
+      operatorMap.get(op)!.push({ dest, freq: r.freq, services: destServices });
     }
   }
 
@@ -44,7 +72,7 @@ export default function InfoCard({ platforms, routes }: InfoCardProps) {
     .sort((a, b) => b.total - a.total);
 
   return (
-    <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[1000] glass-panel rounded-lg w-auto sm:w-[340px] max-h-[60vh] sm:max-h-[500px] overflow-y-auto">
+    <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[1000] glass-panel rounded-lg w-auto sm:w-[380px] max-h-[70vh] sm:max-h-[600px] overflow-y-auto">
       {/* Header */}
       <div className="flex items-start justify-between p-3 border-b border-border sticky top-0 glass-panel z-10">
         <div>
@@ -121,16 +149,80 @@ export default function InfoCard({ platforms, routes }: InfoCardProps) {
 
               {/* Destinations for this operator */}
               <div className="ml-4 space-y-0.5">
-                {dests.map((d, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedPlatform(d.dest)}
-                    className="flex items-center justify-between text-xs py-0.5 px-1.5 w-full text-left rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors"
-                  >
-                    <span className="text-text truncate">{d.dest}</span>
-                    <span className="font-mono text-cyan flex-shrink-0 ml-2">{d.freq}/s</span>
-                  </button>
-                ))}
+                {dests.map((d, i) => {
+                  const destKey = `${op}||${d.dest}`;
+                  const isExpanded = expandedDest === destKey;
+                  return (
+                    <div key={i}>
+                      <button
+                        onClick={() => setExpandedDest(isExpanded ? null : destKey)}
+                        className="flex items-center justify-between text-xs py-1 px-1.5 w-full text-left rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors"
+                      >
+                        <div className="flex items-center gap-1 min-w-0">
+                          <svg
+                            width="8" height="8" viewBox="0 0 8 8"
+                            className={`flex-shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                            fill="currentColor"
+                            style={{ color: color }}
+                          >
+                            <path d="M2 1L6 4L2 7Z" />
+                          </svg>
+                          <span className="text-text truncate">{d.dest}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                          <span className="font-mono text-cyan">{d.freq}/s</span>
+                          <span className="text-[9px] text-muted">{d.services.length} départs</span>
+                        </div>
+                      </button>
+
+                      {/* Expanded: schedule + material */}
+                      {isExpanded && d.services.length > 0 && (
+                        <div className="ml-3 mt-1 mb-2 space-y-1.5">
+                          {/* Schedule table */}
+                          <table className="w-full text-[10px]">
+                            <thead>
+                              <tr className="text-muted">
+                                <th className="text-left font-normal py-0.5 pr-1">Départ</th>
+                                <th className="text-left font-normal py-0.5 pr-1">HLR</th>
+                                <th className="text-left font-normal py-0.5 pr-1">Arrivée</th>
+                                <th className="text-left font-normal py-0.5">MAD</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {d.services.map((s, j) => (
+                                <tr key={j} className="text-text">
+                                  <td className="py-0.5 pr-1 font-medium">{s.dayDep}</td>
+                                  <td className="py-0.5 pr-1 font-mono text-cyan">{s.timeDep || '—'}</td>
+                                  <td className="py-0.5 pr-1 font-medium">{s.dayArr}</td>
+                                  <td className="py-0.5 font-mono text-cyan">{s.timeArr || '—'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+
+                          {/* Material accepted */}
+                          {d.services[0] && (
+                            <div className="flex flex-wrap gap-1">
+                              <MaterialBadge label="CM" value={d.services[0].acceptsCM} />
+                              <MaterialBadge label="Cont." value={d.services[0].acceptsCont} />
+                              <MaterialBadge label="Semi préh." value={d.services[0].acceptsSemiPre} />
+                              <MaterialBadge label="Semi non-préh." value={d.services[0].acceptsSemiNon} />
+                              <MaterialBadge label="P400" value={d.services[0].acceptsP400} />
+                            </div>
+                          )}
+
+                          {/* Navigate button */}
+                          <button
+                            onClick={() => setSelectedPlatform(d.dest)}
+                            className="text-[10px] text-blue hover:text-cyan transition-colors mt-0.5"
+                          >
+                            Voir {d.dest} →
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );

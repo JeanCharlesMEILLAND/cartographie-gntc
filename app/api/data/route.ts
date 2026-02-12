@@ -12,6 +12,7 @@ export async function GET() {
       const empty: TransportData = {
         platforms: [],
         routes: [],
+        services: [],
         operators: [],
         unmatchedPlatforms: [],
         uploadedAt: '',

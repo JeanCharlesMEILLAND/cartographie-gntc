@@ -21,9 +21,25 @@ export interface AggregatedRoute {
   operators: string[];
 }
 
+export interface Service {
+  operator: string;
+  from: string;
+  to: string;
+  dayDep: string;
+  timeDep: string;
+  dayArr: string;
+  timeArr: string;
+  acceptsCM: string;
+  acceptsCont: string;
+  acceptsSemiPre: string;
+  acceptsSemiNon: string;
+  acceptsP400: string;
+}
+
 export interface TransportData {
   platforms: Platform[];
   routes: AggregatedRoute[];
+  services: Service[];
   operators: string[];
   unmatchedPlatforms: string[];
   uploadedAt: string;

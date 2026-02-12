@@ -20,12 +20,13 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const { platforms, routes, operators, unmatchedPlatforms } =
+    const { platforms, routes, services, operators, unmatchedPlatforms } =
       await parseTransportExcel(buffer);
 
     const transportData: TransportData = {
       platforms,
       routes,
+      services,
       operators,
       unmatchedPlatforms,
       uploadedAt: new Date().toISOString(),

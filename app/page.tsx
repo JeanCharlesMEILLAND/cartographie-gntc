@@ -209,7 +209,7 @@ export default function Home() {
       <Legend />
 
       {/* Info Card */}
-      <InfoCard platforms={data?.platforms || []} routes={filteredRoutes} />
+      <InfoCard platforms={data?.platforms || []} routes={filteredRoutes} services={data?.services || []} />
 
       {/* Unmatched platforms warning - only show if significant */}
       {data && data.unmatchedPlatforms.length > 3 && (
