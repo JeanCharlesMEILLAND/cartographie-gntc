@@ -10,6 +10,7 @@ import FluxTable from '@/components/Admin/FluxTable';
 import OperatorList from '@/components/Admin/OperatorList';
 import OperatorView from '@/components/Admin/OperatorView';
 import UserManager from '@/components/Admin/UserManager';
+import OperatorProfile from '@/components/Admin/OperatorProfile';
 import UploadDialog from '@/components/UploadDialog';
 
 export default function AdminPage() {
@@ -26,7 +27,7 @@ export default function AdminPage() {
   // Set default tab based on role
   useEffect(() => {
     if (!isAdmin && userOperator) {
-      setActiveTab('operator');
+      setActiveTab('profile');
     }
   }, [isAdmin, userOperator, setActiveTab]);
 
@@ -81,6 +82,7 @@ export default function AdminPage() {
   ];
 
   const operatorTabs: { key: AdminTab; label: string }[] = [
+    { key: 'profile', label: 'Mon profil' },
     { key: 'operator', label: 'Mon activité' },
     { key: 'flux', label: `Mes flux` },
   ];
@@ -172,6 +174,11 @@ export default function AdminPage() {
             saving={saving}
             userOperator={isAdmin ? undefined : userOperator}
           />
+        )}
+
+        {/* Operator profile */}
+        {activeTab === 'profile' && userOperator && (
+          <OperatorProfile operatorName={userOperator} />
         )}
 
         {/* Operator view */}

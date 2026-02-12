@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type AdminTab = 'dashboard' | 'platforms' | 'operators' | 'flux' | 'users' | 'operator';
+export type AdminTab = 'dashboard' | 'platforms' | 'operators' | 'flux' | 'users' | 'operator' | 'profile';
 
 interface AdminState {
   activeTab: AdminTab;

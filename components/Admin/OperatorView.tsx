@@ -7,6 +7,7 @@ import { getOperatorColor } from '@/lib/colors';
 import { useAdminStore } from '@/store/useAdminStore';
 import KPICard from './shared/KPICard';
 import MaterialBadge from './shared/MaterialBadge';
+import OperatorMap from './OperatorMap';
 
 interface Props {
   data: TransportData;
@@ -82,6 +83,19 @@ export default function OperatorView({ data, operator, onSave, saving }: Props) 
         <KPICard value={stats.routeCount} label="Liaisons" color="text-purple" />
         <KPICard value={stats.trainsPerWeek} label="Trains / semaine" color="text-cyan" />
         <KPICard value={stats.serviceCount} label="Services" color="text-orange" />
+      </div>
+
+      {/* Map */}
+      <div>
+        <h3 className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-3">
+          Carte du réseau
+        </h3>
+        <OperatorMap
+          platforms={data.platforms}
+          routes={data.routes}
+          services={data.services}
+          operator={operator}
+        />
       </div>
 
       {/* Platforms */}
