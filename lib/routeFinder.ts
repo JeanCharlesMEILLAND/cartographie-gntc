@@ -158,8 +158,7 @@ function matchScore(query: string, platform: Platform): number {
     }
   }
 
-  // CP / department match
-  if (platform.cp && qNorm === normalize(platform.cp)) return 50;
+  // Department match
   if (
     platform.departement &&
     normalize(platform.departement).includes(qNorm)
