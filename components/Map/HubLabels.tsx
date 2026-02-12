@@ -29,14 +29,19 @@ export default function HubLabels({ platforms }: HubLabelsProps) {
           className: 'hub-label',
           html: `<span style="
             color: #2b2b2b;
-            font-size: 10px;
+            background: rgba(255,255,255,0.88);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 9px;
             font-weight: 600;
-            text-shadow: 0 0 3px rgba(255,255,255,0.8), 0 0 6px rgba(255,255,255,0.5);
             white-space: nowrap;
             pointer-events: none;
+            border: 1px solid rgba(88,123,189,0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            line-height: 1.4;
           ">${platform.site}</span>`,
           iconSize: [0, 0],
-          iconAnchor: [0, -12],
+          iconAnchor: [0, -14],
         });
 
         return (

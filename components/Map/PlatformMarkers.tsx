@@ -1,6 +1,6 @@
 'use client';
 
-import { CircleMarker, Tooltip, Marker, useMapEvents } from 'react-leaflet';
+import { CircleMarker, Tooltip, Marker, useMapEvents, useMap } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
 import { useSearchStore } from '@/store/useSearchStore';
 import { Platform, AggregatedRoute } from '@/lib/types';
@@ -19,46 +19,89 @@ function getMarkerSize(volume: number): number {
   return 8 + (volume / 200) * 10;
 }
 
+function estimateLabelWidth(text: string, fontSize: number): number {
+  return text.length * fontSize * 0.58 + 12;
+}
+
+const LABEL_H = 16;
+const GAP = 3;
+
+// Candidate offsets: [anchorX, anchorY] relative to the marker pixel position
+// We try above, right, below-right, below, left, above-left, etc.
+const OFFSETS: [number, number][] = [
+  [0, -16],      // above (default)
+  [14, -8],      // top-right
+  [16, 4],       // right
+  [10, 16],      // bottom-right
+  [0, 18],       // below
+  [-14, -8],     // top-left (anchor = label right edge)
+  [-16, 4],      // left
+  [-10, 16],     // bottom-left
+];
+
+interface PlacedRect { x: number; y: number; w: number; h: number }
+
+function findBestOffset(
+  px: number,
+  py: number,
+  labelW: number,
+  placed: PlacedRect[],
+): [number, number] {
+  for (const [ox, oy] of OFFSETS) {
+    // For left-side offsets (negative ox), anchor the right edge of the label
+    const lx = ox < 0 ? px + ox - labelW : px + ox;
+    const ly = py + oy;
+
+    const collides = placed.some((r) =>
+      !(lx + labelW + GAP < r.x || lx > r.x + r.w + GAP ||
+        ly + LABEL_H + GAP < r.y || ly > r.y + r.h + GAP)
+    );
+    if (!collides) return [ox, oy];
+  }
+  // All collide — return default (above), label will overlap but at least shows
+  return OFFSETS[0];
+}
+
 export default function PlatformMarkers({ platforms, routes }: PlatformMarkersProps) {
+  const leafletMap = useMap();
   const { showPlatforms, selectedPlatform, setSelectedPlatform } = useFilterStore();
   const { results, highlightedRouteIndex, departureCitySuggestion, arrivalCitySuggestion } = useSearchStore();
-  const [zoom, setZoom] = useState(6);
+  const [zoom, setZoom] = useState(leafletMap.getZoom());
 
   useMapEvents({
     zoomend: (e) => setZoom(e.target.getZoom()),
+    moveend: () => setZoom(leafletMap.getZoom()),
   });
+
+  const platformVolumes = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of platforms) {
+      m.set(p.site, getTrainVolume(p.site, routes));
+    }
+    return m;
+  }, [platforms, routes]);
 
   if (!showPlatforms) return null;
 
-  // Search mode: only show platforms involved in the highlighted search result
   const searchActive = highlightedRouteIndex !== null && results.length > 0;
   const searchSites = useMemo(() => {
     if (!searchActive) return null;
     const sites = new Set<string>();
     const route = results[highlightedRouteIndex!];
     if (route) {
-      for (const leg of route.legs) {
-        sites.add(leg.from);
-        sites.add(leg.to);
-      }
+      for (const leg of route.legs) { sites.add(leg.from); sites.add(leg.to); }
     }
     return sites;
   }, [searchActive, results, highlightedRouteIndex]);
 
-  // Preview mode: highlight platforms of selected cities (before search)
   const previewSites = useMemo(() => {
-    if (searchActive) return null; // route results take priority
+    if (searchActive) return null;
     const sites = new Set<string>();
-    if (departureCitySuggestion) {
-      departureCitySuggestion.platforms.forEach((p) => sites.add(p.site));
-    }
-    if (arrivalCitySuggestion) {
-      arrivalCitySuggestion.platforms.forEach((p) => sites.add(p.site));
-    }
+    if (departureCitySuggestion) departureCitySuggestion.platforms.forEach((p) => sites.add(p.site));
+    if (arrivalCitySuggestion) arrivalCitySuggestion.platforms.forEach((p) => sites.add(p.site));
     return sites.size > 0 ? sites : null;
   }, [searchActive, departureCitySuggestion, arrivalCitySuggestion]);
 
-  // If a platform is selected, find connected platform names
   const connectedSites = new Set<string>();
   if (selectedPlatform) {
     connectedSites.add(selectedPlatform);
@@ -68,46 +111,79 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
     }
   }
 
+  // --- Label placement with collision avoidance ---
+  const visiblePlatforms = platforms.filter((p) => !searchSites || searchSites.has(p.site));
+
+  // Sort by priority (selected > preview > highest volume first)
+  const sorted = [...visiblePlatforms].sort((a, b) => {
+    const aPri = (a.site === selectedPlatform ? 1e6 : 0) + (previewSites?.has(a.site) ? 5e5 : 0);
+    const bPri = (b.site === selectedPlatform ? 1e6 : 0) + (previewSites?.has(b.site) ? 5e5 : 0);
+    return (bPri + (platformVolumes.get(b.site) || 0)) - (aPri + (platformVolumes.get(a.site) || 0));
+  });
+
+  const placedRects: PlacedRect[] = [];
+  const labelPlacements = new Map<string, [number, number]>(); // site → [anchorX, anchorY]
+
+  for (const platform of sorted) {
+    const volume = platformVolumes.get(platform.site) || 0;
+    const isHub = volume > 30;
+    const isBigHub = volume > 80;
+    const isPreview = previewSites?.has(platform.site) ?? false;
+    const isSelected = platform.site === selectedPlatform;
+    const isHighlighted = selectedPlatform ? connectedSites.has(platform.site) : true;
+
+    const wantsLabel = isSelected || isPreview
+      || (selectedPlatform ? isHighlighted && zoom >= 6 : false)
+      || (!selectedPlatform && (zoom >= 9 || (isHub && zoom >= 7) || (isBigHub && zoom >= 6)));
+
+    if (!wantsLabel) continue;
+
+    const point = leafletMap.latLngToContainerPoint([platform.lat, platform.lon]);
+    const fontSize = isBigHub || isSelected ? 10 : isHub ? 9 : 8;
+    const labelW = estimateLabelWidth(platform.site, fontSize);
+
+    const [ox, oy] = findBestOffset(point.x, point.y, labelW, placedRects);
+    const lx = ox < 0 ? point.x + ox - labelW : point.x + ox;
+    const ly = point.y + oy;
+    placedRects.push({ x: lx, y: ly, w: labelW, h: LABEL_H });
+    labelPlacements.set(platform.site, [ox, oy]);
+  }
+
   return (
     <>
-      {platforms.filter((p) => !searchSites || searchSites.has(p.site)).map((platform) => {
-        const volume = getTrainVolume(platform.site, routes);
+      {visiblePlatforms.map((platform) => {
+        const volume = platformVolumes.get(platform.site) || 0;
         const size = getMarkerSize(volume);
         const isFrance = platform.pays?.toLowerCase() === 'france';
         const isHub = volume > 30;
         const isBigHub = volume > 80;
-
-        // Is this platform highlighted (selected or connected)?
         const isPreview = previewSites?.has(platform.site) ?? false;
-        const isHighlighted = selectedPlatform
-          ? connectedSites.has(platform.site)
-          : true;
+        const isHighlighted = selectedPlatform ? connectedSites.has(platform.site) : true;
         const isSelected = platform.site === selectedPlatform;
+        const dimmed = selectedPlatform && !isHighlighted;
 
-        // When a platform is selected, only show labels for connected platforms
-        // Otherwise: big hubs at zoom >= 6, hubs at zoom >= 7, all at zoom >= 8
-        const showName = isPreview
-          ? true
-          : selectedPlatform
-          ? isHighlighted && zoom >= 6
-          : zoom >= 8 || (isHub && zoom >= 7) || (isBigHub && zoom >= 6);
+        const placement = labelPlacements.get(platform.site);
+        const showName = !!placement;
 
         const labelIcon = showName ? L.divIcon({
           className: 'platform-label',
           html: `<span style="
-            color: ${isSelected ? '#587bbd' : '#2b2b2b'};
-            font-size: ${isBigHub || isSelected ? '11px' : isHub ? '10px' : '9px'};
-            font-weight: ${isBigHub || isSelected ? '700' : '500'};
-            text-shadow: 0 0 3px rgba(255,255,255,0.8), 0 0 6px rgba(255,255,255,0.5);
+            color: ${isSelected ? '#fff' : '#2b2b2b'};
+            background: ${isSelected ? '#587bbd' : 'rgba(255,255,255,0.9)'};
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: ${isBigHub || isSelected ? '10px' : isHub ? '9px' : '8px'};
+            font-weight: ${isBigHub || isSelected ? '700' : '600'};
             white-space: nowrap;
             pointer-events: none;
-            opacity: ${isHighlighted ? '1' : '0.3'};
+            opacity: ${isHighlighted ? '1' : '0.25'};
+            border: 1px solid ${isSelected ? '#587bbd' : 'rgba(88,123,189,0.2)'};
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            line-height: 1.4;
           ">${platform.site}</span>`,
           iconSize: [0, 0],
-          iconAnchor: [0, -12],
+          iconAnchor: [-(placement?.[0] || 0), -(placement?.[1] || 0)],
         }) : null;
-
-        const dimmed = selectedPlatform && !isHighlighted;
 
         return (
           <span key={platform.site}>
