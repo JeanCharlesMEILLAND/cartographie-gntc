@@ -93,7 +93,17 @@ export default function Home() {
     });
   }, [data, activeOperators, minFrequency, country]);
 
-  // Major hubs: platforms with >100 trains/sem
+  // Only show platforms connected to at least one visible route
+  const visiblePlatforms = useMemo<Platform[]>(() => {
+    const connectedSites = new Set<string>();
+    filteredRoutes.forEach((r) => {
+      connectedSites.add(r.from);
+      connectedSites.add(r.to);
+    });
+    return filteredPlatforms.filter((p) => connectedSites.has(p.site));
+  }, [filteredPlatforms, filteredRoutes]);
+
+  // Major hubs: platforms with >30 trains/sem
   const majorHubs = useMemo<Platform[]>(() => {
     const volumeMap = new Map<string, number>();
     filteredRoutes.forEach((r) => {
@@ -149,7 +159,7 @@ export default function Home() {
 
         {/* KPIs */}
         <KPIBar
-          platformCount={filteredPlatforms.length}
+          platformCount={visiblePlatforms.length}
           routeCount={filteredRoutes.length}
           trainsPerWeek={totalTrains}
           operatorCount={activeOps.size}
@@ -170,7 +180,7 @@ export default function Home() {
 
       {/* Map (fullscreen behind everything) */}
       <MapContainer
-        platforms={filteredPlatforms}
+        platforms={visiblePlatforms}
         routes={filteredRoutes}
         majorHubs={majorHubs}
         railGeometries={railGeometries}
