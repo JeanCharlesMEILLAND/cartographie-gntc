@@ -5,6 +5,7 @@ interface KPIBarProps {
   routeCount: number;
   trainsPerWeek: number;
   operatorCount: number;
+  selectedPlatform?: string | null;
 }
 
 function KPIItem({ label, value }: { label: string; value: string | number }) {
@@ -16,10 +17,20 @@ function KPIItem({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-export default function KPIBar({ platformCount, routeCount, trainsPerWeek, operatorCount }: KPIBarProps) {
+export default function KPIBar({ platformCount, routeCount, trainsPerWeek, operatorCount, selectedPlatform }: KPIBarProps) {
   return (
     <div className="hidden sm:flex items-center gap-0.5">
-      <KPIItem label="Sites" value={platformCount} />
+      {selectedPlatform && (
+        <>
+          <div className="flex items-center px-2 py-1">
+            <span className="text-[10px] sm:text-[11px] font-semibold text-text truncate max-w-[120px]">
+              {selectedPlatform}
+            </span>
+          </div>
+          <div className="w-px h-4 bg-border" />
+        </>
+      )}
+      <KPIItem label={selectedPlatform ? 'Destinations' : 'Sites'} value={platformCount} />
       <div className="w-px h-4 bg-border" />
       <KPIItem label="Liaisons" value={routeCount} />
       <div className="w-px h-4 bg-border" />

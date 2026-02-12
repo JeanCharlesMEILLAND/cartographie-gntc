@@ -133,17 +133,30 @@ export default function Home() {
     return filteredPlatforms.filter((p) => connectedSites.has(p.site));
   }, [filteredPlatforms, filteredRoutes]);
 
-  // KPIs
+  // KPIs — context-aware: show platform stats when one is selected
+  const selectedRoutes = useMemo(() => {
+    if (!selectedPlatform) return null;
+    return filteredRoutes.filter(
+      (r) => r.from === selectedPlatform || r.to === selectedPlatform
+    );
+  }, [filteredRoutes, selectedPlatform]);
+
+  const kpiRoutes = selectedRoutes || filteredRoutes;
+
   const totalTrains = useMemo(
-    () => filteredRoutes.reduce((sum, r) => sum + r.freq, 0),
-    [filteredRoutes]
+    () => kpiRoutes.reduce((sum, r) => sum + r.freq, 0),
+    [kpiRoutes]
   );
 
   const activeOps = useMemo(() => {
     const ops = new Set<string>();
-    filteredRoutes.forEach((r) => r.operators.forEach((op) => ops.add(op)));
+    kpiRoutes.forEach((r) => r.operators.forEach((op) => ops.add(op)));
     return ops;
-  }, [filteredRoutes]);
+  }, [kpiRoutes]);
+
+  const kpiPlatformCount = selectedPlatform
+    ? new Set(kpiRoutes.flatMap((r) => [r.from, r.to])).size
+    : visiblePlatforms.length;
 
   if (loading) {
     return (
@@ -173,10 +186,11 @@ export default function Home() {
 
         {/* KPIs */}
         <KPIBar
-          platformCount={visiblePlatforms.length}
-          routeCount={filteredRoutes.length}
+          platformCount={kpiPlatformCount}
+          routeCount={kpiRoutes.length}
           trainsPerWeek={totalTrains}
           operatorCount={activeOps.size}
+          selectedPlatform={selectedPlatform}
         />
 
         {/* Upload button */}
