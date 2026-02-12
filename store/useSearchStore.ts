@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { FoundRoute } from '@/lib/routeFinder';
+import { FoundRoute, CitySuggestion } from '@/lib/routeFinder';
+import { Platform } from '@/lib/types';
 
 export type UTIType = 'cm' | 'cont' | 'semiPre' | 'semiNon' | 'p400';
 
@@ -12,6 +13,12 @@ interface SearchState {
   arrivalQuery: string;
   selectedUTI: Set<UTIType>;
 
+  // City selection step
+  departureCitySuggestion: CitySuggestion | null;
+  arrivalCitySuggestion: CitySuggestion | null;
+  departureSelectedPlatforms: Platform[];
+  arrivalSelectedPlatforms: Platform[];
+
   // Results
   results: FoundRoute[];
   searching: boolean;
@@ -22,6 +29,10 @@ interface SearchState {
   setDepartureQuery: (q: string) => void;
   setArrivalQuery: (q: string) => void;
   toggleUTI: (uti: UTIType) => void;
+  setDepartureCitySuggestion: (c: CitySuggestion | null) => void;
+  setArrivalCitySuggestion: (c: CitySuggestion | null) => void;
+  setDepartureSelectedPlatforms: (p: Platform[]) => void;
+  setArrivalSelectedPlatforms: (p: Platform[]) => void;
   setResults: (r: FoundRoute[]) => void;
   setSearching: (s: boolean) => void;
   setHighlightedRouteIndex: (i: number | null) => void;
@@ -33,6 +44,10 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   departureQuery: '',
   arrivalQuery: '',
   selectedUTI: new Set<UTIType>(),
+  departureCitySuggestion: null,
+  arrivalCitySuggestion: null,
+  departureSelectedPlatforms: [],
+  arrivalSelectedPlatforms: [],
   results: [],
   searching: false,
   highlightedRouteIndex: null,
@@ -40,7 +55,15 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   setSearchOpen: (open) => {
     if (!open) {
       // Clear results when closing so all routes come back on the map
-      set({ searchOpen: false, results: [], highlightedRouteIndex: null });
+      set({
+        searchOpen: false,
+        results: [],
+        highlightedRouteIndex: null,
+        departureCitySuggestion: null,
+        arrivalCitySuggestion: null,
+        departureSelectedPlatforms: [],
+        arrivalSelectedPlatforms: [],
+      });
     } else {
       set({ searchOpen: true });
     }
@@ -56,6 +79,10 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     }
     set({ selectedUTI: current });
   },
+  setDepartureCitySuggestion: (c) => set({ departureCitySuggestion: c }),
+  setArrivalCitySuggestion: (c) => set({ arrivalCitySuggestion: c }),
+  setDepartureSelectedPlatforms: (p) => set({ departureSelectedPlatforms: p }),
+  setArrivalSelectedPlatforms: (p) => set({ arrivalSelectedPlatforms: p }),
   setResults: (r) => set({ results: r }),
   setSearching: (s) => set({ searching: s }),
   setHighlightedRouteIndex: (i) => set({ highlightedRouteIndex: i }),
@@ -64,6 +91,10 @@ export const useSearchStore = create<SearchState>((set, get) => ({
       departureQuery: '',
       arrivalQuery: '',
       selectedUTI: new Set(),
+      departureCitySuggestion: null,
+      arrivalCitySuggestion: null,
+      departureSelectedPlatforms: [],
+      arrivalSelectedPlatforms: [],
       results: [],
       highlightedRouteIndex: null,
     }),

@@ -4,22 +4,13 @@ import { CircleMarker, Tooltip, Marker, useMapEvents } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
 import { useSearchStore } from '@/store/useSearchStore';
 import { Platform, AggregatedRoute } from '@/lib/types';
+import { getTrainVolume } from '@/lib/routeFinder';
 import L from 'leaflet';
 import { useMemo, useState } from 'react';
 
 interface PlatformMarkersProps {
   platforms: Platform[];
   routes: AggregatedRoute[];
-}
-
-function getTrainVolume(platformName: string, routes: AggregatedRoute[]): number {
-  let total = 0;
-  for (const r of routes) {
-    if (r.from === platformName || r.to === platformName) {
-      total += r.freq;
-    }
-  }
-  return total;
 }
 
 function getMarkerSize(volume: number): number {
@@ -30,7 +21,7 @@ function getMarkerSize(volume: number): number {
 
 export default function PlatformMarkers({ platforms, routes }: PlatformMarkersProps) {
   const { showPlatforms, selectedPlatform, setSelectedPlatform } = useFilterStore();
-  const { results, highlightedRouteIndex } = useSearchStore();
+  const { results, highlightedRouteIndex, departureCitySuggestion, arrivalCitySuggestion } = useSearchStore();
   const [zoom, setZoom] = useState(6);
 
   useMapEvents({
@@ -54,6 +45,19 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
     return sites;
   }, [searchActive, results, highlightedRouteIndex]);
 
+  // Preview mode: highlight platforms of selected cities (before search)
+  const previewSites = useMemo(() => {
+    if (searchActive) return null; // route results take priority
+    const sites = new Set<string>();
+    if (departureCitySuggestion) {
+      departureCitySuggestion.platforms.forEach((p) => sites.add(p.site));
+    }
+    if (arrivalCitySuggestion) {
+      arrivalCitySuggestion.platforms.forEach((p) => sites.add(p.site));
+    }
+    return sites.size > 0 ? sites : null;
+  }, [searchActive, departureCitySuggestion, arrivalCitySuggestion]);
+
   // If a platform is selected, find connected platform names
   const connectedSites = new Set<string>();
   if (selectedPlatform) {
@@ -74,6 +78,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
         const isBigHub = volume > 80;
 
         // Is this platform highlighted (selected or connected)?
+        const isPreview = previewSites?.has(platform.site) ?? false;
         const isHighlighted = selectedPlatform
           ? connectedSites.has(platform.site)
           : true;
@@ -81,7 +86,9 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
 
         // When a platform is selected, only show labels for connected platforms
         // Otherwise: big hubs at zoom >= 6, hubs at zoom >= 7, all at zoom >= 8
-        const showName = selectedPlatform
+        const showName = isPreview
+          ? true
+          : selectedPlatform
           ? isHighlighted && zoom >= 6
           : zoom >= 8 || (isHub && zoom >= 7) || (isBigHub && zoom >= 6);
 
@@ -106,13 +113,13 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
           <span key={platform.site}>
             <CircleMarker
               center={[platform.lat, platform.lon]}
-              radius={isSelected ? size + 3 : size}
+              radius={isPreview ? size + 2 : isSelected ? size + 3 : size}
               pathOptions={{
-                fillColor: isFrance ? '#38d9f5' : '#a78bfa',
-                color: isSelected ? '#ffffff' : (isFrance ? '#38d9f5' : '#a78bfa'),
-                fillOpacity: dimmed ? 0.15 : 0.7,
-                weight: isSelected ? 3 : 2,
-                opacity: dimmed ? 0.2 : 1,
+                fillColor: isPreview ? '#38d9f5' : (isFrance ? '#38d9f5' : '#a78bfa'),
+                color: isPreview ? '#38d9f5' : isSelected ? '#ffffff' : (isFrance ? '#38d9f5' : '#a78bfa'),
+                fillOpacity: isPreview ? 0.9 : dimmed ? 0.15 : 0.7,
+                weight: isPreview ? 3 : isSelected ? 3 : 2,
+                opacity: isPreview ? 1 : dimmed ? 0.2 : 1,
                 className: isHub ? 'marker-hub' : undefined,
               }}
               eventHandlers={{

@@ -2,13 +2,22 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchStore, UTIType } from '@/store/useSearchStore';
-import { Platform, Service } from '@/lib/types';
-import { findPlatformsAsync, findRoutes, FoundRoute, RouteLeg, PlatformSuggestion } from '@/lib/routeFinder';
+import { Platform, Service, AggregatedRoute } from '@/lib/types';
+import {
+  findPlatformsAsync,
+  findCitySuggestionsAsync,
+  findRoutes,
+  getTrainVolume,
+  FoundRoute,
+  RouteLeg,
+  CitySuggestion,
+} from '@/lib/routeFinder';
 import { getOperatorColor } from '@/lib/colors';
 
 interface SearchPanelProps {
   platforms: Platform[];
   services: Service[];
+  routes: AggregatedRoute[];
 }
 
 const UTI_OPTIONS: { key: UTIType; label: string; desc: string }[] = [
@@ -21,26 +30,115 @@ const UTI_OPTIONS: { key: UTIType; label: string; desc: string }[] = [
 
 const DAY_ORDER: Record<string, number> = { Lu: 1, Ma: 2, Me: 3, Je: 4, Ve: 5, Sa: 6, Di: 7 };
 
+function PlatformPicker({
+  city,
+  routes,
+  selectedPlatforms,
+  onPlatformsChange,
+}: {
+  city: CitySuggestion;
+  routes: AggregatedRoute[];
+  selectedPlatforms: Platform[];
+  onPlatformsChange: (p: Platform[]) => void;
+}) {
+  const allSelected = selectedPlatforms.length === city.platforms.length;
+
+  const toggleAll = () => {
+    onPlatformsChange(allSelected ? [] : [...city.platforms]);
+  };
+
+  const toggleOne = (platform: Platform) => {
+    const isSelected = selectedPlatforms.some((p) => p.site === platform.site);
+    if (isSelected) {
+      onPlatformsChange(selectedPlatforms.filter((p) => p.site !== platform.site));
+    } else {
+      onPlatformsChange([...selectedPlatforms, platform]);
+    }
+  };
+
+  return (
+    <div className="mt-1.5 rounded-md border border-border bg-[rgba(10,15,30,0.5)] p-1.5 space-y-0.5">
+      <button
+        onClick={toggleAll}
+        className={`w-full text-left text-[10px] px-2 py-1 rounded transition-colors ${
+          allSelected ? 'text-cyan bg-cyan/10' : 'text-muted hover:text-text'
+        }`}
+      >
+        Toutes les plateformes ({city.platforms.length})
+      </button>
+      <div className="border-t border-border/50 pt-0.5 space-y-0.5">
+        {city.platforms.map((platform) => {
+          const volume = getTrainVolume(platform.site, routes);
+          const isSelected = selectedPlatforms.some((p) => p.site === platform.site);
+          return (
+            <button
+              key={platform.site}
+              onClick={() => toggleOne(platform)}
+              className={`w-full text-left px-2 py-1 rounded text-[11px] flex items-center justify-between transition-colors ${
+                isSelected
+                  ? 'bg-blue/10 text-text'
+                  : 'text-muted hover:text-text hover:bg-[rgba(20,30,60,0.3)]'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <div
+                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                    isSelected ? 'bg-cyan' : 'bg-muted/30'
+                  }`}
+                />
+                <span className="truncate">{platform.site}</span>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                <span className="text-[9px] text-muted truncate max-w-[100px]">
+                  {platform.exploitant}
+                </span>
+                {volume > 0 && (
+                  <span className="text-[10px] font-mono text-cyan whitespace-nowrap">{volume} t/sem</span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function CityInput({
   value,
   onChange,
   placeholder,
   platforms,
+  routes,
+  selectedCity,
+  onCitySelect,
+  selectedPlatforms,
+  onPlatformsChange,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
   platforms: Platform[];
+  routes: AggregatedRoute[];
+  selectedCity: CitySuggestion | null;
+  onCitySelect: (c: CitySuggestion | null) => void;
+  selectedPlatforms: Platform[];
+  onPlatformsChange: (p: Platform[]) => void;
 }) {
   const [focused, setFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [suggestions, setSuggestions] = useState<PlatformSuggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<CitySuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Debounced async search (text first, then geocode fallback)
+  // Debounced async search for city suggestions
   useEffect(() => {
+    // Don't search if a city is already selected
+    if (selectedCity) {
+      setSuggestions([]);
+      return;
+    }
     if (!value.trim() || value.length < 2) {
       setSuggestions([]);
       return;
@@ -48,28 +146,42 @@ function CityInput({
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
-      const results = await findPlatformsAsync(value, platforms, 6);
+      const results = await findCitySuggestionsAsync(value, platforms, 8);
       setSuggestions(results);
       setLoading(false);
     }, 250);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [value, platforms]);
+  }, [value, platforms, selectedCity]);
 
-  const showSuggestions = focused && (suggestions.length > 0 || loading);
+  const showSuggestions = focused && !selectedCity && (suggestions.length > 0 || loading);
 
-  const handleSelect = useCallback(
-    (p: Platform) => {
-      onChange(p.site);
+  const handleCitySelect = useCallback(
+    (city: CitySuggestion) => {
+      onCitySelect(city);
+      onChange(city.city);
+      // Auto-select all platforms
+      onPlatformsChange([...city.platforms]);
       setFocused(false);
       setSelectedIndex(-1);
       setSuggestions([]);
     },
-    [onChange]
+    [onChange, onCitySelect, onPlatformsChange]
   );
 
+  const handleClearCity = () => {
+    onCitySelect(null);
+    onPlatformsChange([]);
+    onChange('');
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (selectedCity && e.key === 'Escape') {
+      handleClearCity();
+      return;
+    }
     if (!showSuggestions || suggestions.length === 0) return;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -79,7 +191,7 @@ function CityInput({
       setSelectedIndex((i) => Math.max(i - 1, 0));
     } else if (e.key === 'Enter' && selectedIndex >= 0) {
       e.preventDefault();
-      handleSelect(suggestions[selectedIndex].platform);
+      handleCitySelect(suggestions[selectedIndex]);
     } else if (e.key === 'Escape') {
       setFocused(false);
     }
@@ -87,54 +199,100 @@ function CityInput({
 
   return (
     <div className="relative">
-      <input
-        ref={inputRef}
-        type="text"
-        value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
-          setSelectedIndex(-1);
-        }}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setTimeout(() => setFocused(false), 200)}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className="w-full text-xs bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 transition-colors"
-      />
+      {/* State A: City selected — show chip */}
+      {selectedCity ? (
+        <div className="w-full text-xs bg-[rgba(10,15,30,0.6)] border border-blue/30 rounded-md px-3 py-2 text-text flex items-center justify-between">
+          <span className="truncate">
+            <span className="font-medium">{selectedCity.city}</span>
+            <span className="text-muted ml-1.5 text-[10px]">
+              {selectedCity.platforms.length} plateforme
+              {selectedCity.platforms.length > 1 ? 's' : ''}
+            </span>
+          </span>
+          <button
+            onClick={handleClearCity}
+            className="text-muted hover:text-text ml-2 flex-shrink-0 p-0.5"
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path
+                d="M2 2L8 8M2 8L8 2"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+      ) : (
+        /* State B: No city selected — show input */
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setSelectedIndex(-1);
+          }}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setTimeout(() => setFocused(false), 200)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="w-full text-xs bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 transition-colors"
+        />
+      )}
+
+      {/* City suggestions dropdown */}
       {showSuggestions && (
-        <div className="absolute top-full left-0 right-0 mt-1 glass-panel rounded-md border border-border z-50 max-h-[250px] overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 glass-panel rounded-md border border-border z-50 max-h-[280px] overflow-y-auto">
           {loading && suggestions.length === 0 && (
             <div className="px-3 py-2 text-[10px] text-muted animate-pulse">
-              Recherche des plateformes proches...
+              Recherche des villes proches...
             </div>
           )}
-          {suggestions.map((s, i) => (
+          {suggestions.map((city, i) => (
             <button
-              key={s.platform.site}
+              key={`${city.city}-${city.lat}`}
               onMouseDown={(e) => {
                 e.preventDefault();
-                handleSelect(s.platform);
+                handleCitySelect(city);
               }}
-              className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${
+              className={`w-full text-left px-3 py-2 text-xs transition-colors ${
                 i === selectedIndex
                   ? 'bg-blue/20 text-text'
                   : 'text-text hover:bg-[rgba(20,30,60,0.5)]'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="font-medium truncate">{s.platform.site}</span>
-                {s.distance !== null && (
-                  <span className="text-[10px] font-mono text-cyan flex-shrink-0">
-                    {Math.round(s.distance)} km
+                <span className="font-medium truncate">{city.city}</span>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-[10px] text-muted">
+                    {city.platforms.length} plateforme
+                    {city.platforms.length > 1 ? 's' : ''}
                   </span>
-                )}
+                  {city.distance !== null && (
+                    <span className="text-[10px] font-mono text-cyan">
+                      {city.distance} km
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="text-[10px] text-muted">
-                {s.platform.ville}{s.platform.pays ? ` - ${s.platform.pays}` : ''}
+                {city.departement ? `${city.departement} - ` : ''}
+                {city.pays || ''}
               </div>
             </button>
           ))}
         </div>
+      )}
+
+      {/* Platform picker — shown when city is selected and has multiple platforms */}
+      {selectedCity && selectedCity.platforms.length > 1 && (
+        <PlatformPicker
+          city={selectedCity}
+          routes={routes}
+          selectedPlatforms={selectedPlatforms}
+          onPlatformsChange={onPlatformsChange}
+        />
       )}
     </div>
   );
@@ -303,19 +461,27 @@ function RouteCard({
   );
 }
 
-export default function SearchPanel({ platforms, services }: SearchPanelProps) {
+export default function SearchPanel({ platforms, services, routes }: SearchPanelProps) {
   const {
     searchOpen,
     setSearchOpen,
     departureQuery,
     arrivalQuery,
     selectedUTI,
+    departureCitySuggestion,
+    arrivalCitySuggestion,
+    departureSelectedPlatforms,
+    arrivalSelectedPlatforms,
     results,
     searching,
     highlightedRouteIndex,
     setDepartureQuery,
     setArrivalQuery,
     toggleUTI,
+    setDepartureCitySuggestion,
+    setArrivalCitySuggestion,
+    setDepartureSelectedPlatforms,
+    setArrivalSelectedPlatforms,
     setResults,
     setSearching,
     setHighlightedRouteIndex,
@@ -328,11 +494,27 @@ export default function SearchPanel({ platforms, services }: SearchPanelProps) {
     setSearching(true);
     setHighlightedRouteIndex(null);
 
-    const depSuggestions = await findPlatformsAsync(departureQuery, platforms, 5);
-    const arrSuggestions = await findPlatformsAsync(arrivalQuery, platforms, 5);
+    // Use pre-selected platforms if available, otherwise fall back to text search
+    let depPlatforms: Platform[];
+    let arrPlatforms: Platform[];
 
-    const depPlatforms = depSuggestions.map((s) => s.platform);
-    const arrPlatforms = arrSuggestions.map((s) => s.platform);
+    if (departureSelectedPlatforms.length > 0) {
+      depPlatforms = departureSelectedPlatforms;
+    } else if (departureCitySuggestion) {
+      depPlatforms = departureCitySuggestion.platforms;
+    } else {
+      const depSuggestions = await findPlatformsAsync(departureQuery, platforms, 5);
+      depPlatforms = depSuggestions.map((s) => s.platform);
+    }
+
+    if (arrivalSelectedPlatforms.length > 0) {
+      arrPlatforms = arrivalSelectedPlatforms;
+    } else if (arrivalCitySuggestion) {
+      arrPlatforms = arrivalCitySuggestion.platforms;
+    } else {
+      const arrSuggestions = await findPlatformsAsync(arrivalQuery, platforms, 5);
+      arrPlatforms = arrSuggestions.map((s) => s.platform);
+    }
 
     if (depPlatforms.length === 0 || arrPlatforms.length === 0) {
       setResults([]);
@@ -347,13 +529,26 @@ export default function SearchPanel({ platforms, services }: SearchPanelProps) {
     if (found.length > 0) {
       setHighlightedRouteIndex(0);
     }
-  }, [departureQuery, arrivalQuery, selectedUTI, platforms, services, setResults, setSearching, setHighlightedRouteIndex]);
+  }, [
+    departureQuery, arrivalQuery, selectedUTI, platforms, services,
+    departureSelectedPlatforms, arrivalSelectedPlatforms,
+    departureCitySuggestion, arrivalCitySuggestion,
+    setResults, setSearching, setHighlightedRouteIndex,
+  ]);
 
-  // Swap departure/arrival
+  // Swap departure/arrival (including city selections)
   const handleSwap = () => {
-    const dep = departureQuery;
+    const depQ = departureQuery;
+    const depCity = departureCitySuggestion;
+    const depPlats = departureSelectedPlatforms;
+
     setDepartureQuery(arrivalQuery);
-    setArrivalQuery(dep);
+    setDepartureCitySuggestion(arrivalCitySuggestion);
+    setDepartureSelectedPlatforms(arrivalSelectedPlatforms);
+
+    setArrivalQuery(depQ);
+    setArrivalCitySuggestion(depCity);
+    setArrivalSelectedPlatforms(depPlats);
   };
 
   if (!searchOpen) return null;
@@ -387,6 +582,11 @@ export default function SearchPanel({ platforms, services }: SearchPanelProps) {
             onChange={setDepartureQuery}
             placeholder="Ex: Lyon, Marseille, Paris..."
             platforms={platforms}
+            routes={routes}
+            selectedCity={departureCitySuggestion}
+            onCitySelect={setDepartureCitySuggestion}
+            selectedPlatforms={departureSelectedPlatforms}
+            onPlatformsChange={setDepartureSelectedPlatforms}
           />
         </div>
 
@@ -413,6 +613,11 @@ export default function SearchPanel({ platforms, services }: SearchPanelProps) {
             onChange={setArrivalQuery}
             placeholder="Ex: Bordeaux, Lille, Fos..."
             platforms={platforms}
+            routes={routes}
+            selectedCity={arrivalCitySuggestion}
+            onCitySelect={setArrivalCitySuggestion}
+            selectedPlatforms={arrivalSelectedPlatforms}
+            onPlatformsChange={setArrivalSelectedPlatforms}
           />
         </div>
 

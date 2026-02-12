@@ -245,7 +245,7 @@ export default function Home() {
       <Legend />
 
       {/* Search Panel */}
-      <SearchPanel platforms={data?.platforms || []} services={data?.services || []} />
+      <SearchPanel platforms={data?.platforms || []} services={data?.services || []} routes={filteredRoutes} />
 
       {/* Info Card */}
       <InfoCard platforms={data?.platforms || []} routes={filteredRoutes} services={data?.services || []} />

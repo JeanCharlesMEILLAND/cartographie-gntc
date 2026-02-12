@@ -1,4 +1,4 @@
-import { Platform, Service } from './types';
+import { Platform, Service, AggregatedRoute } from './types';
 import { UTIType } from '@/store/useSearchStore';
 
 export interface FoundRoute {
@@ -54,6 +54,17 @@ export interface PlatformSuggestion {
   matchType: 'text' | 'geo';
 }
 
+export interface CitySuggestion {
+  city: string;
+  lat: number;
+  lon: number;
+  pays: string;
+  departement: string;
+  platforms: Platform[];
+  bestScore: number;
+  distance: number | null; // km if geo-matched, null if text-matched
+}
+
 /** Find platforms near a geocoded location, sorted by distance */
 export function findPlatformsByLocation(
   lat: number,
@@ -97,6 +108,119 @@ export async function findPlatformsAsync(
   if (!coords) return [];
 
   return findPlatformsByLocation(coords.lat, coords.lon, platforms, maxResults);
+}
+
+/** Combined search grouped by city: text matching first, then geocode fallback */
+export async function findCitySuggestionsAsync(
+  query: string,
+  platforms: Platform[],
+  maxResults = 8
+): Promise<CitySuggestion[]> {
+  if (!query.trim() || query.length < 2) return [];
+
+  // 1. Score every platform
+  const scored = platforms
+    .map((p) => ({ platform: p, score: matchScore(query, p) }))
+    .filter((s) => s.score >= 40);
+
+  if (scored.length > 0) {
+    // Group by ville (normalized)
+    const cityMap = new Map<string, { platforms: { platform: Platform; score: number }[] }>();
+    for (const s of scored) {
+      const key = (s.platform.ville || s.platform.site.split(' - ')[0]).toLowerCase().trim();
+      if (!cityMap.has(key)) cityMap.set(key, { platforms: [] });
+      cityMap.get(key)!.platforms.push(s);
+    }
+
+    // Also include nearby platforms that didn't match text but are within 15km
+    // of a matched platform (handles agglomeration cases like Lyon/Venissieux/St Priest)
+    const matchedPlatforms = scored.map((s) => s.platform);
+    for (const p of platforms) {
+      if (matchedPlatforms.some((mp) => mp.site === p.site)) continue; // already matched
+      // Check if this platform is within 15km of any matched platform
+      const nearestMatch = matchedPlatforms.find(
+        (mp) => haversineKm(p.lat, p.lon, mp.lat, mp.lon) < 15
+      );
+      if (nearestMatch) {
+        // Add to the group of the nearest match
+        const nearKey = (nearestMatch.ville || nearestMatch.site.split(' - ')[0]).toLowerCase().trim();
+        if (cityMap.has(nearKey)) {
+          cityMap.get(nearKey)!.platforms.push({ platform: p, score: 0 });
+        }
+      }
+    }
+
+    const cities: CitySuggestion[] = [];
+    for (const [, group] of cityMap) {
+      const best = group.platforms.reduce((a, b) => (a.score > b.score ? a : b));
+      const plats = group.platforms.map((g) => g.platform);
+      cities.push({
+        city: best.platform.ville || best.platform.site.split(' - ')[0],
+        lat: plats[0].lat,
+        lon: plats[0].lon,
+        pays: plats[0].pays,
+        departement: plats[0].departement,
+        platforms: plats,
+        bestScore: best.score,
+        distance: null,
+      });
+    }
+
+    cities.sort((a, b) => b.bestScore - a.bestScore);
+    return cities.slice(0, maxResults);
+  }
+
+  // 2. Geocode fallback — group nearby platforms by ville within 50km
+  const coords = await geocodeCity(query);
+  if (!coords) return [];
+
+  const nearby = platforms
+    .map((p) => ({ platform: p, dist: haversineKm(coords.lat, coords.lon, p.lat, p.lon) }))
+    .filter((s) => s.dist <= 50)
+    .sort((a, b) => a.dist - b.dist);
+
+  if (nearby.length === 0) {
+    // Widen to 150km if nothing within 50km
+    const wider = platforms
+      .map((p) => ({ platform: p, dist: haversineKm(coords.lat, coords.lon, p.lat, p.lon) }))
+      .filter((s) => s.dist <= 150)
+      .sort((a, b) => a.dist - b.dist);
+    return groupNearbyByCity(wider, maxResults);
+  }
+
+  return groupNearbyByCity(nearby, maxResults);
+}
+
+function groupNearbyByCity(
+  nearby: { platform: Platform; dist: number }[],
+  maxResults: number
+): CitySuggestion[] {
+  const cityMap = new Map<string, { platforms: Platform[]; minDist: number }>();
+  for (const s of nearby) {
+    const key = (s.platform.ville || s.platform.site.split(' - ')[0]).toLowerCase().trim();
+    if (!cityMap.has(key)) cityMap.set(key, { platforms: [], minDist: s.dist });
+    const group = cityMap.get(key)!;
+    group.platforms.push(s.platform);
+    if (s.dist < group.minDist) group.minDist = s.dist;
+  }
+
+  const cities: CitySuggestion[] = [];
+  for (const [, group] of cityMap) {
+    const first = group.platforms[0];
+    cities.push({
+      city: first.ville || first.site.split(' - ')[0],
+      lat: first.lat,
+      lon: first.lon,
+      pays: first.pays,
+      departement: first.departement,
+      platforms: group.platforms,
+      bestScore: 0,
+      distance: Math.round(group.minDist),
+    });
+  }
+
+  cities.sort((a, b) => a.distance! - b.distance!);
+  return cities.slice(0, maxResults);
 }
 
 /** Normalize string: remove accents, lowercase, trim */
@@ -358,9 +482,30 @@ export function findRoutes(
     }
   }
 
-  // Sort: direct first, then by frequency
+  // Compute detour ratio for transfer routes to penalize absurd paths
+  // (e.g., Lyon → Belgium → Marseille instead of Lyon → Avignon → Marseille)
+  const getDetourRatio = (route: FoundRoute): number => {
+    if (route.type === 'direct') return 1;
+    const firstLeg = route.legs[0];
+    const lastLeg = route.legs[route.legs.length - 1];
+    const directDist = haversineKm(firstLeg.fromLat, firstLeg.fromLon, lastLeg.toLat, lastLeg.toLon);
+    if (directDist < 1) return 1;
+    let totalDist = 0;
+    for (const leg of route.legs) {
+      totalDist += haversineKm(leg.fromLat, leg.fromLon, leg.toLat, leg.toLon);
+    }
+    return totalDist / directDist;
+  };
+
+  // Sort: direct first, then by detour ratio (lower = better), then by frequency
   results.sort((a, b) => {
     if (a.type !== b.type) return a.type === 'direct' ? -1 : 1;
+    if (a.type === 'transfer' && b.type === 'transfer') {
+      const detourA = getDetourRatio(a);
+      const detourB = getDetourRatio(b);
+      // Significantly different detour → prefer shorter path
+      if (Math.abs(detourA - detourB) > 0.5) return detourA - detourB;
+    }
     return b.totalFreq - a.totalFreq;
   });
 
@@ -372,4 +517,15 @@ export function findRoutes(
     seen.add(key);
     return true;
   });
+}
+
+/** Compute weekly train volume for a platform from aggregated routes */
+export function getTrainVolume(platformName: string, routes: AggregatedRoute[]): number {
+  let total = 0;
+  for (const r of routes) {
+    if (r.from === platformName || r.to === platformName) {
+      total += r.freq;
+    }
+  }
+  return total;
 }
