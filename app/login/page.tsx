@@ -37,7 +37,7 @@ export default function LoginPage() {
       <div className="glass-panel rounded-lg p-8 w-full max-w-sm">
         <div className="text-center mb-6">
           <h1 className="text-lg font-display font-bold gntc-gradient">Administration</h1>
-          <p className="text-xs text-muted mt-1">Transport Combiné 2026 — GNTC</p>
+          <p className="text-xs text-muted mt-1">Transport Combiné — GNTC</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -47,6 +47,8 @@ export default function LoginPage() {
             </label>
             <input
               type="email"
+              name="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -62,6 +64,8 @@ export default function LoginPage() {
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
+                name="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -104,7 +108,7 @@ export default function LoginPage() {
 
         <div className="mt-6 text-center">
           <a href="/" className="text-[10px] text-muted hover:text-blue transition-colors">
-            Retour a la carte
+            Retour à la carte
           </a>
         </div>
       </div>
