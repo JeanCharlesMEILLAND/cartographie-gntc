@@ -15,8 +15,6 @@ const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showVoieUnique', label: 'Voie unique' },
   { key: 'showVoieDouble', label: 'Double voie' },
   { key: 'showElectrification', label: 'Électrification' },
-  { key: 'animateFlux', label: 'Animation flux' },
-  { key: 'showFranceBorder', label: 'Contour France' },
 ];
 
 export default function LayerToggles() {
