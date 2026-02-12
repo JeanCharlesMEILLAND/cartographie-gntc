@@ -16,7 +16,7 @@ export default function FrequencySlider() {
       <input
         type="range"
         min={0}
-        max={100}
+        max={50}
         step={1}
         value={minFrequency}
         onChange={(e) => setMinFrequency(Number(e.target.value))}
@@ -24,8 +24,8 @@ export default function FrequencySlider() {
       />
       <div className="flex justify-between text-[10px] text-muted">
         <span>0</span>
+        <span>25</span>
         <span>50</span>
-        <span>100</span>
       </div>
     </div>
   );
