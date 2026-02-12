@@ -7,9 +7,8 @@ import clsx from 'clsx';
 type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'animateFlux' | 'showFranceBorder';
 
 const LAYERS: { key: LayerKey; label: string }[] = [
-  { key: 'showRoutes', label: 'Routes' },
+  { key: 'showRoutes', label: 'Liaisons' },
   { key: 'showPlatforms', label: 'Plateformes' },
-  { key: 'showLabels', label: 'Labels hubs' },
   { key: 'showRailway', label: 'Réseau ferré' },
   { key: 'animateFlux', label: 'Animation flux' },
   { key: 'showFranceBorder', label: 'Contour France' },

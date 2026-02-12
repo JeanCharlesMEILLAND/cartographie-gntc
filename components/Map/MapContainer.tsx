@@ -15,14 +15,13 @@ const MapInner = dynamic(() => import('./MapInner'), {
 interface MapContainerProps {
   platforms: Platform[];
   routes: AggregatedRoute[];
-  majorHubs: Platform[];
   railGeometries?: Record<string, [number, number][]>;
 }
 
-export default function MapContainer({ platforms, routes, majorHubs, railGeometries }: MapContainerProps) {
+export default function MapContainer({ platforms, routes, railGeometries }: MapContainerProps) {
   return (
     <div className="absolute inset-0">
-      <MapInner platforms={platforms} routes={routes} majorHubs={majorHubs} railGeometries={railGeometries} />
+      <MapInner platforms={platforms} routes={routes} railGeometries={railGeometries} />
     </div>
   );
 }

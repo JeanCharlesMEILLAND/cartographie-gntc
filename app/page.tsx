@@ -116,16 +116,6 @@ export default function Home() {
     return filteredPlatforms.filter((p) => connectedSites.has(p.site));
   }, [filteredPlatforms, filteredRoutes]);
 
-  // Major hubs: platforms with >30 trains/sem
-  const majorHubs = useMemo<Platform[]>(() => {
-    const volumeMap = new Map<string, number>();
-    filteredRoutes.forEach((r) => {
-      volumeMap.set(r.from, (volumeMap.get(r.from) || 0) + r.freq);
-      volumeMap.set(r.to, (volumeMap.get(r.to) || 0) + r.freq);
-    });
-    return filteredPlatforms.filter((p) => (volumeMap.get(p.site) || 0) > 30);
-  }, [filteredPlatforms, filteredRoutes]);
-
   // KPIs
   const totalTrains = useMemo(
     () => filteredRoutes.reduce((sum, r) => sum + r.freq, 0),
@@ -189,7 +179,6 @@ export default function Home() {
       <MapContainer
         platforms={visiblePlatforms}
         routes={filteredRoutes}
-        majorHubs={majorHubs}
         railGeometries={railGeometries}
       />
 
