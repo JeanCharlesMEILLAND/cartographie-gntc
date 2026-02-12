@@ -81,12 +81,22 @@ for (const name of workbook.SheetNames) {
 
 const operatorSet = new Set();
 
-function excelTimeToString(fraction) {
-  if (!fraction && fraction !== 0) return '';
-  const totalMinutes = Math.round(fraction * 24 * 60);
-  const hours = Math.floor(totalMinutes / 60);
-  const mins = totalMinutes % 60;
-  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+function excelTimeToString(value) {
+  if (value === undefined || value === null || value === '') return '';
+  // Already a time string like "12:00:00" or "08:30"
+  if (typeof value === 'string') {
+    const match = value.match(/^(\d{1,2}):(\d{2})/);
+    if (match) return `${match[1].padStart(2, '0')}:${match[2]}`;
+    return value;
+  }
+  // Excel fraction (0.5 = 12:00)
+  if (typeof value === 'number') {
+    const totalMinutes = Math.round(value * 24 * 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  }
+  return '';
 }
 
 // Step 1: Group by operator + directed pair, count rows per group

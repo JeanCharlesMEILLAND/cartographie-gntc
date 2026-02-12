@@ -78,12 +78,22 @@ function mapRow<T>(row: Record<string, unknown>, mapping: Record<string, keyof T
   return result;
 }
 
-function excelTimeToString(fraction: number): string {
-  if (!fraction && fraction !== 0) return '';
-  const totalMinutes = Math.round(fraction * 24 * 60);
-  const hours = Math.floor(totalMinutes / 60);
-  const mins = totalMinutes % 60;
-  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+function excelTimeToString(value: unknown): string {
+  if (value === undefined || value === null || value === '') return '';
+  // Already a time string like "12:00:00" or "08:30"
+  if (typeof value === 'string') {
+    const match = value.match(/^(\d{1,2}):(\d{2})/);
+    if (match) return `${match[1].padStart(2, '0')}:${match[2]}`;
+    return value;
+  }
+  // Excel fraction (0.5 = 12:00)
+  if (typeof value === 'number') {
+    const totalMinutes = Math.round(value * 24 * 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  }
+  return '';
 }
 
 export async function parseTransportExcel(buffer: Buffer): Promise<{
@@ -156,20 +166,28 @@ export async function parseTransportExcel(buffer: Buffer): Promise<{
   }
 
   // 2b. Build services array (individual train services with schedules)
-  const services: Service[] = rawFluxes.map((flux) => ({
-    operator: flux.operateur,
-    from: flux.plateformeExp,
-    to: flux.plateformeDest,
-    dayDep: flux.jourDepart,
-    timeDep: excelTimeToString(Number(flux.hlrDepart)),
-    dayArr: flux.jourArrivee,
-    timeArr: excelTimeToString(Number(flux.madArrivee)),
-    acceptsCM: flux.accepteCaissesMobiles,
-    acceptsCont: flux.accepteConteneurs,
-    acceptsSemiPre: flux.accepteSemiPrehensibles,
-    acceptsSemiNon: flux.accepteSemiNonPrehensibles,
-    acceptsP400: flux.accepteSemiP400,
-  }));
+  // We need the raw mapped values for time fields (before string conversion)
+  const rawRows = fluxSheet ? XLSX.utils.sheet_to_json<Record<string, unknown>>(fluxSheet) : [];
+  const services: Service[] = rawRows
+    .filter((row) => {
+      const from = row['Plateforme Exp'];
+      const to = row['Plateforme Dest'];
+      return from && to;
+    })
+    .map((row) => ({
+      operator: String(row['Opérateur'] || row['Operateur'] || '').trim(),
+      from: String(row['Plateforme Exp'] || '').trim(),
+      to: String(row['Plateforme Dest'] || '').trim(),
+      dayDep: String(row['Jour Départ'] || row['Jour Depart'] || '').trim(),
+      timeDep: excelTimeToString(row['HLR Départ'] || row['HLR Depart']),
+      dayArr: String(row['Jour Arrivée'] || row['Jour Arrivee'] || '').trim(),
+      timeArr: excelTimeToString(row['MAD Arrivée'] || row['MAD Arrivee']),
+      acceptsCM: String(row['Accepte caisses mobiles'] || '').trim(),
+      acceptsCont: String(row['Accepte conteneurs'] || '').trim(),
+      acceptsSemiPre: String(row['Accepte semi-remorques préhensibles'] || row['Accepte semi-remorques prehensibles'] || '').trim(),
+      acceptsSemiNon: String(row['Accepte semi-remorques non-préhensibles'] || row['Accepte semi-remorques non-prehensibles'] || '').trim(),
+      acceptsP400: String(row['Accepte semi-remorque type P400'] || '').trim(),
+    }));
 
   // 3. Geocode platforms
   const platforms: Platform[] = [];
