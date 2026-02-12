@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 export default function Legend() {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   return (
     <div className="absolute bottom-4 right-4 z-[1000]">
