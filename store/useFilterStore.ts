@@ -12,6 +12,9 @@ interface FilterState {
   showPlatforms: boolean;
   showLabels: boolean;
   showRailway: boolean;
+  showITE: boolean;
+  showTrackType: boolean;
+  showElectrification: boolean;
   animateFlux: boolean;
   showFranceBorder: boolean;
 
@@ -37,7 +40,7 @@ interface FilterState {
   selectAllOperators: () => void;
   clearOperators: () => void;
   setMinFrequency: (f: number) => void;
-  toggleLayer: (layer: 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'animateFlux' | 'showFranceBorder') => void;
+  toggleLayer: (layer: 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showTrackType' | 'showElectrification' | 'animateFlux' | 'showFranceBorder') => void;
   setTileStyle: (style: string) => void;
   setRailwayStyle: (style: 'standard' | 'maxspeed' | 'signals' | 'electrification') => void;
   setSelectedPlatform: (name: string | null) => void;
@@ -57,6 +60,9 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   showPlatforms: true,
   showLabels: true,
   showRailway: true,
+  showITE: false,
+  showTrackType: false,
+  showElectrification: false,
   animateFlux: false,
   showFranceBorder: true,
 

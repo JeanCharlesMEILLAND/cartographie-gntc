@@ -13,6 +13,9 @@ function MapClickHandler() {
 }
 import FranceBorder from './FranceBorder';
 import RailwayOverlay from './RailwayOverlay';
+import TrackTypeLayer from './TrackTypeLayer';
+import ElectrificationLayer from './ElectrificationLayer';
+import ITELayer from './ITELayer';
 import RouteLayer from './RouteLayer';
 import PlatformMarkers from './PlatformMarkers';
 import 'leaflet/dist/leaflet.css';
@@ -59,7 +62,10 @@ export default function MapInner({ platforms, routes, railGeometries }: MapInner
       <MapClickHandler />
       <FranceBorder />
       <RailwayOverlay />
+      <TrackTypeLayer />
+      <ElectrificationLayer />
       <RouteLayer routes={routes} railGeometries={railGeometries} />
+      <ITELayer />
       <PlatformMarkers platforms={platforms} routes={routes} />
     </LeafletMap>
   );
