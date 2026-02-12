@@ -3,10 +3,11 @@
 import { useFilterStore } from '@/store/useFilterStore';
 
 const TILES = [
+  { value: 'osm-dark', label: 'OSM France Sombre' },
+  { value: 'osm', label: 'OSM France' },
   { value: 'carto-dark', label: 'CartoDB Dark' },
   { value: 'carto-light', label: 'CartoDB Positron' },
   { value: 'voyager', label: 'CartoDB Voyager' },
-  { value: 'osm', label: 'OSM France' },
   { value: 'topo', label: 'OpenTopoMap' },
 ];
 

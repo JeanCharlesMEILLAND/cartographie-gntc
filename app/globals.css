@@ -35,6 +35,11 @@ body {
   height: 100%;
 }
 
+/* Darken OSM France tiles for better contrast */
+.dark-tiles {
+  filter: brightness(0.55) contrast(1.2) saturate(0.3);
+}
+
 .leaflet-control-zoom a {
   background: var(--panel) !important;
   color: var(--text) !important;

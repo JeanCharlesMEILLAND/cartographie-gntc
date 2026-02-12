@@ -52,7 +52,7 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   animateFlux: false,
   showFranceBorder: true,
 
-  tileStyle: 'osm',
+  tileStyle: 'osm-dark',
   railwayStyle: 'standard',
 
   selectedPlatform: null,
