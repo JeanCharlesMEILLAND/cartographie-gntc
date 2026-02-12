@@ -95,10 +95,10 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
         const labelIcon = showName ? L.divIcon({
           className: 'platform-label',
           html: `<span style="
-            color: ${isSelected ? '#38d9f5' : '#d6ddf0'};
+            color: ${isSelected ? '#587bbd' : '#2b2b2b'};
             font-size: ${isBigHub || isSelected ? '11px' : isHub ? '10px' : '9px'};
             font-weight: ${isBigHub || isSelected ? '700' : '500'};
-            text-shadow: 0 0 4px #060a14, 0 0 8px #060a14, 0 0 12px #060a14;
+            text-shadow: 0 0 3px rgba(255,255,255,0.8), 0 0 6px rgba(255,255,255,0.5);
             white-space: nowrap;
             pointer-events: none;
             opacity: ${isHighlighted ? '1' : '0.3'};
@@ -115,8 +115,8 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
               center={[platform.lat, platform.lon]}
               radius={isPreview ? size + 2 : isSelected ? size + 3 : size}
               pathOptions={{
-                fillColor: isPreview ? '#38d9f5' : (isFrance ? '#38d9f5' : '#a78bfa'),
-                color: isPreview ? '#38d9f5' : isSelected ? '#ffffff' : (isFrance ? '#38d9f5' : '#a78bfa'),
+                fillColor: isPreview ? '#7dc243' : (isFrance ? '#587bbd' : '#a78bfa'),
+                color: isPreview ? '#7dc243' : isSelected ? '#ffffff' : (isFrance ? '#587bbd' : '#a78bfa'),
                 fillOpacity: isPreview ? 0.9 : dimmed ? 0.15 : 0.7,
                 weight: isPreview ? 3 : isSelected ? 3 : 2,
                 opacity: isPreview ? 1 : dimmed ? 0.2 : 1,

@@ -37,12 +37,12 @@ export default function Dashboard({ data }: DashboardProps) {
               <button
                 key={site}
                 onClick={() => navigateToPlatform(site)}
-                className="flex items-center gap-3 w-full text-left group hover:bg-[rgba(20,30,60,0.3)] rounded px-2 py-1.5 transition-colors"
+                className="flex items-center gap-3 w-full text-left group hover:bg-blue/5 rounded px-2 py-1.5 transition-colors"
               >
                 <span className="text-xs text-text group-hover:text-cyan truncate w-[180px] flex-shrink-0">
                   {site}
                 </span>
-                <div className="flex-1 h-4 bg-[rgba(10,15,30,0.6)] rounded-sm overflow-hidden">
+                <div className="flex-1 h-4 bg-gray-200 rounded-sm overflow-hidden">
                   <div
                     className="h-full bg-cyan/30 rounded-sm transition-all"
                     style={{ width: `${(freq / maxFreq) * 100}%` }}
@@ -80,7 +80,7 @@ export default function Dashboard({ data }: DashboardProps) {
                     <tr
                       key={operator}
                       onClick={() => navigateToOperator(operator)}
-                      className="border-b border-border/50 hover:bg-[rgba(20,30,60,0.3)] cursor-pointer transition-colors"
+                      className="border-b border-border/50 hover:bg-blue/5 cursor-pointer transition-colors"
                     >
                       <td className="py-1.5 pr-2">
                         <div className="flex items-center gap-1.5">
@@ -96,7 +96,7 @@ export default function Dashboard({ data }: DashboardProps) {
                       <td className="text-right py-1.5 px-2 font-mono text-cyan">{stats.trainsPerWeek}</td>
                       <td className="text-right py-1.5 pl-2">
                         <div className="flex items-center justify-end gap-1">
-                          <div className="w-12 h-1.5 bg-[rgba(10,15,30,0.6)] rounded-full overflow-hidden">
+                          <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                             <div
                               className="h-full rounded-full"
                               style={{ width: `${pct}%`, backgroundColor: color }}

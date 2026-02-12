@@ -22,7 +22,7 @@ export default function FrequencySlider() {
         step={1}
         value={minFrequency}
         onChange={(e) => setMinFrequency(Number(e.target.value))}
-        className="w-full h-1.5 bg-[rgba(20,30,60,0.6)] rounded-lg appearance-none cursor-pointer accent-blue"
+        className="w-full h-1.5 bg-white rounded-lg appearance-none cursor-pointer accent-blue"
         style={{ direction: 'rtl' }}
       />
       <div className="flex justify-between text-[10px] text-muted">

@@ -120,7 +120,7 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(0); }}
           placeholder="Rechercher..."
-          className="text-xs bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-1.5 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 w-[200px]"
+          className="text-xs bg-white border border-border rounded-md px-3 py-1.5 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 w-[200px]"
         />
         {!userOperator && (
           <FilterSelect
@@ -147,7 +147,7 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
       <div className="overflow-x-auto border border-border rounded-lg">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-[rgba(10,15,30,0.6)]">
+            <tr className="bg-blue/5">
               {COLS.map((col) => (
                 <th key={col.key} className={`text-left font-medium text-muted px-2 py-2 ${col.width}`}>
                   {col.label}
@@ -157,7 +157,7 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
           </thead>
           <tbody>
             {pageData.map((service, i) => (
-              <tr key={`${service.from}-${service.to}-${service.dayDep}-${i}`} className="border-t border-border hover:bg-[rgba(20,30,60,0.3)]">
+              <tr key={`${service.from}-${service.to}-${service.dayDep}-${i}`} className="border-t border-border hover:bg-blue/5">
                 {COLS.map((col) => {
                   const value = String((service as unknown as Record<string, unknown>)[col.key] || '');
                   const isEditing = editCell?.row === i && editCell?.col === col.key;
@@ -184,7 +184,7 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
                             if (e.key === 'Enter') commitEdit();
                             if (e.key === 'Escape') setEditCell(null);
                           }}
-                          className="w-full bg-blue/10 border border-blue/30 rounded px-1.5 py-0.5 text-text focus:outline-none text-xs"
+                          className="w-full bg-blue/5 border border-blue/30 rounded px-1.5 py-0.5 text-text focus:outline-none text-xs"
                         />
                       ) : isClickable ? (
                         <button

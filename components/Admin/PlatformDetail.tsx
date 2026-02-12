@@ -141,7 +141,7 @@ export default function PlatformDetail({ data, onSave }: Props) {
                 </div>
 
                 {/* Frequency bar */}
-                <div className="h-1.5 bg-[rgba(10,15,30,0.6)] rounded-full overflow-hidden ml-4">
+                <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden ml-4">
                   <div
                     className="h-full rounded-full transition-all"
                     style={{ width: `${freqShare * 100}%`, backgroundColor: color }}
@@ -157,7 +157,7 @@ export default function PlatformDetail({ data, onSave }: Props) {
                       <div key={i}>
                         <button
                           onClick={() => setExpandedDest(isExpanded ? null : destKey)}
-                          className="flex items-center justify-between text-xs py-1 px-1.5 w-full text-left rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors"
+                          className="flex items-center justify-between text-xs py-1 px-1.5 w-full text-left rounded hover:bg-blue/8 transition-colors"
                         >
                           <div className="flex items-center gap-1 min-w-0">
                             <svg
@@ -178,7 +178,7 @@ export default function PlatformDetail({ data, onSave }: Props) {
 
                         {/* Expanded detail */}
                         {isExpanded && d.services.length > 0 && (
-                          <div className="ml-3 mt-1 mb-2 space-y-2 bg-[rgba(10,15,30,0.3)] rounded p-2">
+                          <div className="ml-3 mt-1 mb-2 space-y-2 bg-blue/5 rounded p-2">
                             {/* Schedule table */}
                             <table className="w-full text-[10px]">
                               <thead>
@@ -199,7 +199,7 @@ export default function PlatformDetail({ data, onSave }: Props) {
                                         const td = e.currentTarget;
                                         const input = document.createElement('input');
                                         input.value = s.timeDep || '';
-                                        input.className = 'w-full bg-blue/10 border border-blue/30 rounded px-1 py-0 text-text text-[10px] font-mono focus:outline-none';
+                                        input.className = 'w-full bg-blue/5 border border-blue/30 rounded px-1 py-0 text-text text-[10px] font-mono focus:outline-none';
                                         const commit = () => {
                                           handleServiceEdit(operator, s.from, s.to, s.dayDep, s.timeDep, 'timeDep', input.value);
                                           td.textContent = input.value || '—';
@@ -223,7 +223,7 @@ export default function PlatformDetail({ data, onSave }: Props) {
                                         const td = e.currentTarget;
                                         const input = document.createElement('input');
                                         input.value = s.timeArr || '';
-                                        input.className = 'w-full bg-blue/10 border border-blue/30 rounded px-1 py-0 text-text text-[10px] font-mono focus:outline-none';
+                                        input.className = 'w-full bg-blue/5 border border-blue/30 rounded px-1 py-0 text-text text-[10px] font-mono focus:outline-none';
                                         const commit = () => {
                                           handleServiceEdit(operator, s.from, s.to, s.dayDep, s.timeDep, 'timeArr', input.value);
                                           td.textContent = input.value || '—';
@@ -289,7 +289,7 @@ export default function PlatformDetail({ data, onSave }: Props) {
                     <button
                       key={`${r.from}-${r.to}`}
                       onClick={() => selectPlatform(dest)}
-                      className="flex items-center justify-between w-full text-xs py-1 px-2 rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors text-left"
+                      className="flex items-center justify-between w-full text-xs py-1 px-2 rounded hover:bg-blue/8 transition-colors text-left"
                     >
                       <span className="text-text truncate">{dest}</span>
                       <div className="flex items-center gap-2 flex-shrink-0 ml-2">

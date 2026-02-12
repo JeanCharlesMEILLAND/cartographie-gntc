@@ -49,7 +49,7 @@ export default function LayerToggles() {
             <button
               key={key}
               onClick={() => store.toggleLayer(key)}
-              className="flex items-center gap-1.5 w-full text-left hover:bg-[rgba(20,30,60,0.4)] rounded px-2 py-0.5 transition-colors"
+              className="flex items-center gap-1.5 w-full text-left hover:bg-blue/5 rounded px-2 py-0.5 transition-colors"
             >
               <div
                 className={clsx(

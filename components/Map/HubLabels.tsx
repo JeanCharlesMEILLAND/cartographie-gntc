@@ -28,10 +28,10 @@ export default function HubLabels({ platforms }: HubLabelsProps) {
         const icon = L.divIcon({
           className: 'hub-label',
           html: `<span style="
-            color: #d6ddf0;
+            color: #2b2b2b;
             font-size: 10px;
             font-weight: 600;
-            text-shadow: 0 0 4px #060a14, 0 0 8px #060a14, 0 0 12px #060a14;
+            text-shadow: 0 0 3px rgba(255,255,255,0.8), 0 0 6px rgba(255,255,255,0.5);
             white-space: nowrap;
             pointer-events: none;
           ">${platform.site}</span>`,

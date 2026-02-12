@@ -50,7 +50,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full text-sm bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:border-blue/50"
+              className="w-full text-sm bg-white border border-border rounded-md px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:border-blue/50"
               placeholder="admin@gntc.fr"
             />
           </div>
@@ -65,7 +65,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full text-sm bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-2 pr-10 text-text placeholder:text-muted focus:outline-none focus:border-blue/50"
+                className="w-full text-sm bg-white border border-border rounded-md px-3 py-2 pr-10 text-text placeholder:text-muted focus:outline-none focus:border-blue/50"
               />
               <button
                 type="button"

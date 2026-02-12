@@ -25,8 +25,8 @@ export default function FranceBorder() {
     <Polygon
       positions={FRANCE_BORDER}
       pathOptions={{
-        color: 'rgba(91,154,255,0.22)',
-        fillColor: 'rgba(91,154,255,0.03)',
+        color: 'rgba(88,123,189,0.22)',
+        fillColor: 'rgba(88,123,189,0.03)',
         fillOpacity: 1,
         weight: 1.5,
         dashArray: '5,3',

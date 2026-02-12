@@ -9,7 +9,6 @@ import KPIBar from '@/components/Dashboard/KPIBar';
 import RailBadge from '@/components/Dashboard/RailBadge';
 import InfoCard from '@/components/InfoCard';
 import Legend from '@/components/Legend';
-import UploadDialog from '@/components/UploadDialog';
 import SearchPanel from '@/components/Search/SearchPanel';
 import { useSearchStore } from '@/store/useSearchStore';
 
@@ -17,7 +16,6 @@ export default function Home() {
   const [data, setData] = useState<TransportData | null>(null);
   const [railGeometries, setRailGeometries] = useState<Record<string, [number, number][]>>({});
   const [loading, setLoading] = useState(true);
-  const [uploadOpen, setUploadOpen] = useState(false);
   const { searchOpen, setSearchOpen } = useSearchStore();
 
   const {
@@ -180,7 +178,7 @@ export default function Home() {
           {/* Logo GNTC */}
           <img src="/logo-gntc.jpg" alt="GNTC" className="h-8 sm:h-9 flex-shrink-0" />
           <div className="min-w-0">
-            <h1 className="text-xs sm:text-sm font-display font-bold text-text leading-tight truncate">
+            <h1 className="text-xs sm:text-sm font-display font-bold leading-tight truncate gntc-gradient">
               Transport Combiné 2026
             </h1>
             <p className="text-[10px] text-muted leading-tight hidden sm:block">OTC / GNTC</p>
@@ -212,18 +210,6 @@ export default function Home() {
               <circle cx="2" cy="7" r="1.5" stroke="currentColor" strokeWidth="1" />
             </svg>
             <span className="hidden sm:inline">Planificateur</span>
-          </button>
-
-          {/* Upload button */}
-          <button
-            onClick={() => setUploadOpen(true)}
-            className="flex items-center gap-1.5 text-xs text-blue hover:text-cyan transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-blue/30 flex-shrink-0"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 10V2M7 2L4 5M7 2L10 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M2 9V11C2 11.55 2.45 12 3 12H11C11.55 12 12 11.55 12 11V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="hidden sm:inline">Importer</span>
           </button>
 
           {/* Admin button */}
@@ -275,14 +261,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Upload Dialog */}
-      <UploadDialog
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
-        onUploadSuccess={() => {
-          fetchData();
-        }}
-      />
     </div>
   );
 }

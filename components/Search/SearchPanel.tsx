@@ -57,7 +57,7 @@ function PlatformPicker({
   };
 
   return (
-    <div className="mt-1.5 rounded-md border border-border bg-[rgba(10,15,30,0.5)] p-1.5 space-y-0.5">
+    <div className="mt-1.5 rounded-md border border-border bg-blue/5 p-1.5 space-y-0.5">
       <button
         onClick={toggleAll}
         className={`w-full text-left text-[10px] px-2 py-1 rounded transition-colors ${
@@ -77,7 +77,7 @@ function PlatformPicker({
               className={`w-full text-left px-2 py-1 rounded text-[11px] flex items-center justify-between transition-colors ${
                 isSelected
                   ? 'bg-blue/10 text-text'
-                  : 'text-muted hover:text-text hover:bg-[rgba(20,30,60,0.3)]'
+                  : 'text-muted hover:text-text hover:bg-blue/5'
               }`}
             >
               <div className="flex items-center gap-1.5 min-w-0">
@@ -201,7 +201,7 @@ function CityInput({
     <div className="relative">
       {/* State A: City selected — show chip */}
       {selectedCity ? (
-        <div className="w-full text-xs bg-[rgba(10,15,30,0.6)] border border-blue/30 rounded-md px-3 py-2 text-text flex items-center justify-between">
+        <div className="w-full text-xs bg-white border border-blue/30 rounded-md px-3 py-2 text-text flex items-center justify-between">
           <span className="truncate">
             <span className="font-medium">{selectedCity.city}</span>
             <span className="text-muted ml-1.5 text-[10px]">
@@ -237,7 +237,7 @@ function CityInput({
           onBlur={() => setTimeout(() => setFocused(false), 200)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full text-xs bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 transition-colors"
+          className="w-full text-xs bg-white border border-border rounded-md px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 transition-colors"
         />
       )}
 
@@ -259,7 +259,7 @@ function CityInput({
               className={`w-full text-left px-3 py-2 text-xs transition-colors ${
                 i === selectedIndex
                   ? 'bg-blue/20 text-text'
-                  : 'text-text hover:bg-[rgba(20,30,60,0.5)]'
+                  : 'text-text hover:bg-blue/8'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
@@ -368,7 +368,7 @@ function RouteCard({
       className={`rounded-md border transition-colors cursor-pointer ${
         isHighlighted
           ? 'border-cyan/50 bg-[rgba(56,217,245,0.08)]'
-          : 'border-border hover:border-blue/30 bg-[rgba(10,15,30,0.4)]'
+          : 'border-border hover:border-blue/30 bg-blue/5'
       }`}
       onClick={() => onHighlight(isHighlighted ? null : index)}
     >
@@ -594,7 +594,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
         <div className="flex justify-center">
           <button
             onClick={handleSwap}
-            className="text-muted hover:text-blue transition-colors p-1 rounded-md hover:bg-[rgba(20,30,60,0.5)]"
+            className="text-muted hover:text-blue transition-colors p-1 rounded-md hover:bg-blue/8"
             title="Inverser"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

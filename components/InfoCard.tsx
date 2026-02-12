@@ -162,7 +162,7 @@ export default function InfoCard({ platforms, routes, services }: InfoCardProps)
                     <div key={i}>
                       <button
                         onClick={() => setExpandedDest(isExpanded ? null : destKey)}
-                        className="flex items-center justify-between text-xs py-1 px-1.5 w-full text-left rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors"
+                        className="flex items-center justify-between text-xs py-1 px-1.5 w-full text-left rounded hover:bg-blue/8 transition-colors"
                       >
                         <div className="flex items-center gap-1 min-w-0">
                           <svg

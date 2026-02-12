@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { parseTransportExcel } from '@/lib/parseExcel';
 import { TransportData } from '@/lib/types';
 import fs from 'fs';
@@ -6,6 +8,13 @@ import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
+    // Admin only
+    const session = await getServerSession(authOptions);
+    const role = (session?.user as unknown as Record<string, unknown>)?.role;
+    if (!session || role !== 'admin') {
+      return NextResponse.json({ error: 'Accès réservé aux administrateurs' }, { status: 403 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
 

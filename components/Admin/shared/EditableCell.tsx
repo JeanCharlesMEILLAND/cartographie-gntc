@@ -36,7 +36,7 @@ export default function EditableCell({ value, onCommit, className = '' }: Editab
           if (e.key === 'Enter') commit();
           if (e.key === 'Escape') { setEditValue(value); setEditing(false); }
         }}
-        className={`w-full bg-blue/10 border border-blue/30 rounded px-1.5 py-0.5 text-text focus:outline-none text-xs ${className}`}
+        className={`w-full bg-blue/5 border border-blue/30 rounded px-1.5 py-0.5 text-text focus:outline-none text-xs ${className}`}
       />
     );
   }

@@ -26,7 +26,7 @@ export default function RailStyleSelector() {
             e.target.value as 'standard' | 'maxspeed' | 'signals' | 'electrification'
           )
         }
-        className="w-full bg-[rgba(20,30,60,0.6)] border border-border text-text text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue"
+        className="w-full bg-white border border-border text-text text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue"
       >
         {STYLES.map((s) => (
           <option key={s.value} value={s.value}>

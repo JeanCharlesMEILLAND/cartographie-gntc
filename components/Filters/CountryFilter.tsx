@@ -19,7 +19,7 @@ export default function CountryFilter() {
       <select
         value={country}
         onChange={(e) => setCountry(e.target.value as 'all' | 'france' | 'international')}
-        className="w-full bg-[rgba(20,30,60,0.6)] border border-border text-text text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue"
+        className="w-full bg-white border border-border text-text text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

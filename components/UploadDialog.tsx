@@ -149,19 +149,19 @@ export default function UploadDialog({ open, onClose, onUploadSuccess }: UploadD
                 Import réussi !
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2 rounded bg-[rgba(20,30,60,0.4)]">
+                <div className="p-2 rounded bg-blue/5">
                   <span className="text-muted">Plateformes</span>
                   <div className="font-mono text-cyan font-bold">{result.platforms}</div>
                 </div>
-                <div className="p-2 rounded bg-[rgba(20,30,60,0.4)]">
+                <div className="p-2 rounded bg-blue/5">
                   <span className="text-muted">Liaisons</span>
                   <div className="font-mono text-cyan font-bold">{result.routes}</div>
                 </div>
-                <div className="p-2 rounded bg-[rgba(20,30,60,0.4)]">
+                <div className="p-2 rounded bg-blue/5">
                   <span className="text-muted">Opérateurs</span>
                   <div className="font-mono text-cyan font-bold">{result.operators}</div>
                 </div>
-                <div className="p-2 rounded bg-[rgba(20,30,60,0.4)]">
+                <div className="p-2 rounded bg-blue/5">
                   <span className="text-muted">Non géocodées</span>
                   <div className={clsx(
                     'font-mono font-bold',

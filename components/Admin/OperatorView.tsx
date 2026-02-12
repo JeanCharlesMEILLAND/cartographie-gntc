@@ -122,7 +122,7 @@ export default function OperatorView({ data, operator, onSave, saving }: Props) 
               <div key={route} className="glass-panel rounded-lg overflow-hidden">
                 <button
                   onClick={() => setExpandedRoute(isExpanded ? null : route)}
-                  className="flex items-center justify-between w-full p-3 text-left hover:bg-[rgba(20,30,60,0.3)] transition-colors"
+                  className="flex items-center justify-between w-full p-3 text-left hover:bg-blue/5 transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <svg
@@ -176,7 +176,7 @@ export default function OperatorView({ data, operator, onSave, saving }: Props) 
                                 const td = e.currentTarget;
                                 const input = document.createElement('input');
                                 input.value = s.timeDep || '';
-                                input.className = 'w-16 bg-blue/10 border border-blue/30 rounded px-1 py-0 text-text text-[11px] font-mono focus:outline-none';
+                                input.className = 'w-16 bg-blue/5 border border-blue/30 rounded px-1 py-0 text-text text-[11px] font-mono focus:outline-none';
                                 const commit = () => {
                                   handleServiceEdit(from, to, s.dayDep, s.timeDep, 'timeDep', input.value);
                                   td.textContent = input.value || '—';
@@ -200,7 +200,7 @@ export default function OperatorView({ data, operator, onSave, saving }: Props) 
                                 const td = e.currentTarget;
                                 const input = document.createElement('input');
                                 input.value = s.timeArr || '';
-                                input.className = 'w-16 bg-blue/10 border border-blue/30 rounded px-1 py-0 text-text text-[11px] font-mono focus:outline-none';
+                                input.className = 'w-16 bg-blue/5 border border-blue/30 rounded px-1 py-0 text-text text-[11px] font-mono focus:outline-none';
                                 const commit = () => {
                                   handleServiceEdit(from, to, s.dayDep, s.timeDep, 'timeArr', input.value);
                                   td.textContent = input.value || '—';

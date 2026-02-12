@@ -88,7 +88,7 @@ export default function OperatorList({ data, onSave, saving }: Props) {
 
               {/* Share bar */}
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-[rgba(10,15,30,0.6)] rounded-full overflow-hidden">
+                <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full"
                     style={{ width: `${pct}%`, backgroundColor: color }}

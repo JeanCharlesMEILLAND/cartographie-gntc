@@ -10,7 +10,7 @@ export default function FilterSelect({ label, value, onChange, options }: {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="text-[11px] bg-[rgba(10,15,30,0.6)] border border-border rounded px-2 py-1 text-text focus:outline-none focus:border-blue/50"
+        className="text-[11px] bg-white border border-border rounded px-2 py-1 text-text focus:outline-none focus:border-blue/50"
       >
         <option value="">Tous</option>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}

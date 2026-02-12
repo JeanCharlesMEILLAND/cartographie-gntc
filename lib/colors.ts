@@ -1,6 +1,6 @@
 export const OPERATOR_COLORS: Record<string, string> = {
-  'Naviland Cargo': '#5b9aff',
-  'Greenmodal': '#38d9f5',
+  'Naviland Cargo': '#587bbd',
+  'Greenmodal': '#7dc243',
   'VIIA': '#a78bfa',
   'Novatrans': '#f59e42',
   'T3M': '#34d399',

@@ -103,7 +103,7 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Rechercher..."
-          className="text-xs bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-1.5 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 w-[200px]"
+          className="text-xs bg-white border border-border rounded-md px-3 py-1.5 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 w-[200px]"
         />
         <FilterSelect label="Pays" value={filterPays} onChange={setFilterPays} options={paysList} />
         <FilterSelect label="Groupe" value={filterGroupe} onChange={setFilterGroupe} options={groupeList} />
@@ -122,7 +122,7 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
       <div className="overflow-x-auto border border-border rounded-lg">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-[rgba(10,15,30,0.6)]">
+            <tr className="bg-blue/5">
               {COLS.map((col) => (
                 <th key={col.key} className={`text-left font-medium text-muted px-3 py-2 ${col.width}`}>
                   {col.label}
@@ -145,7 +145,7 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
                     className={`border-t border-border cursor-pointer transition-colors ${
                       isSelected
                         ? 'bg-blue/10'
-                        : 'hover:bg-[rgba(20,30,60,0.3)]'
+                        : 'hover:bg-blue/5'
                     }`}
                   >
                     {COLS.map((col) => {
@@ -229,7 +229,7 @@ function InlineDetail({
   if (!platform) return null;
 
   return (
-    <div className="bg-[rgba(10,20,40,0.5)] border-t border-blue/20 border-b border-b-blue/20 px-6 py-4">
+    <div className="bg-blue/5 border-t border-blue/15 border-b border-b-blue/15 px-6 py-4">
       <div className="flex gap-8">
         {/* Left: metadata + KPIs */}
         <div className="flex-shrink-0 w-[220px] space-y-3">
@@ -278,7 +278,7 @@ function InlineDetail({
                     <button
                       key={`${r.from}-${r.to}`}
                       onClick={(e) => { e.stopPropagation(); onSelectPlatform(dest); }}
-                      className="flex items-center justify-between w-full text-[10px] py-0.5 px-1 rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors text-left"
+                      className="flex items-center justify-between w-full text-[10px] py-0.5 px-1 rounded hover:bg-blue/8 transition-colors text-left"
                     >
                       <span className="text-text truncate">{dest}</span>
                       <span className="font-mono text-cyan flex-shrink-0 ml-1">{r.freq}</span>
@@ -307,7 +307,7 @@ function InlineDetail({
                     <span className="text-xs font-semibold text-text hover:text-blue transition-colors">{operator}</span>
                   </button>
                   <div className="flex items-center gap-2">
-                    <div className="w-20 h-1.5 bg-[rgba(10,15,30,0.6)] rounded-full overflow-hidden">
+                    <div className="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${freqShare * 100}%`, backgroundColor: color }} />
                     </div>
                     <span className="text-[10px] font-mono text-muted w-[55px] text-right">{opFreq} t/sem</span>
@@ -323,7 +323,7 @@ function InlineDetail({
                       <div key={i}>
                         <button
                           onClick={(e) => { e.stopPropagation(); setExpandedDest(isExpanded ? null : destKey); }}
-                          className="flex items-center justify-between text-xs py-1 px-1.5 w-full text-left rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors"
+                          className="flex items-center justify-between text-xs py-1 px-1.5 w-full text-left rounded hover:bg-blue/8 transition-colors"
                         >
                           <div className="flex items-center gap-1 min-w-0">
                             <svg
@@ -342,7 +342,7 @@ function InlineDetail({
                         </button>
 
                         {isExpanded && d.services.length > 0 && (
-                          <div className="ml-3 mt-1 mb-2 space-y-2 bg-[rgba(10,15,30,0.3)] rounded p-2">
+                          <div className="ml-3 mt-1 mb-2 space-y-2 bg-blue/5 rounded p-2">
                             <table className="w-full text-[10px]">
                               <thead>
                                 <tr className="text-muted">
@@ -362,7 +362,7 @@ function InlineDetail({
                                         const td = e.currentTarget;
                                         const input = document.createElement('input');
                                         input.value = s.timeDep || '';
-                                        input.className = 'w-full bg-blue/10 border border-blue/30 rounded px-1 py-0 text-text text-[10px] font-mono focus:outline-none';
+                                        input.className = 'w-full bg-blue/5 border border-blue/30 rounded px-1 py-0 text-text text-[10px] font-mono focus:outline-none';
                                         const commit = () => { onServiceEdit(operator, s.from, s.to, s.dayDep, s.timeDep, 'timeDep', input.value); td.textContent = input.value || '—'; };
                                         input.onblur = commit;
                                         input.onkeydown = (ev) => { if (ev.key === 'Enter') commit(); if (ev.key === 'Escape') td.textContent = s.timeDep || '—'; };
@@ -380,7 +380,7 @@ function InlineDetail({
                                         const td = e.currentTarget;
                                         const input = document.createElement('input');
                                         input.value = s.timeArr || '';
-                                        input.className = 'w-full bg-blue/10 border border-blue/30 rounded px-1 py-0 text-text text-[10px] font-mono focus:outline-none';
+                                        input.className = 'w-full bg-blue/5 border border-blue/30 rounded px-1 py-0 text-text text-[10px] font-mono focus:outline-none';
                                         const commit = () => { onServiceEdit(operator, s.from, s.to, s.dayDep, s.timeDep, 'timeArr', input.value); td.textContent = input.value || '—'; };
                                         input.onblur = commit;
                                         input.onkeydown = (ev) => { if (ev.key === 'Enter') commit(); if (ev.key === 'Escape') td.textContent = s.timeArr || '—'; };

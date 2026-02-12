@@ -69,7 +69,7 @@ export default function UserManager() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
-                className="w-full text-xs bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-1.5 text-text focus:outline-none focus:border-blue/50"
+                className="w-full text-xs bg-white border border-border rounded-md px-3 py-1.5 text-text focus:outline-none focus:border-blue/50"
               />
             </div>
             <div>
@@ -79,7 +79,7 @@ export default function UserManager() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
-                className="w-full text-xs bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-1.5 text-text focus:outline-none focus:border-blue/50"
+                className="w-full text-xs bg-white border border-border rounded-md px-3 py-1.5 text-text focus:outline-none focus:border-blue/50"
               />
             </div>
             <div>
@@ -89,7 +89,7 @@ export default function UserManager() {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
-                className="w-full text-xs bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-1.5 text-text focus:outline-none focus:border-blue/50"
+                className="w-full text-xs bg-white border border-border rounded-md px-3 py-1.5 text-text focus:outline-none focus:border-blue/50"
               />
             </div>
             <div>
@@ -97,7 +97,7 @@ export default function UserManager() {
               <select
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
-                className="w-full text-xs bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-1.5 text-text focus:outline-none focus:border-blue/50"
+                className="w-full text-xs bg-white border border-border rounded-md px-3 py-1.5 text-text focus:outline-none focus:border-blue/50"
               >
                 <option value="operator">Opérateur</option>
                 <option value="admin">Admin</option>
@@ -111,7 +111,7 @@ export default function UserManager() {
                 value={form.operator}
                 onChange={(e) => setForm({ ...form, operator: e.target.value })}
                 placeholder="Ex: Naviland Cargo, Novatrans..."
-                className="w-full text-xs bg-[rgba(10,15,30,0.6)] border border-border rounded-md px-3 py-1.5 text-text placeholder:text-muted focus:outline-none focus:border-blue/50"
+                className="w-full text-xs bg-white border border-border rounded-md px-3 py-1.5 text-text placeholder:text-muted focus:outline-none focus:border-blue/50"
               />
             </div>
           )}
@@ -130,7 +130,7 @@ export default function UserManager() {
       <div className="border border-border rounded-lg overflow-hidden">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-[rgba(10,15,30,0.6)]">
+            <tr className="bg-blue/5">
               <th className="text-left font-medium text-muted px-3 py-2">Nom</th>
               <th className="text-left font-medium text-muted px-3 py-2">Email</th>
               <th className="text-left font-medium text-muted px-3 py-2">Rôle</th>
@@ -140,7 +140,7 @@ export default function UserManager() {
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id} className="border-t border-border hover:bg-[rgba(20,30,60,0.3)]">
+              <tr key={u.id} className="border-t border-border hover:bg-blue/5">
                 <td className="px-3 py-1.5">{u.name}</td>
                 <td className="px-3 py-1.5 text-muted">{u.email}</td>
                 <td className="px-3 py-1.5">

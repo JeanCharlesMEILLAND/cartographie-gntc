@@ -24,7 +24,7 @@ export default function RailwayOverlay() {
       key="sncf-rfn"
       data={geoData}
       style={{
-        color: '#6b7db3',
+        color: '#587bbd',
         weight: 1,
         opacity: 0.35,
       }}

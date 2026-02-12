@@ -9,18 +9,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#060a14",
-        panel: "rgba(8,14,30,0.95)",
-        border: "rgba(70,120,255,0.1)",
-        blue: "#5b9aff",
-        cyan: "#38d9f5",
-        purple: "#a78bfa",
-        orange: "#f59e42",
-        muted: "#5e6d8f",
-        text: "#d6ddf0",
+        bg: "#f5f6fa",
+        panel: "rgba(255,255,255,0.97)",
+        border: "rgba(88,123,189,0.15)",
+        blue: "#587bbd",
+        cyan: "#7dc243",
+        purple: "#8b6db5",
+        orange: "#e08a2e",
+        muted: "#8893a7",
+        text: "#2b2b2b",
       },
       fontFamily: {
-        display: ["var(--font-outfit)", "sans-serif"],
+        display: ["var(--font-outfit)", "Arial", "sans-serif"],
         mono: ["var(--font-jetbrains)", "monospace"],
       },
     },
