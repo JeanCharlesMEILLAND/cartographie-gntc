@@ -1,7 +1,9 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Polyline } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
+import { useSearchStore } from '@/store/useSearchStore';
 import { AggregatedRoute } from '@/lib/types';
 import { getBezierPoints } from '@/lib/bezier';
 import { getOperatorColor } from '@/lib/colors';
@@ -23,25 +25,45 @@ function getRouteStyle(freq: number, operator: string) {
 
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
   const { showRoutes, animateFlux, selectedPlatform } = useFilterStore();
+  const { results, highlightedRouteIndex } = useSearchStore();
+
+  // Build set of route pairs matching the search result
+  const searchActive = highlightedRouteIndex !== null && results.length > 0;
+  const searchPairs = useMemo(() => {
+    if (!searchActive) return null;
+    const pairs = new Set<string>();
+    const route = results[highlightedRouteIndex!];
+    if (route) {
+      for (const leg of route.legs) {
+        // Add both directions since AggregatedRoute can have from/to in either order
+        pairs.add(`${leg.from}||${leg.to}`);
+        pairs.add(`${leg.to}||${leg.from}`);
+      }
+    }
+    return pairs;
+  }, [searchActive, results, highlightedRouteIndex]);
 
   if (!showRoutes) return null;
 
   return (
     <>
       {routes.map((route, i) => {
+        const routeKey = `${route.from}||${route.to}`;
+
+        // In search mode: only show matching routes
+        const isSearchMatch = searchPairs ? searchPairs.has(routeKey) : false;
+        if (searchPairs && !isSearchMatch) return null;
+
         // Try rail geometry first (both key orders)
         const key1 = `${route.from}||${route.to}`;
         const key2 = `${route.to}||${route.from}`;
-        let railPoints = railGeometries?.[key1] || railGeometries?.[key2];
+        const railPoints = railGeometries?.[key1] || railGeometries?.[key2];
 
         let points: [number, number][];
         if (railPoints && railPoints.length > 0) {
-          // Snap first/last points to the platform marker positions
-          // so the route visually connects to the blue dot
           points = [...railPoints];
           points[0] = [route.fromLat, route.fromLon];
           points[points.length - 1] = [route.toLat, route.toLon];
-          // If key2 matched, the direction is reversed
           if (!railGeometries?.[key1] && railGeometries?.[key2]) {
             points[0] = [route.toLat, route.toLon];
             points[points.length - 1] = [route.fromLat, route.fromLon];
@@ -58,7 +80,22 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
         const mainOp = route.operators[0] || 'unknown';
         const style = getRouteStyle(route.freq, mainOp);
 
-        // Highlight connected routes when a platform is selected
+        // In search mode: boost the matched route
+        if (isSearchMatch) {
+          return (
+            <Polyline
+              key={`${route.from}-${route.to}-${i}`}
+              positions={points}
+              pathOptions={{
+                ...style,
+                opacity: 1,
+                weight: style.weight + 2,
+              }}
+            />
+          );
+        }
+
+        // Normal mode: highlight connected routes when a platform is selected
         const isConnected = selectedPlatform
           ? route.from === selectedPlatform || route.to === selectedPlatform
           : false;

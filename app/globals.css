@@ -109,6 +109,21 @@ body {
   animation: dash-flow 1.5s linear infinite;
 }
 
+/* Search route tooltips */
+.search-tooltip {
+  background: var(--panel) !important;
+  border: 1px solid var(--cyan) !important;
+  color: var(--text) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 12px rgba(56, 217, 245, 0.3) !important;
+}
+.search-tooltip::before {
+  border-top-color: var(--cyan) !important;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

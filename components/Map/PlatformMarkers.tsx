@@ -2,9 +2,10 @@
 
 import { CircleMarker, Tooltip, Marker, useMapEvents } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
+import { useSearchStore } from '@/store/useSearchStore';
 import { Platform, AggregatedRoute } from '@/lib/types';
 import L from 'leaflet';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 interface PlatformMarkersProps {
   platforms: Platform[];
@@ -29,6 +30,7 @@ function getMarkerSize(volume: number): number {
 
 export default function PlatformMarkers({ platforms, routes }: PlatformMarkersProps) {
   const { showPlatforms, selectedPlatform, setSelectedPlatform } = useFilterStore();
+  const { results, highlightedRouteIndex } = useSearchStore();
   const [zoom, setZoom] = useState(6);
 
   useMapEvents({
@@ -36,6 +38,21 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
   });
 
   if (!showPlatforms) return null;
+
+  // Search mode: only show platforms involved in the highlighted search result
+  const searchActive = highlightedRouteIndex !== null && results.length > 0;
+  const searchSites = useMemo(() => {
+    if (!searchActive) return null;
+    const sites = new Set<string>();
+    const route = results[highlightedRouteIndex!];
+    if (route) {
+      for (const leg of route.legs) {
+        sites.add(leg.from);
+        sites.add(leg.to);
+      }
+    }
+    return sites;
+  }, [searchActive, results, highlightedRouteIndex]);
 
   // If a platform is selected, find connected platform names
   const connectedSites = new Set<string>();
@@ -49,7 +66,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
 
   return (
     <>
-      {platforms.map((platform) => {
+      {platforms.filter((p) => !searchSites || searchSites.has(p.site)).map((platform) => {
         const volume = getTrainVolume(platform.site, routes);
         const size = getMarkerSize(volume);
         const isFrance = platform.pays?.toLowerCase() === 'france';

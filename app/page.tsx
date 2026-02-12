@@ -10,12 +10,15 @@ import RailBadge from '@/components/Dashboard/RailBadge';
 import InfoCard from '@/components/InfoCard';
 import Legend from '@/components/Legend';
 import UploadDialog from '@/components/UploadDialog';
+import SearchPanel from '@/components/Search/SearchPanel';
+import { useSearchStore } from '@/store/useSearchStore';
 
 export default function Home() {
   const [data, setData] = useState<TransportData | null>(null);
   const [railGeometries, setRailGeometries] = useState<Record<string, [number, number][]>>({});
   const [loading, setLoading] = useState(true);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const { searchOpen, setSearchOpen } = useSearchStore();
 
   const {
     country,
@@ -193,17 +196,36 @@ export default function Home() {
           selectedPlatform={selectedPlatform}
         />
 
-        {/* Upload button */}
-        <button
-          onClick={() => setUploadOpen(true)}
-          className="flex items-center gap-1.5 text-xs text-blue hover:text-cyan transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-blue/30 flex-shrink-0"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 10V2M7 2L4 5M7 2L10 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M2 9V11C2 11.55 2.45 12 3 12H11C11.55 12 12 11.55 12 11V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="hidden sm:inline">Importer Excel</span>
-        </button>
+        {/* Action buttons */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Search button */}
+          <button
+            onClick={() => setSearchOpen(!searchOpen)}
+            className={`flex items-center gap-1.5 text-xs transition-colors px-2 sm:px-3 py-1.5 rounded-md border flex-shrink-0 ${
+              searchOpen
+                ? 'text-cyan border-cyan/30 bg-cyan/10'
+                : 'text-blue hover:text-cyan border-border hover:border-blue/30'
+            }`}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="2" cy="7" r="1.5" stroke="currentColor" strokeWidth="1" />
+            </svg>
+            <span className="hidden sm:inline">Planificateur</span>
+          </button>
+
+          {/* Upload button */}
+          <button
+            onClick={() => setUploadOpen(true)}
+            className="flex items-center gap-1.5 text-xs text-blue hover:text-cyan transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-blue/30 flex-shrink-0"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 10V2M7 2L4 5M7 2L10 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 9V11C2 11.55 2.45 12 3 12H11C11.55 12 12 11.55 12 11V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="hidden sm:inline">Importer</span>
+          </button>
+        </div>
       </header>
 
       {/* Map (fullscreen behind everything) */}
@@ -221,6 +243,9 @@ export default function Home() {
 
       {/* Legend */}
       <Legend />
+
+      {/* Search Panel */}
+      <SearchPanel platforms={data?.platforms || []} services={data?.services || []} />
 
       {/* Info Card */}
       <InfoCard platforms={data?.platforms || []} routes={filteredRoutes} services={data?.services || []} />
