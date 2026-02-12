@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { TransportData } from '@/lib/types';
 import { getOperatorComparison } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
+import { getOperatorLogo, getOperatorContact, hasContact } from '@/lib/operatorContacts';
 import { useAdminStore } from '@/store/useAdminStore';
 import OperatorView from './OperatorView';
 
@@ -61,10 +62,14 @@ export default function OperatorList({ data, onSave, saving }: Props) {
             >
               {/* Header */}
               <div className="flex items-center gap-2 mb-3">
-                <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: color }}
-                />
+                {getOperatorLogo(operator) ? (
+                  <img src={getOperatorLogo(operator)!} alt="" className="w-6 h-6 rounded object-contain flex-shrink-0" />
+                ) : (
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: color }}
+                  />
+                )}
                 <span className="text-xs font-semibold text-text group-hover:text-blue transition-colors truncate">
                   {operator}
                 </span>
@@ -97,14 +102,36 @@ export default function OperatorList({ data, onSave, saving }: Props) {
                 <span className="text-[10px] text-muted">{pct}% du réseau</span>
               </div>
 
-              {/* Quick action */}
-              <div className="mt-3 flex gap-2">
+              {/* Contact + actions */}
+              <div className="mt-3 flex items-center justify-between">
                 <span
                   onClick={(e) => { e.stopPropagation(); navigateToOperatorFlux(operator); }}
                   className="text-[10px] text-muted hover:text-cyan transition-colors"
                 >
                   Voir les flux →
                 </span>
+                {hasContact(operator) && (() => {
+                  const c = getOperatorContact(operator)!;
+                  return (
+                    <div className="flex items-center gap-2 text-[10px]">
+                      {c.email && (
+                        <a href={`mailto:${c.email}`} onClick={(e) => e.stopPropagation()} className="text-blue hover:text-cyan transition-colors" title={c.email}>
+                          email
+                        </a>
+                      )}
+                      {c.phone && (
+                        <a href={`tel:${c.phone.replace(/\s/g, '')}`} onClick={(e) => e.stopPropagation()} className="text-blue hover:text-cyan transition-colors" title={c.phone}>
+                          tel
+                        </a>
+                      )}
+                      {c.website && (
+                        <a href={`https://${c.website}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-blue hover:text-cyan transition-colors" title={c.website}>
+                          web
+                        </a>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </button>
           );

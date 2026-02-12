@@ -1,5 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useFilterStore } from '@/store/useFilterStore';
+
 interface KPIBarProps {
   platformCount: number;
   routeCount: number;
@@ -18,6 +21,17 @@ function KPIItem({ label, value }: { label: string; value: string | number }) {
 }
 
 export default function KPIBar({ platformCount, routeCount, trainsPerWeek, operatorCount, selectedPlatform }: KPIBarProps) {
+  const showITE = useFilterStore((s) => s.showITE);
+  const showITEDispo = useFilterStore((s) => s.showITEDispo);
+  const [iteCounts, setIteCounts] = useState<{ active: number; dispo: number } | null>(null);
+
+  useEffect(() => {
+    if (!showITE && !showITEDispo) { setIteCounts(null); return; }
+    fetch('/api/sncf-layers').then((r) => r.ok ? r.json() : null).then((d) => {
+      if (d?.ite && d?.iteDispo) setIteCounts({ active: d.ite.features.length, dispo: d.iteDispo.features.length });
+    }).catch(() => {});
+  }, [showITE, showITEDispo]);
+
   return (
     <div className="hidden sm:flex items-center gap-0.5">
       {selectedPlatform && (
@@ -37,6 +51,18 @@ export default function KPIBar({ platformCount, routeCount, trainsPerWeek, opera
       <KPIItem label="Trains/sem" value={trainsPerWeek} />
       <div className="w-px h-4 bg-border" />
       <KPIItem label="Opérateurs" value={operatorCount} />
+      {showITE && iteCounts && (
+        <>
+          <div className="w-px h-4 bg-border" />
+          <KPIItem label="ITE actives" value={iteCounts.active} />
+        </>
+      )}
+      {showITEDispo && iteCounts && (
+        <>
+          <div className="w-px h-4 bg-border" />
+          <KPIItem label="ITE dispo" value={iteCounts.dispo} />
+        </>
+      )}
     </div>
   );
 }

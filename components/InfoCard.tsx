@@ -5,6 +5,7 @@ import { useFilterStore } from '@/store/useFilterStore';
 import { useSearchStore } from '@/store/useSearchStore';
 import { Platform, AggregatedRoute, Service } from '@/lib/types';
 import { getOperatorColor } from '@/lib/colors';
+import { getOperatorContact, hasContact, getOperatorLogo } from '@/lib/operatorContacts';
 
 interface InfoCardProps {
   platforms: Platform[];
@@ -144,14 +145,42 @@ export default function InfoCard({ platforms, routes, services }: InfoCardProps)
               {/* Operator header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <div
-                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: color }}
-                  />
+                  {getOperatorLogo(op) ? (
+                    <img src={getOperatorLogo(op)!} alt="" className="w-4 h-4 rounded-sm object-contain flex-shrink-0" />
+                  ) : (
+                    <div
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: color }}
+                    />
+                  )}
                   <span className="text-xs font-semibold text-text">{op}</span>
                 </div>
                 <span className="text-[10px] font-mono text-muted">{total} t/sem</span>
               </div>
+
+              {/* Contact info */}
+              {hasContact(op) && (() => {
+                const c = getOperatorContact(op)!;
+                return (
+                  <div className="ml-4 flex flex-wrap items-center gap-1.5 text-[10px]">
+                    {c.email && (
+                      <a href={`mailto:${c.email}`} className="text-blue hover:text-cyan transition-colors" title={c.email}>
+                        email
+                      </a>
+                    )}
+                    {c.phone && (
+                      <a href={`tel:${c.phone.replace(/\s/g, '')}`} className="text-blue hover:text-cyan transition-colors" title={c.phone}>
+                        tel
+                      </a>
+                    )}
+                    {c.website && (
+                      <a href={`https://${c.website}`} target="_blank" rel="noopener noreferrer" className="text-blue hover:text-cyan transition-colors" title={c.website}>
+                        web
+                      </a>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Destinations for this operator */}
               <div className="ml-4 space-y-0.5">

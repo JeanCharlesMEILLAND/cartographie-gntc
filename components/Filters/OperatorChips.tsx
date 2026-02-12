@@ -2,6 +2,7 @@
 
 import { useFilterStore } from '@/store/useFilterStore';
 import { getOperatorColor } from '@/lib/colors';
+import { getOperatorLogo } from '@/lib/operatorContacts';
 import clsx from 'clsx';
 
 export default function OperatorChips() {
@@ -62,6 +63,9 @@ export default function OperatorChips() {
                   : undefined
               }
             >
+              {getOperatorLogo(op) && (
+                <img src={getOperatorLogo(op)!} alt="" className="w-3.5 h-3.5 rounded-sm object-contain inline-block mr-1 -mt-px" />
+              )}
               {op}
             </button>
           );

@@ -14,6 +14,7 @@ import {
   CitySuggestion,
 } from '@/lib/routeFinder';
 import { getOperatorColor } from '@/lib/colors';
+import { getOperatorContact, hasContact, getOperatorLogo } from '@/lib/operatorContacts';
 
 interface SearchPanelProps {
   platforms: Platform[];
@@ -419,14 +420,19 @@ function RouteCard({
             <span className="text-[10px] font-mono text-cyan">{route.totalFreq} t/sem</span>
           </div>
           <div className="flex items-center gap-1">
-            {route.operators.map((op) => (
-              <div
-                key={op}
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: getOperatorColor(op) }}
-                title={op}
-              />
-            ))}
+            {route.operators.map((op) => {
+              const logo = getOperatorLogo(op);
+              return logo ? (
+                <img key={op} src={logo} alt={op} title={op} className="w-4 h-4 rounded-sm object-contain" />
+              ) : (
+                <div
+                  key={op}
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: getOperatorColor(op) }}
+                  title={op}
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -447,19 +453,58 @@ function RouteCard({
 
         {/* Operators */}
         <div className="flex flex-wrap gap-1 mt-1.5">
-          {route.operators.map((op) => (
-            <span
-              key={op}
-              className="text-[9px] px-1.5 py-0.5 rounded"
-              style={{
-                backgroundColor: `${getOperatorColor(op)}20`,
-                color: getOperatorColor(op),
-              }}
-            >
-              {op}
-            </span>
-          ))}
+          {route.operators.map((op) => {
+            const logo = getOperatorLogo(op);
+            return (
+              <span
+                key={op}
+                className="text-[9px] px-1.5 py-0.5 rounded flex items-center gap-1"
+                style={{
+                  backgroundColor: `${getOperatorColor(op)}20`,
+                  color: getOperatorColor(op),
+                }}
+              >
+                {logo && <img src={logo} alt="" className="w-3 h-3 rounded-sm object-contain" />}
+                {op}
+              </span>
+            );
+          })}
         </div>
+
+        {/* Operator contacts */}
+        {route.operators.some(hasContact) && (
+          <div className="mt-2 space-y-1 border-t border-border/50 pt-1.5">
+            {route.operators.filter(hasContact).map((op) => {
+              const c = getOperatorContact(op)!;
+              const color = getOperatorColor(op);
+              return (
+                <div key={op} className="flex items-center gap-2 text-[10px]">
+                  {c.logo ? (
+                    <img src={c.logo} alt="" className="w-3.5 h-3.5 rounded-sm object-contain flex-shrink-0" />
+                  ) : (
+                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                  )}
+                  <span className="text-muted truncate">{op}</span>
+                  {c.email && (
+                    <a href={`mailto:${c.email}`} onClick={(e) => e.stopPropagation()} className="text-blue hover:text-cyan transition-colors flex-shrink-0">
+                      email
+                    </a>
+                  )}
+                  {c.phone && (
+                    <a href={`tel:${c.phone.replace(/\s/g, '')}`} onClick={(e) => e.stopPropagation()} className="text-blue hover:text-cyan transition-colors flex-shrink-0">
+                      tel
+                    </a>
+                  )}
+                  {c.website && (
+                    <a href={`https://${c.website}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-blue hover:text-cyan transition-colors flex-shrink-0">
+                      web
+                    </a>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Expand button */}
@@ -597,6 +642,21 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
     setResults, setSearching, setHighlightedRouteIndex,
   ]);
 
+  // Auto re-search when UTI filter changes (if a search was already done)
+  const hasSearched = useRef(false);
+  useEffect(() => {
+    if (hasSearched.current && departureQuery.trim() && arrivalQuery.trim()) {
+      handleSearch();
+    }
+  }, [selectedUTI]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Track that a manual search was triggered
+  const originalHandleSearch = handleSearch;
+  const wrappedHandleSearch = useCallback(async () => {
+    hasSearched.current = true;
+    await originalHandleSearch();
+  }, [originalHandleSearch]);
+
   // Swap departure/arrival (including city selections)
   const handleSwap = () => {
     const depQ = departureQuery;
@@ -715,7 +775,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
 
         {/* Search button */}
         <button
-          onClick={handleSearch}
+          onClick={wrappedHandleSearch}
           disabled={!departureQuery.trim() || !arrivalQuery.trim() || searching}
           className="w-full text-xs py-2 rounded-md bg-blue/20 text-blue hover:bg-blue/30 border border-blue/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-medium"
         >

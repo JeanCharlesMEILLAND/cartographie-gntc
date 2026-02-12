@@ -3,43 +3,45 @@
 import { useEffect, useState } from 'react';
 import { GeoJSON as GeoJSONLayer } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
-import type { FeatureCollection, Feature } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import { fetchSNCFLayers } from './ITELayer';
 import type { PathOptions } from 'leaflet';
 
-const TRACK_STYLES: Record<string, PathOptions> = {
-  'Double voie': { color: '#e67e22', weight: 2.5, opacity: 0.7 },
-  'Voie unique': { color: '#3498db', weight: 1.5, opacity: 0.6 },
-  'Voie banalisée': { color: '#9b59b6', weight: 1.5, opacity: 0.5, dashArray: '6 4' },
-  'Régime en navette': { color: '#1abc9c', weight: 1, opacity: 0.4, dashArray: '4 4' },
-};
-
-const DEFAULT_STYLE: PathOptions = { color: '#95a5a6', weight: 1, opacity: 0.3, dashArray: '3 3' };
-
-function styleFeature(feature: Feature | undefined): PathOptions {
-  const regime = feature?.properties?.exploitati || '';
-  return TRACK_STYLES[regime] || DEFAULT_STYLE;
-}
+const UNIQUE_STYLE: PathOptions = { color: '#3498db', weight: 2, opacity: 0.7 };
+const DOUBLE_STYLE: PathOptions = { color: '#e67e22', weight: 3, opacity: 0.7 };
 
 export default function TrackTypeLayer() {
-  const showTrackType = useFilterStore((s) => s.showTrackType);
-  const [data, setData] = useState<FeatureCollection | null>(null);
+  const showVoieUnique = useFilterStore((s) => s.showVoieUnique);
+  const showVoieDouble = useFilterStore((s) => s.showVoieDouble);
+  const [data, setData] = useState<{ voieUnique: FeatureCollection; voieDouble: FeatureCollection } | null>(null);
 
   useEffect(() => {
-    if (!showTrackType || data) return;
+    if ((!showVoieUnique && !showVoieDouble) || data) return;
     fetchSNCFLayers().then((d) => {
-      if (d?.regime) setData(d.regime);
+      if (d?.voieUnique && d?.voieDouble) setData({ voieUnique: d.voieUnique, voieDouble: d.voieDouble });
     });
-  }, [showTrackType, data]);
+  }, [showVoieUnique, showVoieDouble, data]);
 
-  if (!showTrackType || !data) return null;
+  if (!data) return null;
 
   return (
-    <GeoJSONLayer
-      key="track-type"
-      data={data}
-      style={styleFeature}
-      interactive={false}
-    />
+    <>
+      {showVoieUnique && (
+        <GeoJSONLayer
+          key="voie-unique"
+          data={data.voieUnique}
+          style={() => UNIQUE_STYLE}
+          interactive={false}
+        />
+      )}
+      {showVoieDouble && (
+        <GeoJSONLayer
+          key="voie-double"
+          data={data.voieDouble}
+          style={() => DOUBLE_STYLE}
+          interactive={false}
+        />
+      )}
+    </>
   );
 }
