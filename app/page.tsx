@@ -141,19 +141,13 @@ export default function Home() {
       {/* Header */}
       <header className="absolute top-0 left-0 right-0 z-[1000] h-[50px] glass-panel flex items-center justify-between px-2 sm:px-4">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          {/* Logo */}
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue to-cyan flex items-center justify-center flex-shrink-0">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 12H14M4 8H12M6 4H10" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-xs sm:text-sm font-display font-bold text-text leading-tight truncate">
-                Transport Combiné 2026
-              </h1>
-              <p className="text-[10px] text-muted leading-tight hidden sm:block">OTC / GNTC</p>
-            </div>
+          {/* Logo GNTC */}
+          <img src="/logo-gntc.jpg" alt="GNTC" className="h-8 sm:h-9 flex-shrink-0" />
+          <div className="min-w-0">
+            <h1 className="text-xs sm:text-sm font-display font-bold text-text leading-tight truncate">
+              Transport Combiné 2026
+            </h1>
+            <p className="text-[10px] text-muted leading-tight hidden sm:block">OTC / GNTC</p>
           </div>
         </div>
 
