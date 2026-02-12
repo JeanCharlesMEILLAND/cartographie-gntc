@@ -98,18 +98,25 @@ export default function InfoCard({ platforms, routes }: InfoCardProps) {
             <span className="text-[10px] text-muted uppercase tracking-wider">
               Destinations ({destinations.length})
             </span>
-            <div className="mt-1 space-y-1 max-h-[150px] overflow-y-auto">
+            <div className="mt-1 space-y-0.5 max-h-[200px] overflow-y-auto">
               {destinations.map((d, i) => (
-                <div key={i} className="flex items-center justify-between text-xs py-0.5">
-                  <div className="flex items-center gap-1.5">
+                <button
+                  key={i}
+                  onClick={() => setSelectedPlatform(d.name)}
+                  className="flex items-center justify-between text-xs py-1 px-1.5 w-full text-left rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors"
+                >
+                  <div className="flex items-center gap-1.5 min-w-0">
                     <div
-                      className="w-1.5 h-1.5 rounded-full"
+                      className="w-2 h-2 rounded-full flex-shrink-0"
                       style={{ backgroundColor: getOperatorColor(d.operators[0] || '') }}
                     />
-                    <span className="text-text truncate max-w-[180px]">{d.name}</span>
+                    <span className="text-text truncate">{d.name}</span>
                   </div>
-                  <span className="font-mono text-cyan">{d.freq}/s</span>
-                </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                    <span className="font-mono text-cyan">{d.freq}/s</span>
+                    <span className="text-[9px] text-muted truncate max-w-[60px]">{d.operators[0]}</span>
+                  </div>
+                </button>
               ))}
             </div>
           </div>
