@@ -18,6 +18,7 @@ import ElectrificationLayer from './ElectrificationLayer';
 import ITELayer from './ITELayer';
 import RouteLayer from './RouteLayer';
 import TrainMarkers from './TrainMarkers';
+import AnimatedFluxDots from './AnimatedFluxDots';
 import PlatformMarkers from './PlatformMarkers';
 import 'leaflet/dist/leaflet.css';
 
@@ -69,6 +70,7 @@ export default function MapInner({ platforms, routes, railGeometries, services, 
       <ElectrificationLayer />
       <RouteLayer routes={routes} railGeometries={railGeometries} />
       <ITELayer />
+      <AnimatedFluxDots routes={routes} platforms={platforms} railGeometries={railGeometries} />
       {services && allPlatforms && (
         <TrainMarkers services={services} platforms={allPlatforms} railGeometries={railGeometries} />
       )}

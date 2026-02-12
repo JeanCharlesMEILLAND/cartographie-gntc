@@ -95,6 +95,13 @@ export default function Home() {
     return () => { cancelled = true; };
   }, [setAllOperators]);
 
+  // Platform lookup map — O(1) instead of O(n) per .find()
+  const platformMap = useMemo(() => {
+    const m = new Map<string, Platform>();
+    if (data) for (const p of data.platforms) m.set(p.site, p);
+    return m;
+  }, [data]);
+
   // Filter platforms by country
   const filteredPlatforms = useMemo<Platform[]>(() => {
     if (!data) return [];
@@ -144,22 +151,19 @@ export default function Home() {
       const hasActiveOp = r.operators.some((op) => activeOperators.has(op));
       if (!hasActiveOp) return false;
 
-      // Country filter
+      // Country filter — O(1) lookup via platformMap
       if (country === 'france') {
-        const fromPlatform = data.platforms.find((p) => p.site === r.from);
-        const toPlatform = data.platforms.find((p) => p.site === r.to);
-        if (!fromPlatform || !toPlatform) return false;
-        if (
-          fromPlatform.pays?.toLowerCase() !== 'france' ||
-          toPlatform.pays?.toLowerCase() !== 'france'
-        )
+        const fromP = platformMap.get(r.from);
+        const toP = platformMap.get(r.to);
+        if (!fromP || !toP) return false;
+        if (fromP.pays?.toLowerCase() !== 'france' || toP.pays?.toLowerCase() !== 'france')
           return false;
       } else if (country === 'international') {
-        const fromPlatform = data.platforms.find((p) => p.site === r.from);
-        const toPlatform = data.platforms.find((p) => p.site === r.to);
-        if (!fromPlatform && !toPlatform) return false;
-        const fromFR = fromPlatform?.pays?.toLowerCase() === 'france';
-        const toFR = toPlatform?.pays?.toLowerCase() === 'france';
+        const fromP = platformMap.get(r.from);
+        const toP = platformMap.get(r.to);
+        if (!fromP && !toP) return false;
+        const fromFR = fromP?.pays?.toLowerCase() === 'france';
+        const toFR = toP?.pays?.toLowerCase() === 'france';
         if (fromFR && toFR) return false;
       }
 

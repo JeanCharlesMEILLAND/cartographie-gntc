@@ -4,7 +4,7 @@ import { CircleMarker, Tooltip, Marker, useMapEvents, useMap } from 'react-leafl
 import { useFilterStore } from '@/store/useFilterStore';
 import { useSearchStore } from '@/store/useSearchStore';
 import { Platform, AggregatedRoute } from '@/lib/types';
-import { getTrainVolume } from '@/lib/routeFinder';
+
 import L from 'leaflet';
 import { useMemo, useState } from 'react';
 
@@ -73,13 +73,15 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
     moveend: () => setZoom(leafletMap.getZoom()),
   });
 
+  // Single-pass volume computation — O(routes) instead of O(platforms × routes)
   const platformVolumes = useMemo(() => {
     const m = new Map<string, number>();
-    for (const p of platforms) {
-      m.set(p.site, getTrainVolume(p.site, routes));
+    for (const r of routes) {
+      m.set(r.from, (m.get(r.from) || 0) + r.freq);
+      m.set(r.to, (m.get(r.to) || 0) + r.freq);
     }
     return m;
-  }, [platforms, routes]);
+  }, [routes]);
 
   if (!showPlatforms) return null;
 

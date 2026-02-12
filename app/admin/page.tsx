@@ -30,6 +30,8 @@ export default function AdminPage() {
   const [message, setMessage] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [operatorInfo, setOperatorInfo] = useState<OperatorInfo | null>(null);
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [loadStep, setLoadStep] = useState('Initialisation...');
   const { activeTab, setActiveTab } = useAdminStore();
 
   const isAdmin = (session?.user as Record<string, unknown>)?.role === 'admin';
@@ -43,8 +45,14 @@ export default function AdminPage() {
   }, [isAdmin, userOperator, setActiveTab]);
 
   const fetchData = useCallback(async () => {
+    setLoadStep('Chargement des données...');
+    setLoadProgress(20);
     const res = await fetch('/api/data');
+    setLoadProgress(60);
+    setLoadStep('Traitement...');
     const json = await res.json();
+    setLoadProgress(90);
+    setLoadStep('Prêt !');
     setData(json);
   }, []);
 
@@ -90,11 +98,7 @@ export default function AdminPage() {
   };
 
   if (!data) {
-    return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="text-cyan animate-pulse">Chargement...</div>
-      </div>
-    );
+    return <LoadingScreen progress={loadProgress} step={loadStep} title="Administration" subtitle="GNTC" />;
   }
 
   // Tabs config based on role

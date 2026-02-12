@@ -47,66 +47,83 @@ export default function OperatorView({ data, operator, onSave, saving }: Props) 
         <span className="text-[10px] text-muted">— Mon activité</span>
       </div>
 
-      {/* KPIs */}
-      <div className="flex gap-4 flex-wrap">
-        <KPICard value={stats.platformCount} label="Plateformes" color="text-blue" />
-        <KPICard value={stats.routeCount} label="Liaisons" color="text-purple" />
-        <KPICard value={stats.trainsPerWeek} label="Trains / semaine" color="text-cyan" />
-        <KPICard value={stats.serviceCount} label="Services" color="text-orange" />
-      </div>
+      {/* Two-column layout */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Left column */}
+        <div className="space-y-6">
+          {/* KPIs */}
+          <div className="flex gap-4 flex-wrap">
+            <KPICard value={stats.platformCount} label="Plateformes" color="text-blue" />
+            <KPICard value={stats.routeCount} label="Liaisons" color="text-purple" />
+            <KPICard value={stats.trainsPerWeek} label="Trains / semaine" color="text-cyan" />
+            <KPICard value={stats.serviceCount} label="Services" color="text-orange" />
+          </div>
 
-      {/* Quick actions */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setActiveTab('routes')}
-          className="text-xs px-3 py-1.5 rounded-md border border-blue/20 text-blue hover:bg-blue/5 transition-colors"
-        >
-          Voir mes liaisons →
-        </button>
-        <button
-          onClick={() => setActiveTab('flux')}
-          className="text-xs px-3 py-1.5 rounded-md border border-border text-muted hover:text-text hover:border-blue/20 transition-colors"
-        >
-          Voir mes flux →
-        </button>
-      </div>
-
-      {/* Map */}
-      <div>
-        <h3 className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-3">
-          Carte du réseau
-        </h3>
-        <OperatorMap
-          platforms={data.platforms}
-          routes={data.routes}
-          services={data.services}
-          operator={operator}
-        />
-      </div>
-
-      {/* Platforms */}
-      <div>
-        <h3 className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-3">
-          Mes plateformes ({operatorPlatforms.length})
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {operatorPlatforms.map(({ site, platform, destinations }) => (
+          {/* Quick actions */}
+          <div className="flex gap-2">
             <button
-              key={site}
-              onClick={() => navigateToPlatform(site)}
-              className="glass-panel rounded-lg p-3 text-left hover:border-blue/30 transition-colors"
+              onClick={() => setActiveTab('routes')}
+              className="text-xs px-3 py-1.5 rounded-md border border-blue/20 text-blue hover:bg-blue/5 transition-colors"
             >
-              <div className="text-xs font-semibold text-text truncate">{site}</div>
-              {platform && (
-                <div className="text-[10px] text-muted mt-0.5">
-                  {platform.ville}{platform.pays !== 'France' ? ` — ${platform.pays}` : ''}
-                </div>
-              )}
-              <div className="text-[10px] text-muted mt-1.5">
-                {destinations.length} destination{destinations.length > 1 ? 's' : ''}
-              </div>
+              Voir mes liaisons →
             </button>
-          ))}
+            <button
+              onClick={() => setActiveTab('flux')}
+              className="text-xs px-3 py-1.5 rounded-md border border-border text-muted hover:text-text hover:border-blue/20 transition-colors"
+            >
+              Voir mes flux →
+            </button>
+          </div>
+
+          {/* Platforms table */}
+          <div>
+            <h3 className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-3">
+              Mes plateformes ({operatorPlatforms.length})
+            </h3>
+            <div className="border border-border rounded-lg overflow-hidden">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="bg-blue/5">
+                    <th className="text-left font-medium text-muted px-3 py-2">Site</th>
+                    <th className="text-left font-medium text-muted px-3 py-2">Ville</th>
+                    <th className="text-left font-medium text-muted px-3 py-2">Pays</th>
+                    <th className="text-right font-medium text-muted px-3 py-2">Destinations</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {operatorPlatforms.map(({ site, platform, destinations }) => (
+                    <tr
+                      key={site}
+                      onClick={() => navigateToPlatform(site)}
+                      className="border-t border-border hover:bg-blue/5 cursor-pointer transition-colors"
+                    >
+                      <td className="px-3 py-1.5 font-semibold text-text">{site}</td>
+                      <td className="px-3 py-1.5 text-muted">{platform?.ville || '—'}</td>
+                      <td className="px-3 py-1.5 text-muted">{platform?.pays || '—'}</td>
+                      <td className="px-3 py-1.5 text-right">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue/10 text-blue">
+                          {destinations.length}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Right column: square map */}
+        <div>
+          <h3 className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-3">
+            Carte du réseau
+          </h3>
+          <OperatorMap
+            platforms={data.platforms}
+            routes={data.routes}
+            services={data.services}
+            operator={operator}
+          />
         </div>
       </div>
 

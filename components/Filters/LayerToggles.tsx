@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useFilterStore } from '@/store/useFilterStore';
 import clsx from 'clsx';
 
-type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification';
+type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification' | 'animateFlux';
 
 const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showRoutes', label: 'Liaisons' },
@@ -15,6 +15,7 @@ const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showVoieUnique', label: 'Voie unique' },
   { key: 'showVoieDouble', label: 'Double voie' },
   { key: 'showElectrification', label: 'Électrification' },
+  { key: 'animateFlux', label: 'Animation flux' },
 ];
 
 export default function LayerToggles() {

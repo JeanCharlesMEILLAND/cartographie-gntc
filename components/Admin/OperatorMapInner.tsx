@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip, useMap } from 'react-leaflet';
 import { Platform, AggregatedRoute, Service } from '@/lib/types';
 import { getBezierPoints } from '@/lib/bezier';
@@ -15,12 +15,20 @@ interface Props {
   operator: string;
 }
 
+// Same weight scale as main map RouteLayer
 function getRouteStyle(freq: number, color: string) {
-  if (freq > 30) return { weight: 4, color, opacity: 0.9 };
-  if (freq > 15) return { weight: 3.5, color, opacity: 0.85 };
-  if (freq > 8) return { weight: 3, color, opacity: 0.75 };
+  if (freq > 30) return { weight: 5, color, opacity: 0.9 };
+  if (freq > 15) return { weight: 4, color, opacity: 0.85 };
+  if (freq > 8) return { weight: 3.5, color, opacity: 0.75 };
   if (freq > 3) return { weight: 2.5, color, opacity: 0.65 };
   return { weight: 2, color, opacity: 0.5 };
+}
+
+// Same marker sizing as main map PlatformMarkers
+function getMarkerSize(volume: number): number {
+  if (volume <= 0) return 8;
+  if (volume > 200) return 18;
+  return 8 + (volume / 200) * 10;
 }
 
 function AutoFitBounds({ platforms }: { platforms: Platform[] }) {
@@ -29,7 +37,6 @@ function AutoFitBounds({ platforms }: { platforms: Platform[] }) {
   useMemo(() => {
     if (platforms.length === 0) return;
     const bounds = L.latLngBounds(platforms.map((p) => [p.lat, p.lon]));
-    // Pad a bit so markers aren't on the edge
     map.fitBounds(bounds, { padding: [30, 30], maxZoom: 8 });
   }, [platforms, map]);
 
@@ -39,6 +46,15 @@ function AutoFitBounds({ platforms }: { platforms: Platform[] }) {
 export default function OperatorMapInner({ platforms, routes, services, operator }: Props) {
   const color = getOperatorColor(operator);
   const [selectedSite, setSelectedSite] = useState<string | null>(null);
+  const [railGeometries, setRailGeometries] = useState<Record<string, [number, number][]>>({});
+
+  // Load rail geometries (same as main map page.tsx)
+  useEffect(() => {
+    fetch('/rail-geometries.json')
+      .then((res) => res.json())
+      .then((data) => setRailGeometries(data))
+      .catch(() => {/* silent - will fallback to bezier */});
+  }, []);
 
   // Get platforms where this operator is active
   const operatorSites = useMemo(() => {
@@ -95,7 +111,7 @@ export default function OperatorMapInner({ platforms, routes, services, operator
   }
 
   return (
-    <div className="glass-panel rounded-lg overflow-hidden" style={{ height: 400 }}>
+    <div className="glass-panel rounded-lg overflow-hidden aspect-square">
       <MapContainer
         center={[46.6, 2.8]}
         zoom={6}
@@ -104,21 +120,43 @@ export default function OperatorMapInner({ platforms, routes, services, operator
         zoomControl={true}
         scrollWheelZoom={true}
       >
+        {/* OSM France dark — same as main map default */}
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+          url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
           maxZoom={19}
+          className="dark-tiles"
         />
         <AutoFitBounds platforms={operatorPlatforms} />
 
-        {/* Routes */}
+        {/* Routes — same rendering logic as RouteLayer.tsx */}
         {operatorRoutes.map((route, i) => {
-          const points = getBezierPoints(
-            route.fromLat,
-            route.fromLon,
-            route.toLat,
-            route.toLon
-          );
+          // Try rail geometry first (both key orders) — exact same logic as RouteLayer
+          const key1 = `${route.from}||${route.to}`;
+          const key2 = `${route.to}||${route.from}`;
+          const railPoints = railGeometries[key1] || railGeometries[key2];
+
+          let points: [number, number][];
+          if (railPoints && railPoints.length > 0) {
+            points = [...railPoints];
+            // Snap endpoints to actual platform coordinates
+            points[0] = [route.fromLat, route.fromLon];
+            points[points.length - 1] = [route.toLat, route.toLon];
+            // If we used the reversed key, swap endpoints
+            if (!railGeometries[key1] && railGeometries[key2]) {
+              points[0] = [route.toLat, route.toLon];
+              points[points.length - 1] = [route.fromLat, route.fromLon];
+            }
+          } else {
+            // Fallback to bezier curves
+            points = getBezierPoints(
+              route.fromLat,
+              route.fromLon,
+              route.toLat,
+              route.toLon
+            );
+          }
+
           const style = getRouteStyle(route.freq, color);
 
           const isConnected = selectedSite
@@ -132,34 +170,36 @@ export default function OperatorMapInner({ platforms, routes, services, operator
               positions={points}
               pathOptions={{
                 ...style,
-                opacity: dimmed ? 0.15 : isConnected ? 1 : style.opacity,
+                opacity: dimmed ? 0.08 : isConnected ? 1 : style.opacity,
                 weight: isConnected ? style.weight + 1.5 : dimmed ? 1 : style.weight,
               }}
             />
           );
         })}
 
-        {/* Platform markers */}
+        {/* Platform markers — same styling as PlatformMarkers.tsx */}
         {operatorPlatforms.map((platform) => {
           const volume = siteVolumes.get(platform.site) || 0;
+          const size = getMarkerSize(volume);
+          const isFrance = platform.pays?.toLowerCase() === 'france';
           const isSelected = platform.site === selectedSite;
           const isConnectedDest = selectedSite ? selectedDestinations.includes(platform.site) || platform.site === selectedSite : false;
           const dimmed = selectedSite && !isConnectedDest;
 
-          // Size based on volume
-          const radius = Math.max(5, Math.min(14, 5 + (volume / 20) * 4));
+          // Same colors as main map: France = #587bbd, International = #a78bfa
+          const markerColor = isFrance ? '#587bbd' : '#a78bfa';
 
           return (
             <CircleMarker
               key={platform.site}
               center={[platform.lat, platform.lon]}
-              radius={isSelected ? radius + 3 : radius}
+              radius={isSelected ? size + 3 : size}
               pathOptions={{
-                fillColor: color,
-                color: isSelected ? '#ffffff' : color,
-                fillOpacity: dimmed ? 0.2 : 0.8,
+                fillColor: markerColor,
+                color: isSelected ? '#ffffff' : markerColor,
+                fillOpacity: dimmed ? 0.15 : 0.7,
                 weight: isSelected ? 3 : 2,
-                opacity: dimmed ? 0.3 : 1,
+                opacity: dimmed ? 0.2 : 1,
               }}
               eventHandlers={{
                 click: (e) => {
@@ -168,14 +208,14 @@ export default function OperatorMapInner({ platforms, routes, services, operator
                 },
               }}
             >
-              <Tooltip direction="top" offset={[0, -radius]} opacity={0.95}>
-                <div style={{ fontSize: 11 }}>
+              <Tooltip direction="top" offset={[0, -size]} opacity={0.95}>
+                <div className="text-xs">
                   <strong>{platform.site}</strong>
                   <br />
                   {platform.ville && <span>{platform.ville}</span>}
                   {platform.pays !== 'France' && <span> — {platform.pays}</span>}
                   <br />
-                  <span style={{ fontFamily: 'monospace', color }}>{volume} trains/sem</span>
+                  <span className="font-mono" style={{ color }}>{volume} trains/sem</span>
                   {isSelected && selectedDestinations.length > 0 && (
                     <>
                       <br />
@@ -191,8 +231,8 @@ export default function OperatorMapInner({ platforms, routes, services, operator
         })}
       </MapContainer>
 
-      {/* Legend bar */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-border px-3 py-1.5 flex items-center gap-4 text-[10px] text-muted z-[1000]" style={{ position: 'relative' }}>
+      {/* Legend bar — dark theme to match */}
+      <div className="bg-bg/90 backdrop-blur-sm border-t border-border px-3 py-1.5 flex items-center gap-4 text-[10px] text-muted">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
           <span>{operatorPlatforms.length} site{operatorPlatforms.length > 1 ? 's' : ''}</span>
