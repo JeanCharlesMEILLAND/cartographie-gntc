@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useSearchStore, UTIType } from '@/store/useSearchStore';
 import { Platform, Service, AggregatedRoute } from '@/lib/types';
 import {
   findPlatformsAsync,
   findCitySuggestionsAsync,
+  getDirectDestinationCities,
   findRoutes,
   getTrainVolume,
   FoundRoute,
@@ -114,6 +115,7 @@ function CityInput({
   onCitySelect,
   selectedPlatforms,
   onPlatformsChange,
+  directDestinations,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -124,6 +126,7 @@ function CityInput({
   onCitySelect: (c: CitySuggestion | null) => void;
   selectedPlatforms: Platform[];
   onPlatformsChange: (p: Platform[]) => void;
+  directDestinations?: CitySuggestion[];
 }) {
   const [focused, setFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -139,21 +142,34 @@ function CityInput({
       setSuggestions([]);
       return;
     }
+    // No text: show direct destinations if available
     if (!value.trim() || value.length < 2) {
-      setSuggestions([]);
+      if (directDestinations && directDestinations.length > 0) {
+        setSuggestions(directDestinations);
+      } else {
+        setSuggestions([]);
+      }
       return;
     }
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       const results = await findCitySuggestionsAsync(value, platforms, 8);
-      setSuggestions(results);
+      // Sort direct destinations first when typing
+      if (directDestinations && directDestinations.length > 0) {
+        const directKeys = new Set(directDestinations.map((d) => d.city.toLowerCase().trim()));
+        const direct = results.filter((r) => directKeys.has(r.city.toLowerCase().trim()));
+        const other = results.filter((r) => !directKeys.has(r.city.toLowerCase().trim()));
+        setSuggestions([...direct, ...other]);
+      } else {
+        setSuggestions(results);
+      }
       setLoading(false);
     }, 250);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [value, platforms, selectedCity]);
+  }, [value, platforms, selectedCity, directDestinations]);
 
   const showSuggestions = focused && !selectedCity && (suggestions.length > 0 || loading);
 
@@ -244,44 +260,59 @@ function CityInput({
       {/* City suggestions dropdown */}
       {showSuggestions && (
         <div className="absolute top-full left-0 right-0 mt-1 glass-panel rounded-md border border-border z-50 max-h-[280px] overflow-y-auto">
+          {directDestinations && directDestinations.length > 0 && (!value.trim() || value.length < 2) && (
+            <div className="px-3 py-1.5 text-[9px] text-muted uppercase tracking-wider border-b border-border/50">
+              Destinations directes ({directDestinations.length})
+            </div>
+          )}
           {loading && suggestions.length === 0 && (
             <div className="px-3 py-2 text-[10px] text-muted animate-pulse">
               Recherche des villes proches...
             </div>
           )}
-          {suggestions.map((city, i) => (
-            <button
-              key={`${city.city}-${city.lat}`}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                handleCitySelect(city);
-              }}
-              className={`w-full text-left px-3 py-2 text-xs transition-colors ${
-                i === selectedIndex
-                  ? 'bg-blue/20 text-text'
-                  : 'text-text hover:bg-blue/8'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-medium truncate">{city.city}</span>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-[10px] text-muted">
-                    {city.platforms.length} plateforme
-                    {city.platforms.length > 1 ? 's' : ''}
-                  </span>
-                  {city.distance !== null && (
-                    <span className="text-[10px] font-mono text-cyan">
-                      {city.distance} km
+          {suggestions.map((city, i) => {
+            const isDirect = directDestinations?.some(
+              (d) => d.city.toLowerCase().trim() === city.city.toLowerCase().trim()
+            );
+            return (
+              <button
+                key={`${city.city}-${city.lat}`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleCitySelect(city);
+                }}
+                className={`w-full text-left px-3 py-2 text-xs transition-colors ${
+                  i === selectedIndex
+                    ? 'bg-blue/20 text-text'
+                    : 'text-text hover:bg-blue/8'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium truncate">{city.city}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {isDirect && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 font-medium">
+                        Direct
+                      </span>
+                    )}
+                    <span className="text-[10px] text-muted">
+                      {city.platforms.length} plateforme
+                      {city.platforms.length > 1 ? 's' : ''}
                     </span>
-                  )}
+                    {city.distance !== null && (
+                      <span className="text-[10px] font-mono text-cyan">
+                        {city.distance} km
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="text-[10px] text-muted">
-                {city.departement ? `${city.departement} - ` : ''}
-                {city.pays || ''}
-              </div>
-            </button>
-          ))}
+                <div className="text-[10px] text-muted">
+                  {city.departement ? `${city.departement} - ` : ''}
+                  {city.pays || ''}
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -488,6 +519,13 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
     clearSearch,
   } = useSearchStore();
 
+  // Compute direct destinations when departure is selected
+  const directDestinations = useMemo(() => {
+    if (departureSelectedPlatforms.length === 0) return [];
+    const depSites = new Set(departureSelectedPlatforms.map((p) => p.site));
+    return getDirectDestinationCities(depSites, services, platforms);
+  }, [departureSelectedPlatforms, services, platforms]);
+
   const handleSearch = useCallback(async () => {
     if (!departureQuery.trim() || !arrivalQuery.trim()) return;
 
@@ -618,6 +656,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
             onCitySelect={setArrivalCitySuggestion}
             selectedPlatforms={arrivalSelectedPlatforms}
             onPlatformsChange={setArrivalSelectedPlatforms}
+            directDestinations={directDestinations}
           />
         </div>
 

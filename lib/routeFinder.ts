@@ -519,6 +519,54 @@ export function findRoutes(
   });
 }
 
+/** Get all cities directly reachable from a set of departure platforms */
+export function getDirectDestinationCities(
+  departureSites: Set<string>,
+  services: Service[],
+  allPlatforms: Platform[]
+): CitySuggestion[] {
+  // Count services per destination site
+  const destSiteFreq = new Map<string, number>();
+  for (const s of services) {
+    if (departureSites.has(s.from) && !departureSites.has(s.to)) {
+      destSiteFreq.set(s.to, (destSiteFreq.get(s.to) || 0) + 1);
+    }
+  }
+  if (destSiteFreq.size === 0) return [];
+
+  const platformMap = new Map(allPlatforms.map((p) => [p.site, p]));
+
+  // Group by city
+  const cityMap = new Map<string, { platforms: Platform[]; totalFreq: number }>();
+  for (const [site, freq] of destSiteFreq) {
+    const platform = platformMap.get(site);
+    if (!platform) continue;
+    const cityKey = (platform.ville || platform.site.split(' - ')[0]).toLowerCase().trim();
+    if (!cityMap.has(cityKey)) cityMap.set(cityKey, { platforms: [], totalFreq: 0 });
+    const group = cityMap.get(cityKey)!;
+    group.platforms.push(platform);
+    group.totalFreq += freq;
+  }
+
+  const results: CitySuggestion[] = [];
+  for (const [, group] of cityMap) {
+    const first = group.platforms[0];
+    results.push({
+      city: first.ville || first.site.split(' - ')[0],
+      lat: first.lat,
+      lon: first.lon,
+      pays: first.pays,
+      departement: first.departement,
+      platforms: group.platforms,
+      bestScore: group.totalFreq,
+      distance: null,
+    });
+  }
+
+  results.sort((a, b) => b.bestScore - a.bestScore);
+  return results;
+}
+
 /** Compute weekly train volume for a platform from aggregated routes */
 export function getTrainVolume(platformName: string, routes: AggregatedRoute[]): number {
   let total = 0;
