@@ -56,7 +56,7 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   showRoutes: true,
   showPlatforms: true,
   showLabels: true,
-  showRailway: false,
+  showRailway: true,
   animateFlux: false,
   showFranceBorder: true,
 
