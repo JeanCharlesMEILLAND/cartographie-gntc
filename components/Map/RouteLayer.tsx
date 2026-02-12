@@ -14,11 +14,11 @@ interface RouteLayerProps {
 function getRouteStyle(freq: number, operator: string) {
   const color = freq > 30 ? '#f59e42' : getOperatorColor(operator);
 
-  if (freq > 30) return { weight: 4, color, opacity: 0.8 };
-  if (freq > 15) return { weight: 3, color: getOperatorColor(operator), opacity: 0.65 };
-  if (freq > 8) return { weight: 2.5, color: getOperatorColor(operator), opacity: 0.5 };
-  if (freq > 3) return { weight: 1.8, color: getOperatorColor(operator), opacity: 0.35 };
-  return { weight: 1.2, color: getOperatorColor(operator), opacity: 0.2 };
+  if (freq > 30) return { weight: 5, color, opacity: 0.9 };
+  if (freq > 15) return { weight: 4, color: getOperatorColor(operator), opacity: 0.85 };
+  if (freq > 8) return { weight: 3.5, color: getOperatorColor(operator), opacity: 0.75 };
+  if (freq > 3) return { weight: 2.5, color: getOperatorColor(operator), opacity: 0.65 };
+  return { weight: 2, color: getOperatorColor(operator), opacity: 0.5 };
 }
 
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
