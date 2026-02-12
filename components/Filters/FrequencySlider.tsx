@@ -9,9 +9,11 @@ export default function FrequencySlider() {
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <label className="text-xs font-medium text-muted uppercase tracking-wider">
-          Fréquence min.
+          Trains / semaine
         </label>
-        <span className="text-xs font-mono text-cyan">{minFrequency}/sem</span>
+        <span className="text-xs font-mono text-cyan">
+          {minFrequency === 0 ? 'Toutes' : `≥ ${minFrequency}/sem`}
+        </span>
       </div>
       <input
         type="range"
