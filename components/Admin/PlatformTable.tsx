@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import { TransportData } from '@/lib/types';
-import { buildAllPlatformStats } from '@/lib/adminComputations';
+import { buildAllPlatformStats, buildPlatformOperatorBreakdown } from '@/lib/adminComputations';
+import { getOperatorColor } from '@/lib/colors';
 import { useAdminStore } from '@/store/useAdminStore';
 import FilterSelect from './shared/FilterSelect';
 import EditableCell from './shared/EditableCell';
+import MaterialBadge from './shared/MaterialBadge';
 
 const COLS = [
   { key: 'site', label: 'Site', width: 'min-w-[180px]' },
@@ -18,6 +20,8 @@ const COLS = [
   { key: '_trains', label: 'T/sem', width: 'min-w-[50px]', computed: true },
 ] as const;
 
+const COL_COUNT = COLS.length;
+
 interface Props {
   data: TransportData;
   onSave: (d: TransportData) => void;
@@ -25,11 +29,12 @@ interface Props {
 }
 
 export default function PlatformTable({ data, onSave, saving }: Props) {
-  const { selectedPlatformSite, selectPlatform } = useAdminStore();
+  const { selectedPlatformSite, selectPlatform, navigateToOperator } = useAdminStore();
   const [search, setSearch] = useState('');
   const [filterPays, setFilterPays] = useState('');
   const [filterGroupe, setFilterGroupe] = useState('');
   const [filterExploitant, setFilterExploitant] = useState('');
+  const [expandedDest, setExpandedDest] = useState<string | null>(null);
 
   const platformStats = useMemo(
     () => buildAllPlatformStats(data.routes, data.services),
@@ -69,6 +74,21 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
     const updatedPlatforms = [...updated.platforms];
     updatedPlatforms[realIndex] = { ...updatedPlatforms[realIndex], [col]: newValue };
     updated.platforms = updatedPlatforms;
+    onSave(updated);
+  };
+
+  const handleServiceEdit = (
+    operator: string, from: string, to: string, dayDep: string, timeDep: string,
+    field: string, newValue: string
+  ) => {
+    const idx = data.services.findIndex(
+      (s) => s.operator === operator && s.from === from && s.to === to && s.dayDep === dayDep && s.timeDep === timeDep
+    );
+    if (idx === -1) return;
+    const updated = { ...data };
+    const updatedServices = [...updated.services];
+    updatedServices[idx] = { ...updatedServices[idx], [field]: newValue };
+    updated.services = updatedServices;
     onSave(updated);
   };
 
@@ -115,47 +135,294 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
               const stats = platformStats.get(platform.site);
               const isSelected = selectedPlatformSite === platform.site;
               return (
-                <tr
-                  key={platform.site}
-                  onClick={() => selectPlatform(isSelected ? null : platform.site)}
-                  className={`border-t border-border cursor-pointer transition-colors ${
-                    isSelected
-                      ? 'bg-blue/10 border-l-2 border-l-blue'
-                      : 'hover:bg-[rgba(20,30,60,0.3)]'
-                  }`}
-                >
-                  {COLS.map((col) => {
-                    if (col.key === '_operators') {
+                <Fragment key={platform.site}>
+                  {/* Platform row */}
+                  <tr
+                    onClick={() => {
+                      selectPlatform(isSelected ? null : platform.site);
+                      if (isSelected) setExpandedDest(null);
+                    }}
+                    className={`border-t border-border cursor-pointer transition-colors ${
+                      isSelected
+                        ? 'bg-blue/10'
+                        : 'hover:bg-[rgba(20,30,60,0.3)]'
+                    }`}
+                  >
+                    {COLS.map((col) => {
+                      if (col.key === '_operators') {
+                        return (
+                          <td key={col.key} className={`px-3 py-1.5 font-mono text-purple ${col.width}`}>
+                            {stats?.operators.length || 0}
+                          </td>
+                        );
+                      }
+                      if (col.key === '_trains') {
+                        return (
+                          <td key={col.key} className={`px-3 py-1.5 font-mono text-cyan ${col.width}`}>
+                            {stats?.trainsPerWeek || 0}
+                          </td>
+                        );
+                      }
+                      const value = String((platform as unknown as Record<string, unknown>)[col.key] || '');
                       return (
-                        <td key={col.key} className={`px-3 py-1.5 font-mono text-purple ${col.width}`}>
-                          {stats?.operators.length || 0}
+                        <td key={col.key} className={`px-3 py-1.5 ${col.width}`}>
+                          <EditableCell
+                            value={value}
+                            onCommit={(v) => handleCellEdit(platform.site, col.key, v)}
+                          />
                         </td>
                       );
-                    }
-                    if (col.key === '_trains') {
-                      return (
-                        <td key={col.key} className={`px-3 py-1.5 font-mono text-cyan ${col.width}`}>
-                          {stats?.trainsPerWeek || 0}
-                        </td>
-                      );
-                    }
-                    const value = String((platform as unknown as Record<string, unknown>)[col.key] || '');
-                    return (
-                      <td key={col.key} className={`px-3 py-1.5 ${col.width}`}>
-                        <EditableCell
-                          value={value}
-                          onCommit={(v) => handleCellEdit(platform.site, col.key, v)}
+                    })}
+                  </tr>
+
+                  {/* Inline detail row */}
+                  {isSelected && (
+                    <tr>
+                      <td colSpan={COL_COUNT} className="p-0">
+                        <InlineDetail
+                          site={platform.site}
+                          data={data}
+                          expandedDest={expandedDest}
+                          setExpandedDest={setExpandedDest}
+                          onServiceEdit={handleServiceEdit}
+                          onSelectPlatform={selectPlatform}
+                          onNavigateOperator={navigateToOperator}
                         />
                       </td>
-                    );
-                  })}
-                </tr>
+                    </tr>
+                  )}
+                </Fragment>
               );
             })}
           </tbody>
         </table>
       </div>
       {saving && <div className="mt-2 text-[10px] text-cyan animate-pulse">Sauvegarde en cours...</div>}
+    </div>
+  );
+}
+
+/* ── Inline Detail (rendered under the selected row) ──────── */
+
+function InlineDetail({
+  site,
+  data,
+  expandedDest,
+  setExpandedDest,
+  onServiceEdit,
+  onSelectPlatform,
+  onNavigateOperator,
+}: {
+  site: string;
+  data: TransportData;
+  expandedDest: string | null;
+  setExpandedDest: (key: string | null) => void;
+  onServiceEdit: (op: string, from: string, to: string, dayDep: string, timeDep: string, field: string, val: string) => void;
+  onSelectPlatform: (site: string) => void;
+  onNavigateOperator: (op: string) => void;
+}) {
+  const platform = data.platforms.find((p) => p.site === site);
+  const breakdown = buildPlatformOperatorBreakdown(site, data.routes, data.services);
+  const connected = data.routes.filter((r) => r.from === site || r.to === site);
+  const totalFreq = connected.reduce((sum, r) => sum + r.freq, 0);
+
+  if (!platform) return null;
+
+  return (
+    <div className="bg-[rgba(10,20,40,0.5)] border-t border-blue/20 border-b border-b-blue/20 px-6 py-4">
+      <div className="flex gap-8">
+        {/* Left: metadata + KPIs */}
+        <div className="flex-shrink-0 w-[220px] space-y-3">
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="text-[10px] text-muted">Exploitant</span>
+              <div className="text-text font-medium">{platform.exploitant || '—'}</div>
+            </div>
+            <div>
+              <span className="text-[10px] text-muted">Groupe</span>
+              <div className="text-text font-medium">{platform.groupe || '—'}</div>
+            </div>
+            <div>
+              <span className="text-[10px] text-muted">Département</span>
+              <div className="text-text font-medium">{platform.departement || '—'}</div>
+            </div>
+            <div>
+              <span className="text-[10px] text-muted">SNCF</span>
+              <div className="text-text font-medium">{platform.chantierSNCF ? 'Oui' : 'Non'}</div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 py-2 border-t border-border">
+            <div className="text-center">
+              <div className="text-lg font-mono font-bold text-cyan">{totalFreq}</div>
+              <div className="text-[9px] text-muted">trains/sem</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-mono font-bold text-blue">{connected.length}</div>
+              <div className="text-[9px] text-muted">liaisons</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-mono font-bold text-purple">{breakdown.length}</div>
+              <div className="text-[9px] text-muted">opérateurs</div>
+            </div>
+          </div>
+
+          {/* Connected platforms */}
+          {connected.length > 0 && (
+            <div>
+              <h4 className="text-[9px] font-semibold text-muted uppercase tracking-wider mb-1">Connectée à</h4>
+              <div className="space-y-0.5 max-h-[200px] overflow-y-auto">
+                {connected.sort((a, b) => b.freq - a.freq).map((r) => {
+                  const dest = r.from === site ? r.to : r.from;
+                  return (
+                    <button
+                      key={`${r.from}-${r.to}`}
+                      onClick={(e) => { e.stopPropagation(); onSelectPlatform(dest); }}
+                      className="flex items-center justify-between w-full text-[10px] py-0.5 px-1 rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors text-left"
+                    >
+                      <span className="text-text truncate">{dest}</span>
+                      <span className="font-mono text-cyan flex-shrink-0 ml-1">{r.freq}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right: operator breakdown */}
+        <div className="flex-1 min-w-0 space-y-3">
+          <h4 className="text-[10px] font-semibold text-muted uppercase tracking-wider">Opérateurs actifs</h4>
+          {breakdown.map(({ operator, destinations, totalFreq: opFreq, freqShare }) => {
+            const color = getOperatorColor(operator);
+            return (
+              <div key={operator} className="space-y-1">
+                {/* Operator header */}
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onNavigateOperator(operator); }}
+                    className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+                  >
+                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                    <span className="text-xs font-semibold text-text hover:text-blue transition-colors">{operator}</span>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <div className="w-20 h-1.5 bg-[rgba(10,15,30,0.6)] rounded-full overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: `${freqShare * 100}%`, backgroundColor: color }} />
+                    </div>
+                    <span className="text-[10px] font-mono text-muted w-[55px] text-right">{opFreq} t/sem</span>
+                  </div>
+                </div>
+
+                {/* Destinations */}
+                <div className="ml-4 space-y-0.5">
+                  {destinations.map((d, i) => {
+                    const destKey = `${operator}||${d.dest}`;
+                    const isExpanded = expandedDest === destKey;
+                    return (
+                      <div key={i}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setExpandedDest(isExpanded ? null : destKey); }}
+                          className="flex items-center justify-between text-xs py-1 px-1.5 w-full text-left rounded hover:bg-[rgba(20,30,60,0.5)] transition-colors"
+                        >
+                          <div className="flex items-center gap-1 min-w-0">
+                            <svg
+                              width="8" height="8" viewBox="0 0 8 8"
+                              className={`flex-shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                              fill="currentColor" style={{ color }}
+                            >
+                              <path d="M2 1L6 4L2 7Z" />
+                            </svg>
+                            <span className="text-text truncate">{d.dest}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                            <span className="font-mono text-cyan">{d.freq}/s</span>
+                            <span className="text-[9px] text-muted">{d.services.length} dép.</span>
+                          </div>
+                        </button>
+
+                        {isExpanded && d.services.length > 0 && (
+                          <div className="ml-3 mt-1 mb-2 space-y-2 bg-[rgba(10,15,30,0.3)] rounded p-2">
+                            <table className="w-full text-[10px]">
+                              <thead>
+                                <tr className="text-muted">
+                                  <th className="text-left font-normal py-0.5 pr-1">Jour Dép</th>
+                                  <th className="text-left font-normal py-0.5 pr-1">HLR</th>
+                                  <th className="text-left font-normal py-0.5 pr-1">Jour Arr</th>
+                                  <th className="text-left font-normal py-0.5">MAD</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {d.services.map((s, j) => (
+                                  <tr key={j} className="text-text">
+                                    <td className="py-0.5 pr-1 font-medium">{s.dayDep}</td>
+                                    <td
+                                      className="py-0.5 pr-1 font-mono text-cyan cursor-pointer hover:text-blue"
+                                      onDoubleClick={(e) => {
+                                        const td = e.currentTarget;
+                                        const input = document.createElement('input');
+                                        input.value = s.timeDep || '';
+                                        input.className = 'w-full bg-blue/10 border border-blue/30 rounded px-1 py-0 text-text text-[10px] font-mono focus:outline-none';
+                                        const commit = () => { onServiceEdit(operator, s.from, s.to, s.dayDep, s.timeDep, 'timeDep', input.value); td.textContent = input.value || '—'; };
+                                        input.onblur = commit;
+                                        input.onkeydown = (ev) => { if (ev.key === 'Enter') commit(); if (ev.key === 'Escape') td.textContent = s.timeDep || '—'; };
+                                        td.textContent = '';
+                                        td.appendChild(input);
+                                        input.focus();
+                                      }}
+                                    >
+                                      {s.timeDep || '—'}
+                                    </td>
+                                    <td className="py-0.5 pr-1 font-medium">{s.dayArr}</td>
+                                    <td
+                                      className="py-0.5 font-mono text-cyan cursor-pointer hover:text-blue"
+                                      onDoubleClick={(e) => {
+                                        const td = e.currentTarget;
+                                        const input = document.createElement('input');
+                                        input.value = s.timeArr || '';
+                                        input.className = 'w-full bg-blue/10 border border-blue/30 rounded px-1 py-0 text-text text-[10px] font-mono focus:outline-none';
+                                        const commit = () => { onServiceEdit(operator, s.from, s.to, s.dayDep, s.timeDep, 'timeArr', input.value); td.textContent = input.value || '—'; };
+                                        input.onblur = commit;
+                                        input.onkeydown = (ev) => { if (ev.key === 'Enter') commit(); if (ev.key === 'Escape') td.textContent = s.timeArr || '—'; };
+                                        td.textContent = '';
+                                        td.appendChild(input);
+                                        input.focus();
+                                      }}
+                                    >
+                                      {s.timeArr || '—'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+
+                            {d.services[0] && (
+                              <div className="flex flex-wrap gap-1">
+                                <MaterialBadge label="CM" value={d.services[0].acceptsCM} />
+                                <MaterialBadge label="Cont." value={d.services[0].acceptsCont} />
+                                <MaterialBadge label="Semi préh." value={d.services[0].acceptsSemiPre} />
+                                <MaterialBadge label="Semi non-préh." value={d.services[0].acceptsSemiNon} />
+                                <MaterialBadge label="P400" value={d.services[0].acceptsP400} />
+                              </div>
+                            )}
+
+                            <button
+                              onClick={(e) => { e.stopPropagation(); onSelectPlatform(d.dest); }}
+                              className="text-[10px] text-blue hover:text-cyan transition-colors"
+                            >
+                              Voir {d.dest} →
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

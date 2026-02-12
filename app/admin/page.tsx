@@ -6,7 +6,6 @@ import { TransportData } from '@/lib/types';
 import { useAdminStore, AdminTab } from '@/store/useAdminStore';
 import Dashboard from '@/components/Admin/Dashboard';
 import PlatformTable from '@/components/Admin/PlatformTable';
-import PlatformDetail from '@/components/Admin/PlatformDetail';
 import FluxTable from '@/components/Admin/FluxTable';
 import OperatorList from '@/components/Admin/OperatorList';
 import OperatorView from '@/components/Admin/OperatorView';
@@ -17,7 +16,7 @@ export default function AdminPage() {
   const [data, setData] = useState<TransportData | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const { activeTab, setActiveTab, selectedPlatformSite } = useAdminStore();
+  const { activeTab, setActiveTab } = useAdminStore();
 
   const isAdmin = (session?.user as Record<string, unknown>)?.role === 'admin';
   const userOperator = (session?.user as Record<string, unknown>)?.operator as string | undefined;
@@ -141,18 +140,9 @@ export default function AdminPage() {
           <Dashboard data={data} />
         )}
 
-        {/* Admin: Platforms master-detail */}
+        {/* Admin: Platforms (inline detail) */}
         {activeTab === 'platforms' && isAdmin && (
-          <div className={`flex gap-4 ${selectedPlatformSite ? '' : ''}`}>
-            <div className={selectedPlatformSite ? 'w-[58%] flex-shrink-0' : 'w-full'}>
-              <PlatformTable data={data} onSave={handleSave} saving={saving} />
-            </div>
-            {selectedPlatformSite && (
-              <div className="w-[42%] flex-shrink-0">
-                <PlatformDetail data={data} onSave={handleSave} />
-              </div>
-            )}
-          </div>
+          <PlatformTable data={data} onSave={handleSave} saving={saving} />
         )}
 
         {/* Admin: Operators */}
