@@ -9,9 +9,19 @@ import PlatformTable from '@/components/Admin/PlatformTable';
 import FluxTable from '@/components/Admin/FluxTable';
 import OperatorList from '@/components/Admin/OperatorList';
 import OperatorView from '@/components/Admin/OperatorView';
+import OperatorRoutes from '@/components/Admin/OperatorRoutes';
 import UserManager from '@/components/Admin/UserManager';
 import OperatorProfile from '@/components/Admin/OperatorProfile';
+import AuditLog from '@/components/Admin/AuditLog';
 import UploadDialog from '@/components/UploadDialog';
+import LoadingScreen from '@/components/LoadingScreen';
+
+interface OperatorInfo {
+  id: number;
+  name: string;
+  logo: string | null;
+  color: string | null;
+}
 
 export default function AdminPage() {
   const { data: session } = useSession();
@@ -19,6 +29,7 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [operatorInfo, setOperatorInfo] = useState<OperatorInfo | null>(null);
   const { activeTab, setActiveTab } = useAdminStore();
 
   const isAdmin = (session?.user as Record<string, unknown>)?.role === 'admin';
@@ -37,9 +48,23 @@ export default function AdminPage() {
     setData(json);
   }, []);
 
+  // Fetch operator info (logo, color) for header
+  const fetchOperatorInfo = useCallback(async () => {
+    if (!userOperator) return;
+    try {
+      const res = await fetch('/api/admin/operators');
+      if (res.ok) {
+        const ops: OperatorInfo[] = await res.json();
+        const op = ops.find((o) => o.name === userOperator);
+        if (op) setOperatorInfo(op);
+      }
+    } catch { /* silent */ }
+  }, [userOperator]);
+
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    fetchOperatorInfo();
+  }, [fetchData, fetchOperatorInfo]);
 
   const handleSave = async (updatedData: TransportData) => {
     setSaving(true);
@@ -79,12 +104,21 @@ export default function AdminPage() {
     { key: 'operators', label: `Opérateurs (${data.operators.length})` },
     { key: 'flux', label: `Flux (${data.services.length})` },
     { key: 'users', label: 'Utilisateurs' },
+    { key: 'audit', label: 'Historique' },
   ];
+
+  const operatorServices = userOperator
+    ? data.services.filter((s) => s.operator === userOperator)
+    : [];
+  const operatorRouteCount = userOperator
+    ? data.routes.filter((r) => r.operators.includes(userOperator)).length
+    : 0;
 
   const operatorTabs: { key: AdminTab; label: string }[] = [
     { key: 'profile', label: 'Mon profil' },
     { key: 'operator', label: 'Mon activité' },
-    { key: 'flux', label: `Mes flux` },
+    { key: 'routes', label: `Mes liaisons (${operatorRouteCount})` },
+    { key: 'flux', label: `Mes flux (${operatorServices.length})` },
   ];
 
   const tabs = isAdmin ? adminTabs : operatorTabs;
@@ -97,9 +131,23 @@ export default function AdminPage() {
           <a href="/" className="text-muted hover:text-blue text-xs transition-colors">
             &larr; Carte
           </a>
-          <h1 className="text-sm font-display font-bold gntc-gradient">Administration</h1>
+
+          {/* Operator header with logo */}
+          {!isAdmin && operatorInfo?.logo ? (
+            <div className="flex items-center gap-2">
+              <img
+                src={operatorInfo.logo}
+                alt={operatorInfo.name}
+                className="h-7 w-auto object-contain"
+              />
+              <h1 className="text-sm font-display font-bold text-text">{operatorInfo.name}</h1>
+            </div>
+          ) : (
+            <h1 className="text-sm font-display font-bold gntc-gradient">Administration</h1>
+          )}
+
           <span className="text-[10px] px-2 py-0.5 rounded bg-blue/10 text-blue border border-blue/20">
-            {isAdmin ? 'Admin' : userOperator || 'Opérateur'}
+            {isAdmin ? 'Admin' : 'Opérateur'}
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -181,9 +229,19 @@ export default function AdminPage() {
           <OperatorProfile operatorName={userOperator} />
         )}
 
-        {/* Operator view */}
+        {/* Operator activity dashboard */}
         {activeTab === 'operator' && userOperator && (
           <OperatorView
+            data={data}
+            operator={userOperator}
+            onSave={handleSave}
+            saving={saving}
+          />
+        )}
+
+        {/* Operator routes/liaisons */}
+        {activeTab === 'routes' && userOperator && (
+          <OperatorRoutes
             data={data}
             operator={userOperator}
             onSave={handleSave}
@@ -194,6 +252,11 @@ export default function AdminPage() {
         {/* Users (admin only) */}
         {activeTab === 'users' && isAdmin && (
           <UserManager />
+        )}
+
+        {/* Audit log (admin only) */}
+        {activeTab === 'audit' && isAdmin && (
+          <AuditLog />
         )}
       </div>
 
