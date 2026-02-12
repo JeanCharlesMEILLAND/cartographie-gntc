@@ -1219,7 +1219,7 @@
       "fromLon": 6.1,
       "toLat": 43.48,
       "toLon": -1.45,
-      "freq": 64,
+      "freq": 16,
       "operators": [
         "Ambrogio Intermodal",
         "VIIA"
@@ -1232,7 +1232,7 @@
       "fromLon": 7.6,
       "toLat": 43.48,
       "toLon": -1.45,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Ambrogio Intermodal"
       ]
@@ -1244,7 +1244,7 @@
       "fromLon": 6.32,
       "toLat": 48.11,
       "toLon": -1.68,
-      "freq": 8,
+      "freq": 4,
       "operators": [
         "Be Modal Intermodal Transport"
       ]
@@ -1256,7 +1256,7 @@
       "fromLon": 2.97,
       "toLat": 48.11,
       "toLon": -1.68,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Be Modal Intermodal Transport"
       ]
@@ -1268,7 +1268,7 @@
       "fromLon": -1.68,
       "toLat": 45.7,
       "toLon": 4.94,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Be Modal Intermodal Transport"
       ]
@@ -1280,7 +1280,7 @@
       "fromLon": -1.62,
       "toLat": 43.48,
       "toLon": -1.45,
-      "freq": 72,
+      "freq": 12,
       "operators": [
         "Brittany Ferries"
       ]
@@ -1292,7 +1292,7 @@
       "fromLon": 1.86,
       "toLat": 42.7,
       "toLon": 2.9,
-      "freq": 32,
+      "freq": 8,
       "operators": [
         "Cargo Beamer"
       ]
@@ -1304,7 +1304,7 @@
       "fromLon": 2.49,
       "toLat": 48.1,
       "toLon": -0.44,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Cinerites"
       ]
@@ -1316,7 +1316,7 @@
       "fromLon": 0.2,
       "toLat": 48.1,
       "toLon": -0.44,
-      "freq": 72,
+      "freq": 12,
       "operators": [
         "Cinerites"
       ]
@@ -1328,7 +1328,7 @@
       "fromLon": 2,
       "toLat": 48.1,
       "toLon": -0.44,
-      "freq": 72,
+      "freq": 12,
       "operators": [
         "Cinerites"
       ]
@@ -1340,7 +1340,7 @@
       "fromLon": 4.63,
       "toLat": 44.91,
       "toLon": -0.37,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Combronde"
       ]
@@ -1352,7 +1352,7 @@
       "fromLon": 3.08,
       "toLat": 43.39,
       "toLon": 4.88,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Combronde"
       ]
@@ -1364,7 +1364,7 @@
       "fromLon": 3.08,
       "toLat": 43.42,
       "toLon": 4.89,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Combronde"
       ]
@@ -1376,7 +1376,7 @@
       "fromLon": 4.88,
       "toLat": 45.57,
       "toLon": 4.8,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Combronde"
       ]
@@ -1388,7 +1388,7 @@
       "fromLon": 4.88,
       "toLat": 43.74,
       "toLon": 4.22,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Combronde"
       ]
@@ -1400,7 +1400,7 @@
       "fromLon": 4.89,
       "toLat": 45.57,
       "toLon": 4.8,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Combronde"
       ]
@@ -1412,7 +1412,7 @@
       "fromLon": 4.89,
       "toLat": 43.74,
       "toLon": 4.22,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Combronde"
       ]
@@ -1424,7 +1424,7 @@
       "fromLon": 3.14,
       "toLat": 49.49,
       "toLon": 0.12,
-      "freq": 8,
+      "freq": 4,
       "operators": [
         "Combronde"
       ]
@@ -1436,7 +1436,7 @@
       "fromLon": 0.12,
       "toLat": 47.22,
       "toLon": 2.07,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Combronde"
       ]
@@ -1460,7 +1460,7 @@
       "fromLon": 4.86,
       "toLat": 43.39,
       "toLon": 4.88,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Delta Rail"
       ]
@@ -1472,7 +1472,7 @@
       "fromLon": 4.86,
       "toLat": 43.42,
       "toLon": 4.89,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Delta Rail"
       ]
@@ -1484,7 +1484,7 @@
       "fromLon": 4.86,
       "toLat": 49.49,
       "toLon": 0.28,
-      "freq": 8,
+      "freq": 4,
       "operators": [
         "Delta Rail"
       ]
@@ -1496,7 +1496,7 @@
       "fromLon": 4.86,
       "toLat": 49.49,
       "toLon": 0.12,
-      "freq": 8,
+      "freq": 4,
       "operators": [
         "Delta Rail"
       ]
@@ -1508,7 +1508,7 @@
       "fromLon": 4.88,
       "toLat": 45.73,
       "toLon": 4.84,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Delta Rail",
         "Naviland Cargo"
@@ -1521,7 +1521,7 @@
       "fromLon": 4.89,
       "toLat": 45.73,
       "toLon": 4.84,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Delta Rail",
         "Naviland Cargo"
@@ -1534,7 +1534,7 @@
       "fromLon": 4.81,
       "toLat": 50.44,
       "toLon": 2.97,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Froidcombi"
       ]
@@ -1546,7 +1546,7 @@
       "fromLon": 4.81,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 200,
+      "freq": 20,
       "operators": [
         "Froidcombi"
       ]
@@ -1558,7 +1558,7 @@
       "fromLon": 4.63,
       "toLat": 50.63,
       "toLon": 3.07,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Froidcombi"
       ]
@@ -1570,7 +1570,7 @@
       "fromLon": 4.35,
       "toLat": 43.39,
       "toLon": 4.88,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1582,7 +1582,7 @@
       "fromLon": 4.35,
       "toLat": 43.42,
       "toLon": 4.89,
-      "freq": 25,
+      "freq": 5,
       "operators": [
         "Greenmodal"
       ]
@@ -1594,7 +1594,7 @@
       "fromLon": 4.35,
       "toLat": 43.33,
       "toLon": 5.35,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1606,7 +1606,7 @@
       "fromLon": 4.35,
       "toLat": 43.58,
       "toLon": 5,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1618,7 +1618,7 @@
       "fromLon": 4.35,
       "toLat": 45.7,
       "toLon": 4.94,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1630,7 +1630,7 @@
       "fromLon": 4.35,
       "toLat": 43.39,
       "toLon": 4.88,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1642,7 +1642,7 @@
       "fromLon": 4.35,
       "toLat": 43.42,
       "toLon": 4.89,
-      "freq": 75,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1654,7 +1654,7 @@
       "fromLon": 4.35,
       "toLat": 43.33,
       "toLon": 5.35,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1666,7 +1666,7 @@
       "fromLon": 4.35,
       "toLat": 43.58,
       "toLon": 5,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1678,7 +1678,7 @@
       "fromLon": 4.35,
       "toLat": 45.7,
       "toLon": 4.94,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1690,7 +1690,7 @@
       "fromLon": 2.97,
       "toLat": 51.01,
       "toLon": 2.19,
-      "freq": 36,
+      "freq": 12,
       "operators": [
         "Greenmodal",
         "Novatrans"
@@ -1703,7 +1703,7 @@
       "fromLon": 2.97,
       "toLat": 43.39,
       "toLon": 4.88,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1715,7 +1715,7 @@
       "fromLon": 2.97,
       "toLat": 43.33,
       "toLon": 5.35,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1727,7 +1727,7 @@
       "fromLon": 2.97,
       "toLat": 43.58,
       "toLon": 5,
-      "freq": 100,
+      "freq": 20,
       "operators": [
         "Greenmodal",
         "Novatrans"
@@ -1740,7 +1740,7 @@
       "fromLon": 2.97,
       "toLat": 45.7,
       "toLon": 4.94,
-      "freq": 100,
+      "freq": 20,
       "operators": [
         "Greenmodal",
         "Novatrans"
@@ -1753,7 +1753,7 @@
       "fromLon": 2.19,
       "toLat": 43.39,
       "toLon": 4.88,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Greenmodal"
       ]
@@ -1765,7 +1765,7 @@
       "fromLon": 2.19,
       "toLat": 43.42,
       "toLon": 4.89,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Greenmodal"
       ]
@@ -1777,7 +1777,7 @@
       "fromLon": 2.19,
       "toLat": 43.33,
       "toLon": 5.35,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Greenmodal"
       ]
@@ -1789,7 +1789,7 @@
       "fromLon": 2.19,
       "toLat": 48.11,
       "toLon": -1.68,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Greenmodal"
       ]
@@ -1801,7 +1801,7 @@
       "fromLon": 2.19,
       "toLat": 43.58,
       "toLon": 5,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Greenmodal"
       ]
@@ -1813,7 +1813,7 @@
       "fromLon": 2.19,
       "toLat": 45.7,
       "toLon": 4.94,
-      "freq": 34,
+      "freq": 8,
       "operators": [
         "Greenmodal"
       ]
@@ -1825,7 +1825,7 @@
       "fromLon": 4.88,
       "toLat": 48.11,
       "toLon": -1.68,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Greenmodal"
       ]
@@ -1837,7 +1837,7 @@
       "fromLon": 4.88,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1849,7 +1849,7 @@
       "fromLon": 4.88,
       "toLat": 45.7,
       "toLon": 4.94,
-      "freq": 36,
+      "freq": 12,
       "operators": [
         "Greenmodal",
         "Novatrans"
@@ -1862,7 +1862,7 @@
       "fromLon": 4.89,
       "toLat": 50.44,
       "toLon": 2.97,
-      "freq": 25,
+      "freq": 5,
       "operators": [
         "Greenmodal"
       ]
@@ -1874,7 +1874,7 @@
       "fromLon": 4.89,
       "toLat": 48.11,
       "toLon": -1.68,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Greenmodal"
       ]
@@ -1886,7 +1886,7 @@
       "fromLon": 4.89,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1898,7 +1898,7 @@
       "fromLon": 4.89,
       "toLat": 45.7,
       "toLon": 4.94,
-      "freq": 36,
+      "freq": 12,
       "operators": [
         "Greenmodal",
         "Novatrans"
@@ -1911,7 +1911,7 @@
       "fromLon": 5.35,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Greenmodal"
       ]
@@ -1923,7 +1923,7 @@
       "fromLon": 5,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 100,
+      "freq": 20,
       "operators": [
         "Greenmodal",
         "Novatrans"
@@ -1936,7 +1936,7 @@
       "fromLon": 4.35,
       "toLat": 42.7,
       "toLon": 2.9,
-      "freq": 200,
+      "freq": 20,
       "operators": [
         "HUPAC"
       ]
@@ -1948,7 +1948,7 @@
       "fromLon": 7.62,
       "toLat": 45.61,
       "toLon": 8.85,
-      "freq": 128,
+      "freq": 16,
       "operators": [
         "HUPAC"
       ]
@@ -1960,7 +1960,7 @@
       "fromLon": 8.29,
       "toLat": 49.01,
       "toLon": 8.4,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "HUPAC"
       ]
@@ -3748,7 +3748,7 @@
       "fromLon": 4.35,
       "toLat": 43.48,
       "toLon": -1.45,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Novatrans"
       ]
@@ -3760,7 +3760,7 @@
       "fromLon": 2.97,
       "toLat": 43.48,
       "toLon": -1.45,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Novatrans"
       ]
@@ -3772,7 +3772,7 @@
       "fromLon": 2.97,
       "toLat": 42.7,
       "toLon": 2.9,
-      "freq": 72,
+      "freq": 12,
       "operators": [
         "Novatrans"
       ]
@@ -3784,7 +3784,7 @@
       "fromLon": 2.97,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Novatrans"
       ]
@@ -3796,7 +3796,7 @@
       "fromLon": 2.97,
       "toLat": 51.33,
       "toLon": 3.18,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Novatrans"
       ]
@@ -3808,7 +3808,7 @@
       "fromLon": -1.45,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Novatrans"
       ]
@@ -3820,7 +3820,7 @@
       "fromLon": 2.45,
       "toLat": 45.45,
       "toLon": 8.62,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Novatrans"
       ]
@@ -3832,7 +3832,7 @@
       "fromLon": 2.9,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Novatrans"
       ]
@@ -3844,7 +3844,7 @@
       "fromLon": 4.81,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "T3M"
       ]
@@ -3856,7 +3856,7 @@
       "fromLon": -0.55,
       "toLat": 50.63,
       "toLon": 3.07,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "T3M"
       ]
@@ -3868,7 +3868,7 @@
       "fromLon": -0.55,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "T3M"
       ]
@@ -3880,7 +3880,7 @@
       "fromLon": 2.49,
       "toLat": 43.58,
       "toLon": 5,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "T3M"
       ]
@@ -3892,7 +3892,7 @@
       "fromLon": 1.39,
       "toLat": 50.63,
       "toLon": 3.07,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "T3M"
       ]
@@ -3904,7 +3904,7 @@
       "fromLon": 1.39,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "T3M"
       ]
@@ -3916,7 +3916,7 @@
       "fromLon": 3.07,
       "toLat": 43.95,
       "toLon": 4.81,
-      "freq": 25,
+      "freq": 5,
       "operators": [
         "T3M"
       ]
@@ -3928,7 +3928,7 @@
       "fromLon": 3.07,
       "toLat": 43.58,
       "toLon": 5,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "T3M"
       ]
@@ -3940,7 +3940,7 @@
       "fromLon": 8.62,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "T3M"
       ]
@@ -3952,7 +3952,7 @@
       "fromLon": 5,
       "toLat": 43.95,
       "toLon": 4.81,
-      "freq": 25,
+      "freq": 5,
       "operators": [
         "T3M"
       ]
@@ -3964,7 +3964,7 @@
       "fromLon": -1.77,
       "toLat": 48.74,
       "toLon": 6.16,
-      "freq": 32,
+      "freq": 8,
       "operators": [
         "Transports Vigneron"
       ]
@@ -3976,7 +3976,7 @@
       "fromLon": 6.16,
       "toLat": 51.33,
       "toLon": 3.18,
-      "freq": 8,
+      "freq": 4,
       "operators": [
         "Transports Vigneron"
       ]
@@ -3988,7 +3988,7 @@
       "fromLon": 6.1,
       "toLat": 42.52,
       "toLon": 2.83,
-      "freq": 1090,
+      "freq": 46,
       "operators": [
         "VIIA"
       ]
@@ -4000,7 +4000,7 @@
       "fromLon": 6.1,
       "toLat": 42.52,
       "toLon": 2.83,
-      "freq": 1058,
+      "freq": 46,
       "operators": [
         "VIIA"
       ]
@@ -4012,7 +4012,7 @@
       "fromLon": 6.1,
       "toLat": 43.48,
       "toLon": -1.45,
-      "freq": 32,
+      "freq": 8,
       "operators": [
         "VIIA"
       ]
@@ -4024,7 +4024,7 @@
       "fromLon": 1.86,
       "toLat": 42.52,
       "toLon": 2.83,
-      "freq": 162,
+      "freq": 18,
       "operators": [
         "VIIA"
       ]
@@ -4036,7 +4036,7 @@
       "fromLon": 1.86,
       "toLat": 42.52,
       "toLon": 2.83,
-      "freq": 162,
+      "freq": 18,
       "operators": [
         "VIIA"
       ]
@@ -4048,7 +4048,7 @@
       "fromLon": 1.86,
       "toLat": 45.73,
       "toLon": 4.84,
-      "freq": 144,
+      "freq": 12,
       "operators": [
         "VIIA"
       ]
@@ -4060,7 +4060,7 @@
       "fromLon": 1.86,
       "toLat": 43.4,
       "toLon": 3.7,
-      "freq": 72,
+      "freq": 12,
       "operators": [
         "VIIA"
       ]
@@ -4072,7 +4072,7 @@
       "fromLon": 10.33,
       "toLat": 43.58,
       "toLon": 5,
-      "freq": 72,
+      "freq": 12,
       "operators": [
         "Metrocargo italia srl"
       ]
@@ -4096,7 +4096,7 @@
       "fromLon": 10.33,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Metrocargo italia srl"
       ]
@@ -4108,7 +4108,7 @@
       "fromLon": 10.33,
       "toLat": 50.44,
       "toLon": 2.97,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "Metrocargo italia srl"
       ]
@@ -4156,7 +4156,7 @@
       "fromLon": 2.49,
       "toLat": 49.12,
       "toLon": 6.18,
-      "freq": 50,
+      "freq": 10,
       "operators": [
         "DB Cargo France"
       ]
@@ -4168,7 +4168,7 @@
       "fromLon": 3.14,
       "toLat": 49.49,
       "toLon": 0.28,
-      "freq": 8,
+      "freq": 4,
       "operators": [
         "Combronde"
       ]
@@ -4180,7 +4180,7 @@
       "fromLon": 0.28,
       "toLat": 47.22,
       "toLon": 2.07,
-      "freq": 18,
+      "freq": 6,
       "operators": [
         "Combronde"
       ]
@@ -4208,6 +4208,6 @@
   "unmatchedPlatforms": [
     "Gares relais vers des plateformes multimodales"
   ],
-  "uploadedAt": "2026-02-11T18:50:07.376Z",
+  "uploadedAt": "2026-02-12T08:06:08.589Z",
   "fileName": "2026-01-23_Plan-de-transport-OTC-GNTC_2026VF2-1.xlsx"
 }

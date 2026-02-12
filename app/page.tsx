@@ -100,7 +100,7 @@ export default function Home() {
       volumeMap.set(r.from, (volumeMap.get(r.from) || 0) + r.freq);
       volumeMap.set(r.to, (volumeMap.get(r.to) || 0) + r.freq);
     });
-    return filteredPlatforms.filter((p) => (volumeMap.get(p.site) || 0) > 100);
+    return filteredPlatforms.filter((p) => (volumeMap.get(p.site) || 0) > 30);
   }, [filteredPlatforms, filteredRoutes]);
 
   // KPIs

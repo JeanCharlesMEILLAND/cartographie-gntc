@@ -4,16 +4,19 @@ import { geocodePlatform } from './geocode';
 export function aggregateRoutes(
   fluxes: RawFlux[]
 ): { routes: AggregatedRoute[]; unmatchedPlatforms: string[] } {
-  const routeMap = new Map<string, {
+  const unmatched = new Set<string>();
+
+  // Step 1: Deduplicate by operator + directed pair → take freq once per service
+  // Each row in Excel = 1 departure day. "Fréquence Hebdo" = total trains/week for that service.
+  // So we take the frequency ONCE per (operator, from, to) group, not sum every row.
+  const serviceMap = new Map<string, {
     from: string;
     to: string;
     fromCoords: [number, number];
     toCoords: [number, number];
+    operator: string;
     freq: number;
-    operators: Set<string>;
   }>();
-
-  const unmatched = new Set<string>();
 
   for (const flux of fluxes) {
     const fromName = flux.plateformeExp.trim();
@@ -26,20 +29,48 @@ export function aggregateRoutes(
     if (!toCoords) unmatched.add(toName);
     if (!fromCoords || !toCoords) continue;
 
-    const key = [fromName, toName].sort().join('||');
-    const existing = routeMap.get(key);
+    // Key by operator + directed pair (operator A→B is different from operator B→A)
+    const serviceKey = `${flux.operateur?.trim() || ''}||${fromName}||${toName}`;
+    const existing = serviceMap.get(serviceKey);
 
-    if (existing) {
-      existing.freq += flux.frequenceHebdo || 0;
-      if (flux.operateur) existing.operators.add(flux.operateur.trim());
-    } else {
-      routeMap.set(key, {
+    if (!existing) {
+      serviceMap.set(serviceKey, {
         from: fromName,
         to: toName,
         fromCoords,
         toCoords,
+        operator: flux.operateur?.trim() || '',
         freq: flux.frequenceHebdo || 0,
-        operators: new Set(flux.operateur ? [flux.operateur.trim()] : []),
+      });
+    }
+    // If already exists, skip (same service, different departure day)
+  }
+
+  // Step 2: Aggregate by platform pair (both directions merged), summing across operators
+  const routeMap = new Map<string, {
+    from: string;
+    to: string;
+    fromCoords: [number, number];
+    toCoords: [number, number];
+    freq: number;
+    operators: Set<string>;
+  }>();
+
+  for (const service of serviceMap.values()) {
+    const key = [service.from, service.to].sort().join('||');
+    const existing = routeMap.get(key);
+
+    if (existing) {
+      existing.freq += service.freq;
+      if (service.operator) existing.operators.add(service.operator);
+    } else {
+      routeMap.set(key, {
+        from: service.from,
+        to: service.to,
+        fromCoords: service.fromCoords,
+        toCoords: service.toCoords,
+        freq: service.freq,
+        operators: new Set(service.operator ? [service.operator] : []),
       });
     }
   }

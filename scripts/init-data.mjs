@@ -79,8 +79,11 @@ for (const name of workbook.SheetNames) {
   }
 }
 
-const routeMap = new Map();
 const operatorSet = new Set();
+
+// Step 1: Deduplicate by operator + directed pair → take freq once per service
+// Each row in Excel = 1 departure day. "Fréquence Hebdo" = total trains/week for that service.
+const serviceMap = new Map();
 
 if (fluxSheet) {
   const rows = XLSX.utils.sheet_to_json(fluxSheet);
@@ -102,23 +105,33 @@ if (fluxSheet) {
     if (!toCoords) unmatchedSet.add(toName);
     if (!fromCoords || !toCoords) continue;
 
-    const key = [fromName, toName].sort().join('||');
-    if (routeMap.has(key)) {
-      const existing = routeMap.get(key);
-      existing.freq += freq;
-      if (operator) existing.operators.add(operator);
-    } else {
-      routeMap.set(key, {
-        from: fromName,
-        to: toName,
-        fromLat: fromCoords[0],
-        fromLon: fromCoords[1],
-        toLat: toCoords[0],
-        toLon: toCoords[1],
-        freq,
-        operators: new Set(operator ? [operator] : []),
+    // Key by operator + directed pair (take freq once per service)
+    const serviceKey = `${operator}||${fromName}||${toName}`;
+    if (!serviceMap.has(serviceKey)) {
+      serviceMap.set(serviceKey, {
+        from: fromName, to: toName,
+        fromCoords, toCoords, operator, freq,
       });
     }
+  }
+}
+
+// Step 2: Aggregate by platform pair (both directions merged), summing across operators
+const routeMap = new Map();
+for (const svc of serviceMap.values()) {
+  const key = [svc.from, svc.to].sort().join('||');
+  if (routeMap.has(key)) {
+    const existing = routeMap.get(key);
+    existing.freq += svc.freq;
+    if (svc.operator) existing.operators.add(svc.operator);
+  } else {
+    routeMap.set(key, {
+      from: svc.from, to: svc.to,
+      fromLat: svc.fromCoords[0], fromLon: svc.fromCoords[1],
+      toLat: svc.toCoords[0], toLon: svc.toCoords[1],
+      freq: svc.freq,
+      operators: new Set(svc.operator ? [svc.operator] : []),
+    });
   }
 }
 
