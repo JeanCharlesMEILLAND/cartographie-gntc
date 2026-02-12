@@ -14,7 +14,8 @@ interface FilterState {
   showRailway: boolean;
   showITE: boolean;
   showITEDispo: boolean;
-  showTrackType: boolean;
+  showVoieUnique: boolean;
+  showVoieDouble: boolean;
   showElectrification: boolean;
   animateFlux: boolean;
   showFranceBorder: boolean;
@@ -40,6 +41,7 @@ interface FilterState {
   clockDay: string;
   clockTime: number;
   clockPlaying: boolean;
+  clockLive: boolean;
 
   // Actions
   setCountry: (c: 'all' | 'france' | 'international') => void;
@@ -47,7 +49,7 @@ interface FilterState {
   selectAllOperators: () => void;
   clearOperators: () => void;
   setMinFrequency: (f: number) => void;
-  toggleLayer: (layer: 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showTrackType' | 'showElectrification' | 'animateFlux' | 'showFranceBorder') => void;
+  toggleLayer: (layer: 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification' | 'animateFlux' | 'showFranceBorder') => void;
   setTileStyle: (style: string) => void;
   setRailwayStyle: (style: 'standard' | 'maxspeed' | 'signals' | 'electrification') => void;
   setSelectedPlatform: (name: string | null) => void;
@@ -59,6 +61,7 @@ interface FilterState {
   setClockDay: (day: string) => void;
   setClockTime: (minutes: number) => void;
   setClockPlaying: (playing: boolean) => void;
+  setClockLive: (live: boolean) => void;
 }
 
 export const useFilterStore = create<FilterState>((set, get) => ({
@@ -73,7 +76,8 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   showRailway: true,
   showITE: false,
   showITEDispo: false,
-  showTrackType: false,
+  showVoieUnique: false,
+  showVoieDouble: false,
   showElectrification: false,
   animateFlux: false,
   showFranceBorder: true,
@@ -91,6 +95,7 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   clockDay: (() => { const d = ['Di','Lu','Ma','Me','Je','Ve','Sa']; return d[new Date().getDay()]; })(),
   clockTime: new Date().getHours() * 60 + new Date().getMinutes(),
   clockPlaying: false,
+  clockLive: true,
 
   setCountry: (c) => set({ country: c }),
 
@@ -131,8 +136,9 @@ export const useFilterStore = create<FilterState>((set, get) => ({
 
   setVisibleOperators: (ops) => set({ visibleOperators: ops }),
 
-  toggleClock: () => set((s) => ({ showClock: !s.showClock, clockPlaying: false })),
-  setClockDay: (day) => set({ clockDay: day }),
+  toggleClock: () => set((s) => ({ showClock: !s.showClock, clockPlaying: false, clockLive: !s.showClock ? true : false })),
+  setClockDay: (day) => set({ clockDay: day, clockLive: false }),
   setClockTime: (minutes) => set({ clockTime: minutes }),
-  setClockPlaying: (playing) => set({ clockPlaying: playing }),
+  setClockPlaying: (playing) => set({ clockPlaying: playing, clockLive: false }),
+  setClockLive: (live) => set({ clockLive: live, clockPlaying: false }),
 }));

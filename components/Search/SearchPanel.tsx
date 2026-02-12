@@ -526,6 +526,29 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
     return getDirectDestinationCities(depSites, services, platforms);
   }, [departureSelectedPlatforms, services, platforms]);
 
+  // Compute which UTI types are available from selected departure platforms
+  const availableUTI = useMemo(() => {
+    const available = new Set<UTIType>();
+    if (departureSelectedPlatforms.length === 0 && !departureCitySuggestion) {
+      // No departure selected — all UTI available (don't restrict)
+      return null;
+    }
+    const depSites = new Set(
+      departureSelectedPlatforms.length > 0
+        ? departureSelectedPlatforms.map((p) => p.site)
+        : departureCitySuggestion?.platforms.map((p) => p.site) || []
+    );
+    for (const svc of services) {
+      if (!depSites.has(svc.from) && !depSites.has(svc.to)) continue;
+      if (svc.acceptsCM === 'Oui' || svc.acceptsCM === 'oui') available.add('cm');
+      if (svc.acceptsCont === 'Oui' || svc.acceptsCont === 'oui') available.add('cont');
+      if (svc.acceptsSemiPre === 'Oui' || svc.acceptsSemiPre === 'oui') available.add('semiPre');
+      if (svc.acceptsSemiNon === 'Oui' || svc.acceptsSemiNon === 'oui') available.add('semiNon');
+      if (svc.acceptsP400 === 'Oui' || svc.acceptsP400 === 'oui') available.add('p400');
+    }
+    return available;
+  }, [departureSelectedPlatforms, departureCitySuggestion, services]);
+
   const handleSearch = useCallback(async () => {
     if (!departureQuery.trim() || !arrivalQuery.trim()) return;
 
@@ -668,16 +691,20 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
           <div className="flex flex-wrap gap-1.5">
             {UTI_OPTIONS.map((uti) => {
               const active = selectedUTI.has(uti.key);
+              const disabled = availableUTI !== null && !availableUTI.has(uti.key);
               return (
                 <button
                   key={uti.key}
-                  onClick={() => toggleUTI(uti.key)}
+                  onClick={() => !disabled && toggleUTI(uti.key)}
+                  disabled={disabled}
                   className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${
-                    active
-                      ? 'border-cyan/50 bg-cyan/10 text-cyan'
-                      : 'border-border text-muted hover:text-text hover:border-blue/30'
+                    disabled
+                      ? 'border-border/50 text-muted/40 cursor-not-allowed line-through'
+                      : active
+                        ? 'border-cyan/50 bg-cyan/10 text-cyan'
+                        : 'border-border text-muted hover:text-text hover:border-blue/30'
                   }`}
-                  title={uti.desc}
+                  title={disabled ? `${uti.desc} — non disponible sur cette liaison` : uti.desc}
                 >
                   {uti.label}
                 </button>

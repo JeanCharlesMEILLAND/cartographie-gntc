@@ -7,6 +7,7 @@ import MapContainer from '@/components/Map/MapContainer';
 import FilterPanel from '@/components/Filters/FilterPanel';
 import KPIBar from '@/components/Dashboard/KPIBar';
 import RailBadge from '@/components/Dashboard/RailBadge';
+import CO2Badge from '@/components/Dashboard/CO2Badge';
 import InfoCard from '@/components/InfoCard';
 import Legend from '@/components/Legend';
 import SearchPanel from '@/components/Search/SearchPanel';
@@ -232,7 +233,7 @@ export default function Home() {
             <span className="hidden sm:inline">Planificateur</span>
           </button>
 
-          {/* Clock button */}
+          {/* Live traffic button */}
           <button
             onClick={toggleClock}
             className={`flex items-center gap-1.5 text-xs transition-colors px-2 sm:px-3 py-1.5 rounded-md border flex-shrink-0 ${
@@ -240,13 +241,12 @@ export default function Home() {
                 ? 'text-cyan border-cyan/30 bg-cyan/10'
                 : 'text-blue hover:text-cyan border-border hover:border-blue/30'
             }`}
-            title="Horloge réseau"
+            title="Trafic en direct"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
-              <circle cx="7" cy="7" r="5.5" />
-              <path d="M7 4v3l2 1.5" />
+              <path d="M2 10V8M5 10V5M8 10V3M11 10V6" />
             </svg>
-            <span className="hidden sm:inline">Horloge</span>
+            <span className="hidden sm:inline">Trafic live</span>
           </button>
 
           {/* Admin button */}
@@ -275,8 +275,11 @@ export default function Home() {
       {/* Filter Panel */}
       <FilterPanel />
 
-      {/* Rail Badge */}
-      <RailBadge />
+      {/* Right-side badges */}
+      <div className="absolute top-[60px] right-4 z-[999] flex flex-col gap-2">
+        <RailBadge />
+        <CO2Badge routes={filteredRoutes} />
+      </div>
 
       {/* Legend */}
       <Legend />

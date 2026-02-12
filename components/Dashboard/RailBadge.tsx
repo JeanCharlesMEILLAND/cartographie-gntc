@@ -19,7 +19,7 @@ export default function RailBadge() {
   return (
     <div
       className={clsx(
-        'absolute top-[60px] right-4 z-[1000] glass-panel rounded-md px-3 py-1.5',
+        'glass-panel rounded-md px-3 py-1.5',
         'flex items-center gap-2'
       )}
     >
