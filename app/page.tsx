@@ -13,6 +13,8 @@ import SearchPanel from '@/components/Search/SearchPanel';
 import TimeControl from '@/components/Clock/TimeControl';
 import { useSearchStore } from '@/store/useSearchStore';
 import { dayTimeToMinutes, getTrainProgress } from '@/lib/trainClock';
+import { exportSynthese } from '@/lib/exportCsv';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import LoadingScreen from '@/components/LoadingScreen';
 
 export default function Home() {
@@ -22,6 +24,8 @@ export default function Home() {
   const [loadProgress, setLoadProgress] = useState(0);
   const [loadStep, setLoadStep] = useState('Initialisation...');
   const { searchOpen, setSearchOpen } = useSearchStore();
+
+  useKeyboardShortcuts();
 
   const {
     country,
@@ -282,6 +286,20 @@ export default function Home() {
             <span className="text-[9px] sm:text-xs"><span className="sm:hidden">Live</span><span className="hidden sm:inline">Trafic live</span></span>
           </button>
 
+          {/* Export button */}
+          {data && (
+            <button
+              onClick={() => exportSynthese(data)}
+              className="flex items-center gap-1.5 text-xs text-muted hover:text-cyan transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-cyan/30 flex-shrink-0"
+              title="Exporter les données (CSV)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span className="hidden sm:inline">Export</span>
+            </button>
+          )}
+
           {/* Admin button */}
           <a
             href="/admin"
@@ -314,7 +332,7 @@ export default function Home() {
       </div>
 
       {/* Legend */}
-      <Legend />
+      <Legend routes={filteredRoutes} />
 
       {/* Search Panel */}
       <SearchPanel platforms={data?.platforms || []} services={data?.services || []} routes={filteredRoutes} />

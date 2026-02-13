@@ -6,6 +6,8 @@ import { getTopPlatforms, getOperatorComparison } from '@/lib/adminComputations'
 import { getOperatorColor } from '@/lib/colors';
 import { getOperatorLogo } from '@/lib/operatorContacts';
 import { useAdminNav } from '@/lib/useAdminNav';
+import { analyzeDataQuality, QualityIssue } from '@/lib/dataQuality';
+import { exportPlatforms, exportRoutes, exportServices, exportSynthese } from '@/lib/exportCsv';
 import Link from 'next/link';
 import KPICard from './shared/KPICard';
 
@@ -78,6 +80,8 @@ export default function Dashboard({ data }: DashboardProps) {
     [data.routes, data.services]
   );
   const top5Operators = operatorComparison.slice(0, 5);
+
+  const qualityIssues = useMemo(() => analyzeDataQuality(data), [data]);
 
   return (
     <div className="space-y-6">
@@ -363,6 +367,85 @@ export default function Dashboard({ data }: DashboardProps) {
         </div>
       </div>
 
+      {/* Quality + Export row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Data Quality */}
+        <div className="glass-panel rounded-lg p-4">
+          <h3 className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-3">
+            Qualité des données
+          </h3>
+          {qualityIssues.length === 0 ? (
+            <div className="flex items-center gap-2 text-xs text-cyan">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              Aucun problème détecté
+            </div>
+          ) : (
+            <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+              {qualityIssues.map((issue, i) => (
+                <div key={i} className={`flex items-start gap-2 text-xs rounded px-2 py-1.5 ${
+                  issue.severity === 'error' ? 'bg-orange/5' : issue.severity === 'warning' ? 'bg-yellow-500/5' : 'bg-blue/5'
+                }`}>
+                  <span className={`text-[8px] px-1.5 py-0.5 rounded font-medium uppercase flex-shrink-0 mt-0.5 ${
+                    issue.severity === 'error' ? 'bg-orange/10 text-orange' : issue.severity === 'warning' ? 'bg-yellow-500/10 text-yellow-600' : 'bg-blue/10 text-blue'
+                  }`}>
+                    {issue.severity === 'error' ? 'Erreur' : issue.severity === 'warning' ? 'Alerte' : 'Info'}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-text font-medium">{issue.message}</div>
+                    {issue.details && <div className="text-[10px] text-muted mt-0.5 truncate">{issue.details}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="mt-2 text-[10px] text-muted">
+            {qualityIssues.filter((i) => i.severity === 'error').length} erreurs,{' '}
+            {qualityIssues.filter((i) => i.severity === 'warning').length} alertes,{' '}
+            {qualityIssues.filter((i) => i.severity === 'info').length} infos
+          </div>
+        </div>
+
+        {/* Export */}
+        <div className="glass-panel rounded-lg p-4">
+          <h3 className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-3">
+            Export des données
+          </h3>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => exportSynthese(data)}
+              className="flex items-center gap-2 text-xs px-3 py-2 rounded-md border border-cyan/20 text-cyan hover:bg-cyan/5 transition-colors"
+            >
+              <IconExport />
+              Synthèse complète
+            </button>
+            <button
+              onClick={() => exportPlatforms(data.platforms)}
+              className="flex items-center gap-2 text-xs px-3 py-2 rounded-md border border-blue/20 text-blue hover:bg-blue/5 transition-colors"
+            >
+              <IconExport />
+              Plateformes
+            </button>
+            <button
+              onClick={() => exportRoutes(data.routes)}
+              className="flex items-center gap-2 text-xs px-3 py-2 rounded-md border border-purple/20 text-purple hover:bg-purple/5 transition-colors"
+            >
+              <IconExport />
+              Liaisons
+            </button>
+            <button
+              onClick={() => exportServices(data.services)}
+              className="flex items-center gap-2 text-xs px-3 py-2 rounded-md border border-orange/20 text-orange hover:bg-orange/5 transition-colors"
+            >
+              <IconExport />
+              Services
+            </button>
+          </div>
+          <p className="text-[9px] text-muted mt-2">Format CSV (séparateur point-virgule) compatible Excel</p>
+        </div>
+      </div>
+
       {/* Data info */}
       <div className="text-[10px] text-muted flex items-center gap-3">
         <span>Fichier : {data.fileName}</span>
@@ -392,6 +475,12 @@ function ActionBadge({ action }: { action: string }) {
     </span>
   );
 }
+
+const IconExport = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+);
 
 function formatTimeAgo(timestamp: string): string {
   const now = Date.now();

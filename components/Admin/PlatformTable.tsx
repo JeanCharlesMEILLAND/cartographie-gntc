@@ -6,6 +6,7 @@ import { buildAllPlatformStats, buildPlatformOperatorBreakdown } from '@/lib/adm
 import { getOperatorColor } from '@/lib/colors';
 import { useAdminStore } from '@/store/useAdminStore';
 import { useAdminNav } from '@/lib/useAdminNav';
+import { exportPlatforms } from '@/lib/exportCsv';
 import FilterSelect from './shared/FilterSelect';
 import EditableCell from './shared/EditableCell';
 import MaterialBadge from './shared/MaterialBadge';
@@ -196,6 +197,16 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
           </button>
         )}
         <span className="text-[10px] text-muted ml-auto">{filtered.length} / {data.platforms.length}</span>
+        <button
+          onClick={() => exportPlatforms(filtered)}
+          className="text-xs px-3 py-1.5 rounded-md border border-cyan/20 text-cyan hover:bg-cyan/5 transition-colors flex items-center gap-1.5"
+          title="Exporter en CSV"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          CSV
+        </button>
         <button
           onClick={() => setShowAdd(!showAdd)}
           className="text-xs px-3 py-1.5 rounded-md bg-blue text-white hover:bg-blue/90 transition-colors flex items-center gap-1.5"

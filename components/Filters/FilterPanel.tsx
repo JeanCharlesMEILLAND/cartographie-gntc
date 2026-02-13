@@ -25,12 +25,14 @@ export default function FilterPanel() {
 
   return (
     <>
-      {/* Toggle button */}
+      {/* Toggle button - Desktop: side, Mobile: bottom */}
       <button
         onClick={() => setPanelCollapsed(!panelCollapsed)}
         className={clsx(
-          'absolute top-1/2 -translate-y-1/2 z-[1000] glass-panel rounded-r-md px-1 py-4 text-muted hover:text-blue transition-all duration-300',
-          panelCollapsed ? 'left-0' : 'left-[260px] sm:left-[280px]'
+          'absolute z-[1000] glass-panel transition-all duration-300',
+          // Desktop: side button
+          'hidden sm:block top-1/2 -translate-y-1/2 rounded-r-md px-1 py-4 text-muted hover:text-blue',
+          panelCollapsed ? 'left-0' : 'left-[280px]'
         )}
       >
         {panelCollapsed ? (
@@ -44,11 +46,37 @@ export default function FilterPanel() {
         )}
       </button>
 
-      {/* Panel */}
+      {/* Mobile toggle button - bottom bar */}
+      <button
+        onClick={() => setPanelCollapsed(!panelCollapsed)}
+        className={clsx(
+          'sm:hidden absolute z-[1000] glass-panel rounded-t-lg transition-all duration-300',
+          'left-2 right-2 py-2 px-4 flex items-center justify-center gap-2 text-xs',
+          panelCollapsed ? 'bottom-0 text-muted' : 'bottom-[60vh] text-blue'
+        )}
+      >
+        <svg
+          width="12" height="12" viewBox="0 0 12 12" fill="none"
+          className={clsx('transition-transform', !panelCollapsed && 'rotate-180')}
+        >
+          <path d="M3 7.5L6 4.5L9 7.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        {panelCollapsed ? 'Filtres' : 'Fermer'}
+      </button>
+
+      {/* Panel - Desktop: sidebar, Mobile: bottom sheet */}
       <div
         className={clsx(
-          'absolute top-[50px] left-0 bottom-0 z-[999] glass-panel overflow-y-auto transition-transform duration-300 w-[260px] sm:w-[280px]',
-          panelCollapsed ? '-translate-x-full' : 'translate-x-0'
+          'absolute z-[999] glass-panel overflow-y-auto transition-all duration-300',
+          // Desktop: left sidebar
+          'sm:top-[50px] sm:left-0 sm:bottom-0 sm:w-[280px]',
+          panelCollapsed ? 'sm:-translate-x-full' : 'sm:translate-x-0',
+          // Mobile: bottom sheet
+          'sm:rounded-none rounded-t-xl',
+          'left-0 right-0',
+          panelCollapsed
+            ? 'bottom-0 translate-y-full sm:translate-y-0'
+            : 'bottom-0 h-[60vh] sm:h-auto'
         )}
       >
         <div className="p-3 sm:p-4 space-y-4 sm:space-y-5">
@@ -68,8 +96,19 @@ export default function FilterPanel() {
           </div>
 
           <LayerToggles />
+
+          {/* Spacer for mobile bottom safe area */}
+          <div className="sm:hidden h-4" />
         </div>
       </div>
+
+      {/* Mobile backdrop */}
+      {!panelCollapsed && (
+        <div
+          className="sm:hidden fixed inset-0 z-[998] bg-black/30"
+          onClick={() => setPanelCollapsed(true)}
+        />
+      )}
     </>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 interface AuditEntry {
   id: number;
@@ -15,9 +15,11 @@ interface AuditEntry {
 }
 
 const ACTION_LABELS: Record<string, { label: string; color: string }> = {
-  create: { label: 'Ajout', color: 'bg-green-100 text-green-700' },
-  update: { label: 'Modification', color: 'bg-blue-100 text-blue-700' },
-  delete: { label: 'Suppression', color: 'bg-red-100 text-red-700' },
+  create: { label: 'Ajout', color: 'bg-cyan/10 text-cyan' },
+  update: { label: 'Modification', color: 'bg-blue/10 text-blue' },
+  delete: { label: 'Suppression', color: 'bg-orange/10 text-orange' },
+  import: { label: 'Import', color: 'bg-purple/10 text-purple' },
+  upload: { label: 'Upload', color: 'bg-purple/10 text-purple' },
 };
 
 export default function AuditLog() {
@@ -25,6 +27,9 @@ export default function AuditLog() {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [page, setPage] = useState(0);
+  const [filterAction, setFilterAction] = useState('');
+  const [filterUser, setFilterUser] = useState('');
+  const [search, setSearch] = useState('');
   const PAGE_SIZE = 50;
 
   useEffect(() => {
@@ -43,14 +48,48 @@ export default function AuditLog() {
     setLoading(false);
   };
 
+  const users = useMemo(
+    () => [...new Set(entries.map((e) => e.userName).filter(Boolean))].sort() as string[],
+    [entries]
+  );
+
+  const actions = useMemo(
+    () => [...new Set(entries.map((e) => e.action))].sort(),
+    [entries]
+  );
+
+  const filtered = useMemo(() => {
+    return entries.filter((e) => {
+      if (filterAction && e.action !== filterAction) return false;
+      if (filterUser && e.userName !== filterUser) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        if (
+          !(e.recordId || '').toLowerCase().includes(q) &&
+          !(e.tableName || '').toLowerCase().includes(q) &&
+          !(e.userName || '').toLowerCase().includes(q)
+        ) return false;
+      }
+      return true;
+    });
+  }, [entries, filterAction, filterUser, search]);
+
   const formatDate = (ts: string) => {
     return new Date(ts).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
     });
+  };
+
+  const formatTimeAgo = (ts: string) => {
+    const diff = Date.now() - new Date(ts).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "à l'instant";
+    if (mins < 60) return `il y a ${mins}min`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `il y a ${hours}h`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `il y a ${days}j`;
+    return formatDate(ts);
   };
 
   const renderDiff = (entry: AuditEntry) => {
@@ -61,7 +100,7 @@ export default function AuditLog() {
           <div className="text-[10px] text-muted space-y-0.5">
             {Object.entries(val).map(([k, v]) => (
               <div key={k}>
-                <span className="text-text font-medium">{k}</span>: <span className="text-green-600">{String(v)}</span>
+                <span className="text-text font-medium">{k}</span>: <span className="text-cyan">{String(v)}</span>
               </div>
             ))}
           </div>
@@ -76,7 +115,7 @@ export default function AuditLog() {
           <div className="text-[10px] text-muted space-y-0.5">
             {Object.entries(val).map(([k, v]) => (
               <div key={k}>
-                <span className="text-text font-medium">{k}</span>: <span className="text-red-400 line-through">{String(v)}</span>
+                <span className="text-text font-medium">{k}</span>: <span className="text-orange line-through">{String(v)}</span>
               </div>
             ))}
           </div>
@@ -89,15 +128,15 @@ export default function AuditLog() {
         const oldVal = JSON.parse(entry.oldValue);
         const newVal = JSON.parse(entry.newValue);
         const changes = Object.keys(newVal).filter((k) => JSON.stringify(oldVal[k]) !== JSON.stringify(newVal[k]));
-        if (changes.length === 0) return <span className="text-[10px] text-muted">Aucun changement détecté</span>;
+        if (changes.length === 0) return <span className="text-[10px] text-muted">Aucun changement</span>;
         return (
           <div className="text-[10px] space-y-0.5">
             {changes.map((k) => (
               <div key={k}>
                 <span className="text-text font-medium">{k}</span>:{' '}
-                <span className="text-red-400 line-through">{String(oldVal[k] ?? '—')}</span>
+                <span className="text-orange line-through">{String(oldVal[k] ?? '—')}</span>
                 {' → '}
-                <span className="text-green-600">{String(newVal[k] ?? '—')}</span>
+                <span className="text-cyan">{String(newVal[k] ?? '—')}</span>
               </div>
             ))}
           </div>
@@ -112,6 +151,8 @@ export default function AuditLog() {
     return <div className="text-cyan animate-pulse text-xs">Chargement de l'historique...</div>;
   }
 
+  const hasFilters = filterAction || filterUser || search;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -124,9 +165,49 @@ export default function AuditLog() {
         </button>
       </div>
 
-      {entries.length === 0 ? (
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher..."
+          className="text-xs bg-white border border-border rounded-md px-3 py-1.5 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 w-[180px]"
+        />
+        <select
+          value={filterAction}
+          onChange={(e) => setFilterAction(e.target.value)}
+          className="text-xs bg-white border border-border rounded-md px-2 py-1.5 text-text focus:outline-none focus:border-blue/50"
+        >
+          <option value="">Toutes actions</option>
+          {actions.map((a) => (
+            <option key={a} value={a}>{ACTION_LABELS[a]?.label || a}</option>
+          ))}
+        </select>
+        <select
+          value={filterUser}
+          onChange={(e) => setFilterUser(e.target.value)}
+          className="text-xs bg-white border border-border rounded-md px-2 py-1.5 text-text focus:outline-none focus:border-blue/50"
+        >
+          <option value="">Tous utilisateurs</option>
+          {users.map((u) => (
+            <option key={u} value={u}>{u}</option>
+          ))}
+        </select>
+        {hasFilters && (
+          <button
+            onClick={() => { setSearch(''); setFilterAction(''); setFilterUser(''); }}
+            className="text-[10px] text-muted hover:text-orange transition-colors"
+          >
+            Effacer filtres
+          </button>
+        )}
+        <span className="text-[10px] text-muted ml-auto">{filtered.length} entrées</span>
+      </div>
+
+      {filtered.length === 0 ? (
         <div className="glass-panel rounded-lg p-6 text-center">
-          <p className="text-xs text-muted">Aucune modification enregistrée pour le moment.</p>
+          <p className="text-xs text-muted">Aucune modification enregistrée.</p>
         </div>
       ) : (
         <>
@@ -141,7 +222,7 @@ export default function AuditLog() {
                 </tr>
               </thead>
               <tbody>
-                {entries.map((entry) => {
+                {filtered.map((entry) => {
                   const actionInfo = ACTION_LABELS[entry.action] || { label: entry.action, color: 'bg-gray-100 text-gray-600' };
                   const isExpanded = expandedId === entry.id;
 
@@ -151,19 +232,21 @@ export default function AuditLog() {
                       className="border-t border-border hover:bg-blue/5 cursor-pointer"
                       onClick={() => setExpandedId(isExpanded ? null : entry.id)}
                     >
-                      <td className="px-3 py-1.5 text-muted font-mono text-[10px] align-top">
-                        {formatDate(entry.timestamp)}
+                      <td className="px-3 py-1.5 align-top">
+                        <div className="font-mono text-[10px] text-muted">{formatDate(entry.timestamp)}</div>
+                        <div className="text-[9px] text-muted">{formatTimeAgo(entry.timestamp)}</div>
                       </td>
                       <td className="px-3 py-1.5 align-top">
-                        {entry.userName || '—'}
+                        {entry.userName || <span className="text-muted">Système</span>}
                       </td>
                       <td className="px-3 py-1.5 align-top">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${actionInfo.color}`}>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${actionInfo.color}`}>
                           {actionInfo.label}
                         </span>
                       </td>
                       <td className="px-3 py-1.5 align-top">
-                        <div className="text-[11px] text-text">{entry.recordId || '—'}</div>
+                        <div className="text-[11px] text-text font-medium">{entry.tableName}</div>
+                        {entry.recordId && <div className="text-[10px] text-muted truncate max-w-[300px]">{entry.recordId}</div>}
                         {isExpanded && (
                           <div className="mt-2 p-2 bg-white/50 rounded border border-border/50">
                             {renderDiff(entry)}
@@ -184,17 +267,17 @@ export default function AuditLog() {
               disabled={page === 0}
               className="text-xs text-muted hover:text-blue disabled:opacity-30 transition-colors"
             >
-              ← Précédent
+              Précédent
             </button>
             <span className="text-[10px] text-muted">
-              Page {page + 1} — {entries.length} entrée{entries.length > 1 ? 's' : ''}
+              Page {page + 1}
             </span>
             <button
               onClick={() => setPage(page + 1)}
               disabled={entries.length < PAGE_SIZE}
               className="text-xs text-muted hover:text-blue disabled:opacity-30 transition-colors"
             >
-              Suivant →
+              Suivant
             </button>
           </div>
         </>

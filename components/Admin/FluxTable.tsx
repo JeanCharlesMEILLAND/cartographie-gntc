@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TransportData } from '@/lib/types';
 import { useAdminNav } from '@/lib/useAdminNav';
+import { exportServices } from '@/lib/exportCsv';
+import { parseCsvServices } from '@/lib/importCsv';
 import FilterSelect from './shared/FilterSelect';
 import { MaterialDot } from './shared/MaterialBadge';
 
@@ -44,6 +46,8 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
   const [editValue, setEditValue] = useState('');
   const [page, setPage] = useState(0);
   const perPage = 50;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importResult, setImportResult] = useState<{ added: number; errors: string[] } | null>(null);
 
   // Apply external operator filter from store navigation
   const effectiveOperatorFilter = userOperator || fluxOperatorFilter || filterOperator;
@@ -112,6 +116,50 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
     setEditCell(null);
   };
 
+  const handleCsvImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = reader.result as string;
+      const result = parseCsvServices(text);
+      if (result.errors.length > 0) {
+        setImportResult({ added: 0, errors: result.errors });
+        return;
+      }
+      if (result.services.length === 0) {
+        setImportResult({ added: 0, errors: ['Aucun service valide trouvé'] });
+        return;
+      }
+      const updated = { ...data };
+      updated.services = [...updated.services, ...result.services];
+      // Re-aggregate routes
+      const routeMap = new Map<string, { from: string; to: string; fromLat: number; fromLon: number; toLat: number; toLon: number; freq: number; operators: Set<string> }>();
+      for (const s of updated.services) {
+        const key = [s.from, s.to].sort().join('||');
+        if (!routeMap.has(key)) {
+          const fromP = updated.platforms.find((p) => p.site === s.from);
+          const toP = updated.platforms.find((p) => p.site === s.to);
+          routeMap.set(key, {
+            from: s.from, to: s.to,
+            fromLat: fromP?.lat || 0, fromLon: fromP?.lon || 0,
+            toLat: toP?.lat || 0, toLon: toP?.lon || 0,
+            freq: 0, operators: new Set(),
+          });
+        }
+        const r = routeMap.get(key)!;
+        r.freq++;
+        r.operators.add(s.operator);
+      }
+      updated.routes = [...routeMap.values()].map((r) => ({ ...r, operators: [...r.operators] }));
+      updated.operators = [...new Set(updated.services.map((s) => s.operator))].sort();
+      onSave(updated);
+      setImportResult({ added: result.services.length, errors: result.skipped > 0 ? [`${result.skipped} lignes ignorées (données manquantes)`] : [] });
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   const hasFilters = effectiveOperatorFilter || filterFrom || filterTo || filterDay || search;
 
   return (
@@ -145,7 +193,45 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
           </button>
         )}
         <span className="text-[10px] text-muted ml-auto">{filtered.length} / {baseServices.length} services</span>
+        <button
+          onClick={() => exportServices(filtered)}
+          className="text-xs px-3 py-1.5 rounded-md border border-cyan/20 text-cyan hover:bg-cyan/5 transition-colors flex items-center gap-1.5"
+          title="Exporter en CSV"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Export
+        </button>
+        {!userOperator && (
+          <>
+            <input ref={fileInputRef} type="file" accept=".csv,.txt" onChange={handleCsvImport} className="hidden" />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="text-xs px-3 py-1.5 rounded-md border border-blue/20 text-blue hover:bg-blue/5 transition-colors flex items-center gap-1.5"
+              title="Importer des services depuis un CSV"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              Import CSV
+            </button>
+          </>
+        )}
       </div>
+
+      {/* Import result */}
+      {importResult && (
+        <div className={`mb-3 p-3 rounded-lg text-xs ${importResult.errors.length > 0 && importResult.added === 0 ? 'bg-orange/10 border border-orange/20' : 'bg-cyan/10 border border-cyan/20'}`}>
+          <div className="flex items-center justify-between">
+            <div>
+              {importResult.added > 0 && <span className="text-cyan font-medium">{importResult.added} services importés avec succès. </span>}
+              {importResult.errors.map((err, i) => <span key={i} className="text-orange">{err} </span>)}
+            </div>
+            <button onClick={() => setImportResult(null)} className="text-muted hover:text-text text-[10px]">Fermer</button>
+          </div>
+        </div>
+      )}
 
       <div className="overflow-x-auto border border-border rounded-lg">
         <table className="w-full text-xs">

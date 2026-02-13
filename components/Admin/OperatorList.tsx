@@ -6,6 +6,7 @@ import { getOperatorComparison } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
 import { getOperatorLogo, getOperatorContact, hasContact } from '@/lib/operatorContacts';
 import { useAdminNav } from '@/lib/useAdminNav';
+import { exportRoutes } from '@/lib/exportCsv';
 
 interface Props {
   data: TransportData;
@@ -80,15 +81,27 @@ export default function OperatorList({ data, onSave, saving }: Props) {
         <h3 className="text-xs font-semibold text-text">
           {operators.length} opérateurs actifs
         </h3>
-        <button
-          onClick={() => setShowAdd(!showAdd)}
-          className="text-xs px-3 py-1.5 rounded-md bg-blue text-white hover:bg-blue/90 transition-colors flex items-center gap-1.5"
-        >
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => exportRoutes(data.routes)}
+            className="text-xs px-3 py-1.5 rounded-md border border-cyan/20 text-cyan hover:bg-cyan/5 transition-colors flex items-center gap-1.5"
+            title="Exporter les liaisons en CSV"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            CSV
+          </button>
+          <button
+            onClick={() => setShowAdd(!showAdd)}
+            className="text-xs px-3 py-1.5 rounded-md bg-blue text-white hover:bg-blue/90 transition-colors flex items-center gap-1.5"
+          >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
           Ajouter un opérateur
         </button>
+        </div>
       </div>
 
       {/* Add operator form */}
