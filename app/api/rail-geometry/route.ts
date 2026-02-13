@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { railGeometrySchema, parseBody } from '@/lib/validations';
 
 const BROUTER_URL = 'https://brouter.de/brouter';
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
@@ -80,10 +81,12 @@ async function findNearestRailNode(lat: number, lon: number): Promise<{ lat: num
 
 export async function POST(req: Request) {
   try {
-    const { from, to, fromLat, fromLon, toLat, toLon } = await req.json();
-    if (!from || !to || !fromLat || !toLat) {
-      return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
+    const body = await req.json();
+    const parsed = parseBody(railGeometrySchema, body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
+    const { from, to, fromLat, fromLon, toLat, toLon } = parsed.data;
 
     const key = `${from}||${to}`;
     const reverseKey = `${to}||${from}`;

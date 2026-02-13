@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { auditLog } from '@/lib/db/schema';
+import { transportDataSchema, parseBody } from '@/lib/validations';
 import fs from 'fs';
 import path from 'path';
 
@@ -32,7 +33,12 @@ export async function POST(request: NextRequest) {
   const userName = session.user?.name || session.user?.email || 'inconnu';
 
   try {
-    const data = await request.json();
+    const raw = await request.json();
+    const parsed = parseBody(transportDataSchema, raw);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
+    }
+    const data = parsed.data;
     const dataDir = path.join(process.cwd(), 'data');
     const filePath = path.join(dataDir, 'current.json');
 

@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq, and, ne } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
+import { createUserSchema, updateUserSchema, parseBody } from '@/lib/validations';
 
 export async function GET() {
   const session = await auth();
@@ -31,11 +32,11 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { email, password, name, role, operator } = body;
-
-  if (!email || !password || !name) {
-    return NextResponse.json({ error: 'Champs requis manquants' }, { status: 400 });
+  const parsed = parseBody(createUserSchema, body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+  const { email, password, name, role, operator } = parsed.data;
 
   // Check duplicate email
   const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
@@ -63,11 +64,11 @@ export async function PUT(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { id, email, password, name, role, operator } = body;
-
-  if (!id) {
-    return NextResponse.json({ error: 'ID requis' }, { status: 400 });
+  const parsed = parseBody(updateUserSchema, body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+  const { id, email, password, name, role, operator } = parsed.data;
 
   // Build update object
   const updateData: Record<string, unknown> = {};

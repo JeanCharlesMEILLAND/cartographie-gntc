@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { operators, users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { createOperatorSchema, updateOperatorSchema, parseBody } from '@/lib/validations';
 
 export async function GET() {
   const session = await auth();
@@ -39,11 +40,11 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { name } = body;
-
-  if (!name) {
-    return NextResponse.json({ error: 'Nom requis' }, { status: 400 });
+  const parsed = parseBody(createOperatorSchema, body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+  const { name, ...optionalFields } = parsed.data;
 
   // Check duplicate name
   const existing = await db.select().from(operators).where(eq(operators.name, name)).limit(1);
@@ -53,13 +54,13 @@ export async function POST(request: NextRequest) {
 
   const [created] = await db.insert(operators).values({
     name,
-    logo: body.logo || null,
-    description: body.description || null,
-    website: body.website || null,
-    contactEmail: body.contactEmail || null,
-    contactPhone: body.contactPhone || null,
-    address: body.address || null,
-    color: body.color || null,
+    logo: optionalFields.logo || null,
+    description: optionalFields.description || null,
+    website: optionalFields.website || null,
+    contactEmail: optionalFields.contactEmail || null,
+    contactPhone: optionalFields.contactPhone || null,
+    address: optionalFields.address || null,
+    color: optionalFields.color || null,
   }).returning();
 
   return NextResponse.json({ success: true, operator: created });
@@ -75,11 +76,11 @@ export async function PUT(request: NextRequest) {
   const userOperator = (session.user as Record<string, unknown>)?.operator as string | undefined;
 
   const body = await request.json();
-  const { id, ...fields } = body;
-
-  if (!id) {
-    return NextResponse.json({ error: 'ID requis' }, { status: 400 });
+  const parsed = parseBody(updateOperatorSchema, body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+  const { id, ...fields } = parsed.data;
 
   // Verify ownership for operator role
   if (role === 'operator') {
