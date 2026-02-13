@@ -5,6 +5,7 @@ import { TransportData } from '@/lib/types';
 import { buildPlatformOperatorBreakdown, DAY_ORDER } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
 import { useAdminStore } from '@/store/useAdminStore';
+import { useAdminNav } from '@/lib/useAdminNav';
 import MaterialBadge from './shared/MaterialBadge';
 
 interface Props {
@@ -13,7 +14,8 @@ interface Props {
 }
 
 export default function PlatformDetail({ data, onSave }: Props) {
-  const { selectedPlatformSite, selectPlatform, navigateToOperator } = useAdminStore();
+  const { selectedPlatformSite, selectPlatform } = useAdminStore();
+  const { navigateToOperator } = useAdminNav();
   const [expandedDest, setExpandedDest] = useState<string | null>(null);
 
   const platform = data.platforms.find((p) => p.site === selectedPlatformSite);

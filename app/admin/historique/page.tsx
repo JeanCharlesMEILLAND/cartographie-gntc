@@ -1,14 +1,12 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import DashboardClient from './DashboardClient';
+import AuditLog from '@/components/Admin/AuditLog';
 
-export default async function AdminRootPage() {
+export default async function HistoriquePage() {
   const session = await auth();
-
-  // Operators get redirected to their profile
   if ((session?.user as Record<string, unknown>)?.role !== 'admin') {
     redirect('/admin/profil');
   }
 
-  return <DashboardClient />;
+  return <AuditLog />;
 }

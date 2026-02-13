@@ -3,7 +3,7 @@
 import { TransportData } from '@/lib/types';
 import { getTopPlatforms, getOperatorComparison } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
-import { useAdminStore } from '@/store/useAdminStore';
+import { useAdminNav } from '@/lib/useAdminNav';
 import KPICard from './shared/KPICard';
 
 interface DashboardProps {
@@ -11,7 +11,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ data }: DashboardProps) {
-  const { navigateToPlatform, navigateToOperator } = useAdminStore();
+  const { navigateToPlatform, navigateToOperator } = useAdminNav();
 
   const totalTrains = data.routes.reduce((sum, r) => sum + r.freq, 0);
   const topPlatforms = getTopPlatforms(data.routes, 10);

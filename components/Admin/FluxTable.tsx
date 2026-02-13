@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { TransportData } from '@/lib/types';
-import { useAdminStore } from '@/store/useAdminStore';
+import { useAdminNav } from '@/lib/useAdminNav';
 import FilterSelect from './shared/FilterSelect';
 import { MaterialDot } from './shared/MaterialBadge';
 
@@ -31,7 +32,9 @@ interface Props {
 }
 
 export default function FluxTable({ data, onSave, saving, userOperator }: Props) {
-  const { fluxOperatorFilter, navigateToPlatform } = useAdminStore();
+  const searchParams = useSearchParams();
+  const fluxOperatorFilter = searchParams.get('operateur') || '';
+  const { navigateToPlatform } = useAdminNav();
   const [search, setSearch] = useState('');
   const [filterOperator, setFilterOperator] = useState('');
   const [filterFrom, setFilterFrom] = useState('');

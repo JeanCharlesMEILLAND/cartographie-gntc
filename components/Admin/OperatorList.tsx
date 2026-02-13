@@ -5,8 +5,7 @@ import { TransportData } from '@/lib/types';
 import { getOperatorComparison } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
 import { getOperatorLogo, getOperatorContact, hasContact } from '@/lib/operatorContacts';
-import { useAdminStore } from '@/store/useAdminStore';
-import OperatorView from './OperatorView';
+import { useAdminNav } from '@/lib/useAdminNav';
 
 interface Props {
   data: TransportData;
@@ -15,7 +14,7 @@ interface Props {
 }
 
 export default function OperatorList({ data, onSave, saving }: Props) {
-  const { selectedOperator, selectOperator, navigateToOperatorFlux } = useAdminStore();
+  const { navigateToOperator, navigateToOperatorFlux } = useAdminNav();
 
   const operators = useMemo(
     () => getOperatorComparison(data.routes, data.services),
@@ -23,21 +22,6 @@ export default function OperatorList({ data, onSave, saving }: Props) {
   );
 
   const totalTrains = data.routes.reduce((sum, r) => sum + r.freq, 0);
-
-  // If an operator is selected, show its detail view
-  if (selectedOperator) {
-    return (
-      <div>
-        <button
-          onClick={() => selectOperator(null)}
-          className="text-xs text-muted hover:text-blue transition-colors mb-4 flex items-center gap-1"
-        >
-          &larr; Retour à la liste des opérateurs
-        </button>
-        <OperatorView data={data} operator={selectedOperator} onSave={onSave} saving={saving} />
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -57,7 +41,7 @@ export default function OperatorList({ data, onSave, saving }: Props) {
           return (
             <button
               key={operator}
-              onClick={() => selectOperator(operator)}
+              onClick={() => navigateToOperator(operator)}
               className="glass-panel rounded-lg p-4 text-left hover:border-blue/30 transition-all group"
             >
               {/* Header */}

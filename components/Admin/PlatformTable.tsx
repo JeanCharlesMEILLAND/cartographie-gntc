@@ -5,6 +5,7 @@ import { TransportData } from '@/lib/types';
 import { buildAllPlatformStats, buildPlatformOperatorBreakdown } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
 import { useAdminStore } from '@/store/useAdminStore';
+import { useAdminNav } from '@/lib/useAdminNav';
 import FilterSelect from './shared/FilterSelect';
 import EditableCell from './shared/EditableCell';
 import MaterialBadge from './shared/MaterialBadge';
@@ -29,7 +30,8 @@ interface Props {
 }
 
 export default function PlatformTable({ data, onSave, saving }: Props) {
-  const { selectedPlatformSite, selectPlatform, navigateToOperator } = useAdminStore();
+  const { selectedPlatformSite, selectPlatform } = useAdminStore();
+  const { navigateToOperator } = useAdminNav();
   const [search, setSearch] = useState('');
   const [filterPays, setFilterPays] = useState('');
   const [filterGroupe, setFilterGroupe] = useState('');

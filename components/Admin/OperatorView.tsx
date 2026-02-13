@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { TransportData } from '@/lib/types';
 import { buildOperatorStats, getOperatorPlatforms } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
-import { useAdminStore } from '@/store/useAdminStore';
+import { useAdminNav } from '@/lib/useAdminNav';
 import KPICard from './shared/KPICard';
 import OperatorMap from './OperatorMap';
 
@@ -16,7 +16,7 @@ interface Props {
 }
 
 export default function OperatorView({ data, operator, onSave, saving }: Props) {
-  const { navigateToPlatform, setActiveTab } = useAdminStore();
+  const { navigateToPlatform, navigateToRoutes, navigateToFlux } = useAdminNav();
   const color = getOperatorColor(operator);
 
   const stats = useMemo(
@@ -62,13 +62,13 @@ export default function OperatorView({ data, operator, onSave, saving }: Props) 
           {/* Quick actions */}
           <div className="flex gap-2">
             <button
-              onClick={() => setActiveTab('routes')}
+              onClick={() => navigateToRoutes()}
               className="text-xs px-3 py-1.5 rounded-md border border-blue/20 text-blue hover:bg-blue/5 transition-colors"
             >
               Voir mes liaisons →
             </button>
             <button
-              onClick={() => setActiveTab('flux')}
+              onClick={() => navigateToFlux()}
               className="text-xs px-3 py-1.5 rounded-md border border-border text-muted hover:text-text hover:border-blue/20 transition-colors"
             >
               Voir mes flux →
