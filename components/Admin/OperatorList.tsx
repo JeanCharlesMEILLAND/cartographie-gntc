@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { TransportData } from '@/lib/types';
 import { getOperatorComparison } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
@@ -15,6 +15,10 @@ interface Props {
 
 export default function OperatorList({ data, onSave, saving }: Props) {
   const { navigateToOperator, navigateToOperatorFlux } = useAdminNav();
+  const [showAdd, setShowAdd] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState('');
 
   const operators = useMemo(
     () => getOperatorComparison(data.routes, data.services),
@@ -23,13 +27,83 @@ export default function OperatorList({ data, onSave, saving }: Props) {
 
   const totalTrains = data.routes.reduce((sum, r) => sum + r.freq, 0);
 
+  const handleAdd = async () => {
+    const name = newName.trim();
+    if (!name) return;
+    setAdding(true);
+    setAddError('');
+    try {
+      const res = await fetch('/api/admin/operators', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        setAddError(err.error || 'Erreur');
+        return;
+      }
+      setNewName('');
+      setShowAdd(false);
+      // Refresh the data
+      window.location.reload();
+    } catch {
+      setAddError('Erreur réseau');
+    } finally {
+      setAdding(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xs font-semibold text-text">
           {operators.length} opérateurs actifs
         </h3>
+        <button
+          onClick={() => setShowAdd(!showAdd)}
+          className="text-xs px-3 py-1.5 rounded-md bg-blue text-white hover:bg-blue/90 transition-colors flex items-center gap-1.5"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Ajouter un opérateur
+        </button>
       </div>
+
+      {/* Add operator form */}
+      {showAdd && (
+        <div className="glass-panel rounded-lg p-4 mb-4 border border-blue/20">
+          <h4 className="text-xs font-semibold text-text mb-3">Nouvel opérateur</h4>
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+              placeholder="Nom de l'opérateur"
+              className="flex-1 text-xs bg-white border border-border rounded-md px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:border-blue/50"
+              autoFocus
+            />
+            <button
+              onClick={handleAdd}
+              disabled={adding || !newName.trim()}
+              className="text-xs px-4 py-2 rounded-md bg-blue text-white hover:bg-blue/90 disabled:opacity-40 transition-colors"
+            >
+              {adding ? 'Ajout...' : 'Créer'}
+            </button>
+            <button
+              onClick={() => { setShowAdd(false); setNewName(''); setAddError(''); }}
+              className="text-xs px-3 py-2 rounded-md border border-border text-muted hover:text-text transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
+          {addError && (
+            <p className="text-[10px] text-orange mt-2">{addError}</p>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {operators.map(({ operator, stats }) => {

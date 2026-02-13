@@ -40,8 +40,9 @@ export default function LoadingScreen({
         <circle r="4" fill="#587bbd" stroke="#fff" strokeWidth="1.5" className="loading-train" />
       </svg>
 
-      {/* Text */}
+      {/* Logo + Text */}
       <div className="text-center">
+        <img src="/favicon-192x192.png" alt="" className="w-16 h-16 mx-auto mb-3 rounded-xl loading-title" />
         <h1 className="text-xl font-display font-bold gntc-gradient loading-title mb-1">
           {title}
         </h1>

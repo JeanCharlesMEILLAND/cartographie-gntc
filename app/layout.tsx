@@ -15,8 +15,17 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Transport Combiné 2026 — OTC/GNTC',
+  title: 'Transport Combiné — OTC/GNTC',
   description: 'Cartographie interactive des flux de transport combiné rail-route',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: '/favicon-192x192.png',
+  },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
