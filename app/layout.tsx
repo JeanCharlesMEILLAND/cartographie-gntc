@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Outfit, JetBrains_Mono } from 'next/font/google';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import './globals.css';
 
 const outfit = Outfit({
@@ -36,7 +37,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${outfit.variable} ${jetbrains.variable}`}>
       <body className="font-display bg-bg text-text antialiased">
-        {children}
+        <ErrorBoundary fallbackMessage="L'application a rencontré une erreur">
+          {children}
+        </ErrorBoundary>
       </body>
     </html>
   );
