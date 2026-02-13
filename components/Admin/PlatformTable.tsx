@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, Fragment } from 'react';
-import { TransportData } from '@/lib/types';
+import { TransportData, Platform } from '@/lib/types';
 import { buildAllPlatformStats, buildPlatformOperatorBreakdown } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
 import { useAdminStore } from '@/store/useAdminStore';
@@ -11,17 +11,27 @@ import EditableCell from './shared/EditableCell';
 import MaterialBadge from './shared/MaterialBadge';
 
 const COLS = [
-  { key: 'site', label: 'Site', width: 'min-w-[180px]' },
-  { key: 'ville', label: 'Ville', width: 'min-w-[100px]' },
-  { key: 'exploitant', label: 'Exploitant', width: 'min-w-[130px]' },
-  { key: 'groupe', label: 'Groupe', width: 'min-w-[110px]' },
-  { key: 'departement', label: 'Dept', width: 'min-w-[50px]' },
-  { key: 'pays', label: 'Pays', width: 'min-w-[70px]' },
-  { key: '_operators', label: 'Op.', width: 'min-w-[40px]', computed: true },
-  { key: '_trains', label: 'T/sem', width: 'min-w-[50px]', computed: true },
+  { key: 'site', label: 'Site', width: 'min-w-[160px]' },
+  { key: 'ville', label: 'Ville', width: 'min-w-[90px]' },
+  { key: 'exploitant', label: 'Exploitant', width: 'min-w-[120px]' },
+  { key: 'groupe', label: 'Groupe', width: 'min-w-[100px]' },
+  { key: 'departement', label: 'Dept', width: 'min-w-[45px]' },
+  { key: 'pays', label: 'Pays', width: 'min-w-[65px]' },
+  { key: 'lat', label: 'Lat', width: 'min-w-[65px]' },
+  { key: 'lon', label: 'Lon', width: 'min-w-[65px]' },
+  { key: 'chantierSNCF', label: 'SNCF', width: 'min-w-[40px]' },
+  { key: '_operators', label: 'Op.', width: 'min-w-[35px]', computed: true },
+  { key: '_trains', label: 'T/sem', width: 'min-w-[45px]', computed: true },
+  { key: '_actions', label: '', width: 'min-w-[30px]', computed: true },
 ] as const;
 
 const COL_COUNT = COLS.length;
+
+const inputCls = 'w-full text-xs bg-white border border-border rounded-md px-3 py-1.5 text-text focus:outline-none focus:border-blue/50';
+
+const EMPTY_PLATFORM: Omit<Platform, 'lat' | 'lon'> & { lat: string; lon: string } = {
+  site: '', ville: '', exploitant: '', groupe: '', departement: '', pays: 'France', lat: '', lon: '',
+};
 
 interface Props {
   data: TransportData;
@@ -37,6 +47,12 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
   const [filterGroupe, setFilterGroupe] = useState('');
   const [filterExploitant, setFilterExploitant] = useState('');
   const [expandedDest, setExpandedDest] = useState<string | null>(null);
+
+  // Add platform state
+  const [showAdd, setShowAdd] = useState(false);
+  const [addForm, setAddForm] = useState({ ...EMPTY_PLATFORM });
+  const [addChantier, setAddChantier] = useState(false);
+  const [addError, setAddError] = useState('');
 
   const platformStats = useMemo(
     () => buildAllPlatformStats(data.routes, data.services),
@@ -72,11 +88,72 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
   const handleCellEdit = (platformSite: string, col: string, newValue: string) => {
     const realIndex = data.platforms.findIndex((p) => p.site === platformSite);
     if (realIndex === -1) return;
+
+    // Validate numeric fields
+    if (col === 'lat' || col === 'lon') {
+      const num = parseFloat(newValue);
+      if (isNaN(num)) return;
+      const updated = { ...data };
+      const updatedPlatforms = [...updated.platforms];
+      updatedPlatforms[realIndex] = { ...updatedPlatforms[realIndex], [col]: num };
+      updated.platforms = updatedPlatforms;
+      onSave(updated);
+      return;
+    }
+
     const updated = { ...data };
     const updatedPlatforms = [...updated.platforms];
     updatedPlatforms[realIndex] = { ...updatedPlatforms[realIndex], [col]: newValue };
     updated.platforms = updatedPlatforms;
     onSave(updated);
+  };
+
+  const handleChantierToggle = (platformSite: string) => {
+    const realIndex = data.platforms.findIndex((p) => p.site === platformSite);
+    if (realIndex === -1) return;
+    const updated = { ...data };
+    const updatedPlatforms = [...updated.platforms];
+    updatedPlatforms[realIndex] = { ...updatedPlatforms[realIndex], chantierSNCF: !updatedPlatforms[realIndex].chantierSNCF };
+    updated.platforms = updatedPlatforms;
+    onSave(updated);
+  };
+
+  const handleDelete = (platformSite: string) => {
+    if (!confirm(`Supprimer la plateforme "${platformSite}" et toutes ses liaisons/services associés ?`)) return;
+    const updated = { ...data };
+    updated.platforms = updated.platforms.filter((p) => p.site !== platformSite);
+    updated.routes = updated.routes.filter((r) => r.from !== platformSite && r.to !== platformSite);
+    updated.services = updated.services.filter((s) => s.from !== platformSite && s.to !== platformSite);
+    if (selectedPlatformSite === platformSite) selectPlatform(null);
+    onSave(updated);
+  };
+
+  const handleAdd = () => {
+    const site = addForm.site.trim();
+    if (!site) { setAddError('Le nom du site est requis'); return; }
+    if (data.platforms.some((p) => p.site === site)) { setAddError('Ce site existe déjà'); return; }
+    const lat = parseFloat(addForm.lat) || 0;
+    const lon = parseFloat(addForm.lon) || 0;
+
+    const newPlatform: Platform = {
+      site,
+      ville: addForm.ville.trim(),
+      exploitant: addForm.exploitant.trim(),
+      groupe: addForm.groupe.trim(),
+      departement: addForm.departement.trim(),
+      pays: addForm.pays.trim() || 'France',
+      lat,
+      lon,
+      chantierSNCF: addChantier,
+    };
+
+    const updated = { ...data };
+    updated.platforms = [...updated.platforms, newPlatform];
+    onSave(updated);
+    setShowAdd(false);
+    setAddForm({ ...EMPTY_PLATFORM });
+    setAddChantier(false);
+    setAddError('');
   };
 
   const handleServiceEdit = (
@@ -98,7 +175,7 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
 
   return (
     <div>
-      {/* Filters */}
+      {/* Header */}
       <div className="flex flex-wrap items-center gap-3 mb-3">
         <input
           type="text"
@@ -119,14 +196,75 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
           </button>
         )}
         <span className="text-[10px] text-muted ml-auto">{filtered.length} / {data.platforms.length}</span>
+        <button
+          onClick={() => setShowAdd(!showAdd)}
+          className="text-xs px-3 py-1.5 rounded-md bg-blue text-white hover:bg-blue/90 transition-colors flex items-center gap-1.5"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Ajouter
+        </button>
       </div>
+
+      {/* Add platform form */}
+      {showAdd && (
+        <div className="glass-panel rounded-lg p-4 mb-4 border border-blue/20">
+          <h4 className="text-xs font-semibold text-text mb-3">Nouvelle plateforme</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label className="text-[10px] text-muted uppercase block mb-1">Site *</label>
+              <input value={addForm.site} onChange={(e) => setAddForm({ ...addForm, site: e.target.value })} className={inputCls} placeholder="Nom du site" />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted uppercase block mb-1">Ville</label>
+              <input value={addForm.ville} onChange={(e) => setAddForm({ ...addForm, ville: e.target.value })} className={inputCls} />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted uppercase block mb-1">Exploitant</label>
+              <input value={addForm.exploitant} onChange={(e) => setAddForm({ ...addForm, exploitant: e.target.value })} className={inputCls} />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted uppercase block mb-1">Groupe</label>
+              <input value={addForm.groupe} onChange={(e) => setAddForm({ ...addForm, groupe: e.target.value })} className={inputCls} />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted uppercase block mb-1">Département</label>
+              <input value={addForm.departement} onChange={(e) => setAddForm({ ...addForm, departement: e.target.value })} className={inputCls} />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted uppercase block mb-1">Pays</label>
+              <input value={addForm.pays} onChange={(e) => setAddForm({ ...addForm, pays: e.target.value })} className={inputCls} />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted uppercase block mb-1">Latitude</label>
+              <input type="number" step="any" value={addForm.lat} onChange={(e) => setAddForm({ ...addForm, lat: e.target.value })} className={inputCls} placeholder="46.5" />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted uppercase block mb-1">Longitude</label>
+              <input type="number" step="any" value={addForm.lon} onChange={(e) => setAddForm({ ...addForm, lon: e.target.value })} className={inputCls} placeholder="2.3" />
+            </div>
+          </div>
+          <div className="flex items-center gap-4 mt-3">
+            <label className="flex items-center gap-2 text-xs text-text cursor-pointer">
+              <input type="checkbox" checked={addChantier} onChange={(e) => setAddChantier(e.target.checked)} className="rounded" />
+              Chantier SNCF
+            </label>
+          </div>
+          {addError && <p className="text-[10px] text-orange mt-2">{addError}</p>}
+          <div className="flex gap-2 mt-3">
+            <button onClick={handleAdd} className="text-xs px-4 py-1.5 rounded-md bg-blue text-white hover:bg-blue/90 transition-colors">Créer</button>
+            <button onClick={() => { setShowAdd(false); setAddError(''); }} className="text-xs px-3 py-1.5 rounded-md border border-border text-muted hover:text-text transition-colors">Annuler</button>
+          </div>
+        </div>
+      )}
 
       <div className="overflow-x-auto border border-border rounded-lg">
         <table className="w-full text-xs">
           <thead>
             <tr className="bg-blue/5">
               {COLS.map((col) => (
-                <th key={col.key} className={`text-left font-medium text-muted px-3 py-2 ${col.width}`}>
+                <th key={col.key} className={`text-left font-medium text-muted px-2 py-2 ${col.width}`}>
                   {col.label}
                 </th>
               ))}
@@ -138,36 +276,73 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
               const isSelected = selectedPlatformSite === platform.site;
               return (
                 <Fragment key={platform.site}>
-                  {/* Platform row */}
                   <tr
                     onClick={() => {
                       selectPlatform(isSelected ? null : platform.site);
                       if (isSelected) setExpandedDest(null);
                     }}
                     className={`border-t border-border cursor-pointer transition-colors ${
-                      isSelected
-                        ? 'bg-blue/10'
-                        : 'hover:bg-blue/5'
+                      isSelected ? 'bg-blue/10' : 'hover:bg-blue/5'
                     }`}
                   >
                     {COLS.map((col) => {
                       if (col.key === '_operators') {
                         return (
-                          <td key={col.key} className={`px-3 py-1.5 font-mono text-purple ${col.width}`}>
+                          <td key={col.key} className={`px-2 py-1.5 font-mono text-purple ${col.width}`}>
                             {stats?.operators.length || 0}
                           </td>
                         );
                       }
                       if (col.key === '_trains') {
                         return (
-                          <td key={col.key} className={`px-3 py-1.5 font-mono text-cyan ${col.width}`}>
+                          <td key={col.key} className={`px-2 py-1.5 font-mono text-cyan ${col.width}`}>
                             {stats?.trainsPerWeek || 0}
+                          </td>
+                        );
+                      }
+                      if (col.key === '_actions') {
+                        return (
+                          <td key={col.key} className={`px-2 py-1.5 ${col.width}`}>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDelete(platform.site); }}
+                              className="text-muted hover:text-orange transition-colors"
+                              title="Supprimer"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                            </button>
+                          </td>
+                        );
+                      }
+                      if (col.key === 'chantierSNCF') {
+                        return (
+                          <td key={col.key} className={`px-2 py-1.5 text-center ${col.width}`}>
+                            <input
+                              type="checkbox"
+                              checked={!!platform.chantierSNCF}
+                              onChange={(e) => { e.stopPropagation(); handleChantierToggle(platform.site); }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="rounded cursor-pointer"
+                            />
+                          </td>
+                        );
+                      }
+                      if (col.key === 'lat' || col.key === 'lon') {
+                        const numVal = platform[col.key];
+                        return (
+                          <td key={col.key} className={`px-2 py-1.5 ${col.width}`}>
+                            <EditableCell
+                              value={numVal != null ? String(numVal) : ''}
+                              onCommit={(v) => handleCellEdit(platform.site, col.key, v)}
+                              className="font-mono text-[10px]"
+                            />
                           </td>
                         );
                       }
                       const value = String((platform as unknown as Record<string, unknown>)[col.key] || '');
                       return (
-                        <td key={col.key} className={`px-3 py-1.5 ${col.width}`}>
+                        <td key={col.key} className={`px-2 py-1.5 ${col.width}`}>
                           <EditableCell
                             value={value}
                             onCommit={(v) => handleCellEdit(platform.site, col.key, v)}
@@ -177,7 +352,6 @@ export default function PlatformTable({ data, onSave, saving }: Props) {
                     })}
                   </tr>
 
-                  {/* Inline detail row */}
                   {isSelected && (
                     <tr>
                       <td colSpan={COL_COUNT} className="p-0">
@@ -269,7 +443,6 @@ function InlineDetail({
             </div>
           </div>
 
-          {/* Connected platforms */}
           {connected.length > 0 && (
             <div>
               <h4 className="text-[9px] font-semibold text-muted uppercase tracking-wider mb-1">Connectée à</h4>
@@ -299,7 +472,6 @@ function InlineDetail({
             const color = getOperatorColor(operator);
             return (
               <div key={operator} className="space-y-1">
-                {/* Operator header */}
                 <div className="flex items-center justify-between">
                   <button
                     onClick={(e) => { e.stopPropagation(); onNavigateOperator(operator); }}
@@ -316,7 +488,6 @@ function InlineDetail({
                   </div>
                 </div>
 
-                {/* Destinations */}
                 <div className="ml-4 space-y-0.5">
                   {destinations.map((d, i) => {
                     const destKey = `${operator}||${d.dest}`;
