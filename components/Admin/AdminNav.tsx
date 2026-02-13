@@ -11,14 +11,6 @@ export default function AdminNav() {
   const { data } = useAdminData();
 
   const isAdmin = (session?.user as Record<string, unknown>)?.role === 'admin';
-  const userOperator = (session?.user as Record<string, unknown>)?.operator as string | undefined;
-
-  const operatorServices = data && userOperator
-    ? data.services.filter((s) => s.operator === userOperator)
-    : [];
-  const operatorRouteCount = data && userOperator
-    ? data.routes.filter((r) => r.operators.includes(userOperator)).length
-    : 0;
 
   const adminLinks = [
     { href: '/admin', label: 'Tableau de bord' },
@@ -29,14 +21,10 @@ export default function AdminNav() {
     { href: '/admin/historique', label: 'Historique' },
   ];
 
-  const operatorLinks = [
-    { href: '/admin/profil', label: 'Mon profil' },
-    { href: '/admin/activite', label: 'Mon activité' },
-    { href: '/admin/liaisons', label: `Mes liaisons (${operatorRouteCount})` },
-    { href: '/admin/flux', label: `Mes flux (${operatorServices.length})` },
-  ];
+  // Opérateur : un seul onglet, on masque la barre
+  if (!isAdmin) return null;
 
-  const links = isAdmin ? adminLinks : operatorLinks;
+  const links = adminLinks;
 
   const isActive = (href: string) => {
     if (href === '/admin') return pathname === '/admin';

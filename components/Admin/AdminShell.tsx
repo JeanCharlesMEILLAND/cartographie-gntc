@@ -35,30 +35,48 @@ function AdminHeader() {
 
   return (
     <>
-      <header className="glass-panel border-b border-border px-4 py-3 flex items-center justify-between">
+      <header className="glass-panel border-b border-border px-4 py-3 flex items-center justify-between relative">
+        {/* Gauche */}
         <div className="flex items-center gap-3">
           <a href="/" className="text-muted hover:text-blue text-xs transition-colors">
             &larr; Carte
           </a>
+          {isAdmin && (
+            <>
+              <h1 className="text-sm font-display font-bold gntc-gradient">Administration</h1>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-blue/10 text-blue border border-blue/20">Admin</span>
+            </>
+          )}
+        </div>
 
-          {!isAdmin && operatorInfo?.logo ? (
-            <div className="flex items-center gap-2">
+        {/* Centre — logo + nom opérateur */}
+        {!isAdmin && operatorInfo && (
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
+            {operatorInfo.logo && (
               <img
                 src={operatorInfo.logo}
                 alt={operatorInfo.name}
                 className="h-7 w-auto object-contain"
               />
-              <h1 className="text-sm font-display font-bold text-text">{operatorInfo.name}</h1>
-            </div>
-          ) : (
-            <h1 className="text-sm font-display font-bold gntc-gradient">Administration</h1>
-          )}
+            )}
+            <h1 className="text-sm font-display font-bold text-text">{operatorInfo.name}</h1>
+          </div>
+        )}
 
-          <span className="text-[10px] px-2 py-0.5 rounded bg-blue/10 text-blue border border-blue/20">
-            {isAdmin ? 'Admin' : 'Opérateur'}
-          </span>
-        </div>
+        {/* Droite */}
         <div className="flex items-center gap-3">
+          {!isAdmin && (
+            <a
+              href="/admin/profil"
+              className="flex items-center gap-1.5 text-xs text-muted hover:text-blue transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              Mon profil
+            </a>
+          )}
           <span className="text-xs text-muted">{session?.user?.email}</span>
           {message && (
             <span className={`text-xs ${message.includes('Erreur') ? 'text-red-400' : 'text-green-400'}`}>

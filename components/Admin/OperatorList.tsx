@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TransportData } from '@/lib/types';
 import { getOperatorComparison } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
@@ -19,11 +19,28 @@ export default function OperatorList({ data, onSave, saving }: Props) {
   const [newName, setNewName] = useState('');
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState('');
+  const [dbOperators, setDbOperators] = useState<string[]>([]);
 
-  const operators = useMemo(
-    () => getOperatorComparison(data.routes, data.services),
-    [data.routes, data.services]
-  );
+  // Fetch operators from DB to include those without services
+  useEffect(() => {
+    fetch('/api/admin/operators')
+      .then((r) => r.ok ? r.json() : [])
+      .then((ops: { name: string }[]) => setDbOperators(ops.map((o) => o.name)))
+      .catch(() => {});
+  }, []);
+
+  const operators = useMemo(() => {
+    const fromServices = getOperatorComparison(data.routes, data.services);
+    const serviceNames = new Set(fromServices.map((o) => o.operator));
+    // Ajouter les opérateurs DB qui n'ont pas encore de services
+    const emptyOps = dbOperators
+      .filter((name) => !serviceNames.has(name))
+      .map((name) => ({
+        operator: name,
+        stats: { platformCount: 0, routeCount: 0, trainsPerWeek: 0, serviceCount: 0, platforms: [] as string[] },
+      }));
+    return [...fromServices, ...emptyOps];
+  }, [data.routes, data.services, dbOperators]);
 
   const totalTrains = data.routes.reduce((sum, r) => sum + r.freq, 0);
 
@@ -45,8 +62,11 @@ export default function OperatorList({ data, onSave, saving }: Props) {
       }
       setNewName('');
       setShowAdd(false);
-      // Refresh the data
-      window.location.reload();
+      // Refresh la liste des opérateurs DB
+      fetch('/api/admin/operators')
+        .then((r) => r.ok ? r.json() : [])
+        .then((ops: { name: string }[]) => setDbOperators(ops.map((o) => o.name)))
+        .catch(() => {});
     } catch {
       setAddError('Erreur réseau');
     } finally {

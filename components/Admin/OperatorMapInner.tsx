@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip, Marker, useMap, useMapEvents } from 'react-leaflet';
 import { Platform, AggregatedRoute, Service } from '@/lib/types';
 import { getBezierPoints } from '@/lib/bezier';
 import { getOperatorColor } from '@/lib/colors';
@@ -13,6 +13,9 @@ interface Props {
   routes: AggregatedRoute[];
   services: Service[];
   operator: string;
+  highlightedSite?: string | null;
+  onSiteSelect?: (site: string | null) => void;
+  extraRailGeometries?: Record<string, [number, number][]>;
 }
 
 // Same weight scale as main map RouteLayer
@@ -31,6 +34,122 @@ function getMarkerSize(volume: number): number {
   return 8 + (volume / 200) * 10;
 }
 
+// ── Label collision avoidance (same pattern as PlatformMarkers.tsx) ──
+function estimateLabelWidth(text: string, fontSize: number): number {
+  return text.length * fontSize * 0.58 + 12;
+}
+
+const LABEL_H = 16;
+const LABEL_GAP = 3;
+const LABEL_OFFSETS: [number, number][] = [
+  [0, -16], [14, -8], [16, 4], [10, 16],
+  [0, 18], [-14, -8], [-16, 4], [-10, 16],
+];
+
+interface PlacedRect { x: number; y: number; w: number; h: number }
+
+function findBestOffset(px: number, py: number, labelW: number, placed: PlacedRect[]): [number, number] {
+  for (const [ox, oy] of LABEL_OFFSETS) {
+    const lx = ox < 0 ? px + ox - labelW : px + ox;
+    const ly = py + oy;
+    const collides = placed.some((r) =>
+      !(lx + labelW + LABEL_GAP < r.x || lx > r.x + r.w + LABEL_GAP ||
+        ly + LABEL_H + LABEL_GAP < r.y || ly > r.y + r.h + LABEL_GAP)
+    );
+    if (!collides) return [ox, oy];
+  }
+  return LABEL_OFFSETS[0];
+}
+
+function SiteLabels({ platforms, selectedSite, selectedDestinations, siteVolumes, color }: {
+  platforms: Platform[];
+  selectedSite: string | null;
+  selectedDestinations: string[];
+  siteVolumes: Map<string, number>;
+  color: string;
+}) {
+  const map = useMap();
+  const [zoom, setZoom] = useState(map.getZoom());
+  useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
+
+  const labelPlacements = useMemo(() => {
+    const placements = new Map<string, [number, number]>();
+    const placedRects: PlacedRect[] = [];
+
+    // Trier : sélectionné d'abord, puis gros volumes
+    const sorted = [...platforms].sort((a, b) => {
+      if (a.site === selectedSite) return -1;
+      if (b.site === selectedSite) return 1;
+      return (siteVolumes.get(b.site) || 0) - (siteVolumes.get(a.site) || 0);
+    });
+
+    for (const p of sorted) {
+      const isSelected = p.site === selectedSite;
+      const isConnected = selectedSite ? selectedDestinations.includes(p.site) || p.site === selectedSite : false;
+      const volume = siteVolumes.get(p.site) || 0;
+
+      // Toujours afficher si sélectionné/connecté, sinon selon le zoom
+      const show = isSelected || isConnected
+        || (volume > 80 && zoom >= 5)
+        || (volume > 30 && zoom >= 6)
+        || (volume > 0 && zoom >= 7)
+        || zoom >= 8;
+      if (!show) continue;
+
+      const point = map.latLngToContainerPoint([p.lat, p.lon]);
+      const fontSize = isSelected ? 10 : volume > 80 ? 9 : 8;
+      const labelW = estimateLabelWidth(p.site, fontSize);
+      const [ox, oy] = findBestOffset(point.x, point.y, labelW, placedRects);
+      const lx = ox < 0 ? point.x + ox - labelW : point.x + ox;
+      placedRects.push({ x: lx, y: point.y + oy, w: labelW, h: LABEL_H });
+      placements.set(p.site, [ox, oy]);
+    }
+    return placements;
+  }, [platforms, selectedSite, selectedDestinations, siteVolumes, zoom, map]);
+
+  return (
+    <>
+      {platforms.map((p) => {
+        const placement = labelPlacements.get(p.site);
+        if (!placement) return null;
+        const isSelected = p.site === selectedSite;
+        const isConnected = selectedSite ? selectedDestinations.includes(p.site) || p.site === selectedSite : false;
+        const dimmed = selectedSite && !isConnected;
+        const volume = siteVolumes.get(p.site) || 0;
+
+        const icon = L.divIcon({
+          className: 'platform-label',
+          html: `<span style="
+            color: ${isSelected ? '#fff' : '#2b2b2b'};
+            background: ${isSelected ? color : 'rgba(255,255,255,0.9)'};
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: ${isSelected ? '10px' : volume > 80 ? '9px' : '8px'};
+            font-weight: ${isSelected ? '700' : '600'};
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: ${dimmed ? '0.25' : '1'};
+            border: 1px solid ${isSelected ? color : 'rgba(88,123,189,0.2)'};
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            line-height: 1.4;
+          ">${p.site}</span>`,
+          iconSize: [0, 0],
+          iconAnchor: [-(placement[0]), -(placement[1])],
+        });
+
+        return (
+          <Marker
+            key={`label-${p.site}`}
+            position={[p.lat, p.lon]}
+            icon={icon}
+            interactive={false}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 function AutoFitBounds({ platforms }: { platforms: Platform[] }) {
   const map = useMap();
 
@@ -43,18 +162,26 @@ function AutoFitBounds({ platforms }: { platforms: Platform[] }) {
   return null;
 }
 
-export default function OperatorMapInner({ platforms, routes, services, operator }: Props) {
+export default function OperatorMapInner({ platforms, routes, services, operator, highlightedSite, onSiteSelect, extraRailGeometries }: Props) {
   const color = getOperatorColor(operator);
-  const [selectedSite, setSelectedSite] = useState<string | null>(null);
-  const [railGeometries, setRailGeometries] = useState<Record<string, [number, number][]>>({});
+  const [internalSelected, setInternalSelected] = useState<string | null>(null);
+  const selectedSite = highlightedSite !== undefined ? highlightedSite : internalSelected;
+  const setSelectedSite = onSiteSelect || setInternalSelected;
+  const [baseRailGeometries, setBaseRailGeometries] = useState<Record<string, [number, number][]>>({});
 
   // Load rail geometries (same as main map page.tsx)
   useEffect(() => {
     fetch('/rail-geometries.json')
       .then((res) => res.json())
-      .then((data) => setRailGeometries(data))
+      .then((data) => setBaseRailGeometries(data))
       .catch(() => {/* silent - will fallback to bezier */});
   }, []);
+
+  // Merge base + extra geometries
+  const railGeometries = useMemo(
+    () => ({ ...baseRailGeometries, ...extraRailGeometries }),
+    [baseRailGeometries, extraRailGeometries]
+  );
 
   // Get platforms where this operator is active
   const operatorSites = useMemo(() => {
@@ -111,7 +238,7 @@ export default function OperatorMapInner({ platforms, routes, services, operator
   }
 
   return (
-    <div className="glass-panel rounded-lg overflow-hidden aspect-square">
+    <div className="glass-panel rounded-lg overflow-hidden h-full">
       <MapContainer
         center={[46.6, 2.8]}
         zoom={6}
@@ -229,6 +356,15 @@ export default function OperatorMapInner({ platforms, routes, services, operator
             </CircleMarker>
           );
         })}
+
+        {/* Labels de noms de sites */}
+        <SiteLabels
+          platforms={operatorPlatforms}
+          selectedSite={selectedSite}
+          selectedDestinations={selectedDestinations}
+          siteVolumes={siteVolumes}
+          color={color}
+        />
       </MapContainer>
 
       {/* Legend bar — dark theme to match */}

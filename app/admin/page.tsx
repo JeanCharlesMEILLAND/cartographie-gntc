@@ -5,9 +5,9 @@ import DashboardClient from './DashboardClient';
 export default async function AdminRootPage() {
   const session = await auth();
 
-  // Operators get redirected to their profile
+  // Operators get redirected to their activity dashboard
   if ((session?.user as Record<string, unknown>)?.role !== 'admin') {
-    redirect('/admin/profil');
+    redirect('/admin/activite');
   }
 
   return <DashboardClient />;

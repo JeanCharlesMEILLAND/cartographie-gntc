@@ -1298,18 +1298,6 @@
       ]
     },
     {
-      "from": "Bonneuil-sur-Marne",
-      "to": "Société des Carrières de Voutré",
-      "fromLat": 48.77,
-      "fromLon": 2.49,
-      "toLat": 48.1,
-      "toLon": -0.44,
-      "freq": 10,
-      "operators": [
-        "Cinerites"
-      ]
-    },
-    {
       "from": "MATSUD - Le Mans",
       "to": "Société des Carrières de Voutré",
       "fromLat": 48,
@@ -1340,30 +1328,6 @@
       "fromLon": 4.63,
       "toLat": 44.91,
       "toLon": -0.37,
-      "freq": 6,
-      "operators": [
-        "Combronde"
-      ]
-    },
-    {
-      "from": "Clermont Ferrand La combaude",
-      "to": "EUROFOS",
-      "fromLat": 45.78,
-      "fromLon": 3.08,
-      "toLat": 43.39,
-      "toLon": 4.88,
-      "freq": 6,
-      "operators": [
-        "Combronde"
-      ]
-    },
-    {
-      "from": "Clermont Ferrand La combaude",
-      "to": "Fos 2XL _ Seayard",
-      "fromLat": 45.78,
-      "fromLon": 3.08,
-      "toLat": 43.42,
-      "toLon": 4.89,
       "freq": 6,
       "operators": [
         "Combronde"
@@ -1642,7 +1606,7 @@
       "fromLon": 4.35,
       "toLat": 43.42,
       "toLon": 4.89,
-      "freq": 10,
+      "freq": 15,
       "operators": [
         "Greenmodal"
       ]
@@ -1856,12 +1820,12 @@
       ]
     },
     {
-      "from": "Fos 2XL _ Seayard",
-      "to": "Dourges",
-      "fromLat": 43.42,
-      "fromLon": 4.89,
-      "toLat": 50.44,
-      "toLon": 2.97,
+      "from": "Dourges",
+      "to": "Fos 2XL _ Seayard",
+      "fromLat": 50.44,
+      "fromLon": 2.97,
+      "toLat": 43.42,
+      "toLon": 4.89,
       "freq": 5,
       "operators": [
         "Greenmodal"
@@ -1963,114 +1927,6 @@
       "freq": 10,
       "operators": [
         "HUPAC"
-      ]
-    },
-    {
-      "from": "ANVERS MAIN HUB",
-      "to": "Bègles (Bordeaux) - Naviland Cargo",
-      "fromLat": 51.26,
-      "fromLon": 4.35,
-      "toLat": 44.79,
-      "toLon": -0.55,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ANVERS MAIN HUB",
-      "to": "EUROFOS",
-      "fromLat": 51.26,
-      "fromLon": 4.35,
-      "toLat": 43.39,
-      "toLon": 4.88,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ANVERS MAIN HUB",
-      "to": "Fenouillet (Toulouse) - Naviland",
-      "fromLat": 51.26,
-      "fromLon": 4.35,
-      "toLat": 43.67,
-      "toLon": 1.39,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ANVERS MAIN HUB",
-      "to": "Fos 2XL _ Seayard",
-      "fromLat": 51.26,
-      "fromLon": 4.35,
-      "toLat": 43.42,
-      "toLon": 4.89,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ANVERS MAIN HUB",
-      "to": "Gevrey (Dijon)",
-      "fromLat": 51.26,
-      "fromLon": 4.35,
-      "toLat": 47.24,
-      "toLon": 5.01,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ANVERS MAIN HUB",
-      "to": "Port Edouard Hérriot (Lyon)",
-      "fromLat": 51.26,
-      "fromLon": 4.35,
-      "toLat": 45.73,
-      "toLon": 4.84,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ANVERS MAIN HUB",
-      "to": "Port de Marseille Fos (GPMM)",
-      "fromLat": 51.26,
-      "fromLon": 4.35,
-      "toLat": 43.33,
-      "toLon": 5.35,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ANVERS MAIN HUB",
-      "to": "Riom (Clermont Ferrand)",
-      "fromLat": 51.26,
-      "fromLon": 4.35,
-      "toLat": 45.89,
-      "toLon": 3.11,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ANVERS MAIN HUB",
-      "to": "Terminal conteneurs Nord de Strasbourg - Naviland",
-      "fromLat": 51.26,
-      "fromLon": 4.35,
-      "toLat": 48.62,
-      "toLon": 7.74,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
       ]
     },
     {
@@ -2494,42 +2350,6 @@
       ]
     },
     {
-      "from": "BARCELONE",
-      "to": "Bègles (Bordeaux) - Naviland Cargo",
-      "fromLat": 41.35,
-      "fromLon": 2.15,
-      "toLat": 44.79,
-      "toLon": -0.55,
-      "freq": 4,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "BARCELONE",
-      "to": "EUROFOS",
-      "fromLat": 41.35,
-      "fromLon": 2.15,
-      "toLat": 43.39,
-      "toLon": 4.88,
-      "freq": 4,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "BARCELONE",
-      "to": "Fenouillet (Toulouse) - Naviland",
-      "fromLat": 41.35,
-      "fromLon": 2.15,
-      "toLat": 43.67,
-      "toLon": 1.39,
-      "freq": 4,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
       "from": "Bègles (Bordeaux) - Naviland Cargo",
       "to": "EUROFOS",
       "fromLat": 44.79,
@@ -2662,12 +2482,12 @@
       ]
     },
     {
-      "from": "EUROFOS",
-      "to": "Anvers Main Hub",
-      "fromLat": 43.39,
-      "fromLon": 4.88,
-      "toLat": 51.26,
-      "toLon": 4.35,
+      "from": "Anvers Main Hub",
+      "to": "EUROFOS",
+      "fromLat": 51.26,
+      "fromLon": 4.35,
+      "toLat": 43.39,
+      "toLon": 4.88,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
@@ -2890,12 +2710,12 @@
       ]
     },
     {
-      "from": "Fos 2XL _ Seayard",
-      "to": "Anvers Main Hub",
-      "fromLat": 43.42,
-      "fromLon": 4.89,
-      "toLat": 51.26,
-      "toLon": 4.35,
+      "from": "Anvers Main Hub",
+      "to": "Fos 2XL _ Seayard",
+      "fromLat": 51.26,
+      "fromLon": 4.35,
+      "toLat": 43.42,
+      "toLon": 4.89,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
@@ -3010,12 +2830,12 @@
       ]
     },
     {
-      "from": "Gevrey (Dijon)",
-      "to": "Anvers Main Hub",
-      "fromLat": 47.24,
-      "fromLon": 5.01,
-      "toLat": 51.26,
-      "toLon": 4.35,
+      "from": "Anvers Main Hub",
+      "to": "Gevrey (Dijon)",
+      "fromLat": 51.26,
+      "fromLon": 4.35,
+      "toLat": 47.24,
+      "toLon": 5.01,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
@@ -3358,24 +3178,24 @@
       ]
     },
     {
-      "from": "Port Edouard Hérriot (Lyon)",
-      "to": "Anvers Main Hub",
-      "fromLat": 45.73,
-      "fromLon": 4.84,
-      "toLat": 51.26,
-      "toLon": 4.35,
+      "from": "Anvers Main Hub",
+      "to": "Port Edouard Hérriot (Lyon)",
+      "fromLat": 51.26,
+      "fromLon": 4.35,
+      "toLat": 45.73,
+      "toLon": 4.84,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Port Edouard Hérriot (Lyon)",
-      "to": "Marseille",
-      "fromLat": 45.73,
-      "fromLon": 4.84,
-      "toLat": 43.3,
-      "toLon": 5.37,
+      "from": "Marseille",
+      "to": "Port Edouard Hérriot (Lyon)",
+      "fromLat": 43.3,
+      "fromLon": 5.37,
+      "toLat": 45.73,
+      "toLon": 4.84,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
@@ -3418,60 +3238,60 @@
       ]
     },
     {
-      "from": "Port de Marseille Fos (GPMM)",
-      "to": "Anvers Main Hub",
-      "fromLat": 43.33,
-      "fromLon": 5.35,
-      "toLat": 51.26,
-      "toLon": 4.35,
+      "from": "Anvers Main Hub",
+      "to": "Port de Marseille Fos (GPMM)",
+      "fromLat": 51.26,
+      "fromLon": 4.35,
+      "toLat": 43.33,
+      "toLon": 5.35,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Port de Marseille Fos (GPMM)",
-      "to": "Bègles (Bordeaux) - Naviland Cargo",
-      "fromLat": 43.33,
-      "fromLon": 5.35,
-      "toLat": 44.79,
-      "toLon": -0.55,
+      "from": "Bègles (Bordeaux) - Naviland Cargo",
+      "to": "Port de Marseille Fos (GPMM)",
+      "fromLat": 44.79,
+      "fromLon": -0.55,
+      "toLat": 43.33,
+      "toLon": 5.35,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Port de Marseille Fos (GPMM)",
-      "to": "Fenouillet (Toulouse) - Naviland",
-      "fromLat": 43.33,
-      "fromLon": 5.35,
-      "toLat": 43.67,
-      "toLon": 1.39,
+      "from": "Fenouillet (Toulouse) - Naviland",
+      "to": "Port de Marseille Fos (GPMM)",
+      "fromLat": 43.67,
+      "fromLon": 1.39,
+      "toLat": 43.33,
+      "toLon": 5.35,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Port de Marseille Fos (GPMM)",
-      "to": "Gevrey (Dijon)",
-      "fromLat": 43.33,
-      "fromLon": 5.35,
-      "toLat": 47.24,
-      "toLon": 5.01,
+      "from": "Gevrey (Dijon)",
+      "to": "Port de Marseille Fos (GPMM)",
+      "fromLat": 47.24,
+      "fromLon": 5.01,
+      "toLat": 43.33,
+      "toLon": 5.35,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Port de Marseille Fos (GPMM)",
-      "to": "Port Edouard Hérriot (Lyon)",
-      "fromLat": 43.33,
-      "fromLon": 5.35,
-      "toLat": 45.73,
-      "toLon": 4.84,
+      "from": "Port Edouard Hérriot (Lyon)",
+      "to": "Port de Marseille Fos (GPMM)",
+      "fromLat": 45.73,
+      "fromLon": 4.84,
+      "toLat": 43.33,
+      "toLon": 5.35,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
@@ -3526,24 +3346,24 @@
       ]
     },
     {
-      "from": "Riom (Clermont Ferrand)",
-      "to": "Anvers Main Hub",
-      "fromLat": 45.89,
-      "fromLon": 3.11,
-      "toLat": 51.26,
-      "toLon": 4.35,
+      "from": "Anvers Main Hub",
+      "to": "Riom (Clermont Ferrand)",
+      "fromLat": 51.26,
+      "fromLon": 4.35,
+      "toLat": 45.89,
+      "toLon": 3.11,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Riom (Clermont Ferrand)",
-      "to": "Marseille",
-      "fromLat": 45.89,
-      "fromLon": 3.11,
-      "toLat": 43.3,
-      "toLon": 5.37,
+      "from": "Marseille",
+      "to": "Riom (Clermont Ferrand)",
+      "fromLat": 43.3,
+      "fromLon": 5.37,
+      "toLat": 45.89,
+      "toLon": 3.11,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
@@ -3586,156 +3406,72 @@
       ]
     },
     {
-      "from": "ROTTERDAM",
-      "to": "Bègles (Bordeaux) - Naviland Cargo",
-      "fromLat": 51.92,
-      "fromLon": 4.48,
-      "toLat": 44.79,
-      "toLon": -0.55,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ROTTERDAM",
-      "to": "EUROFOS",
-      "fromLat": 51.92,
-      "fromLon": 4.48,
-      "toLat": 43.39,
-      "toLon": 4.88,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ROTTERDAM",
-      "to": "Fenouillet (Toulouse) - Naviland",
-      "fromLat": 51.92,
-      "fromLon": 4.48,
-      "toLat": 43.67,
-      "toLon": 1.39,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ROTTERDAM",
-      "to": "Gevrey (Dijon)",
-      "fromLat": 51.92,
-      "fromLon": 4.48,
-      "toLat": 47.24,
-      "toLon": 5.01,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ROTTERDAM",
-      "to": "Port de Marseille Fos (GPMM)",
-      "fromLat": 51.92,
-      "fromLon": 4.48,
-      "toLat": 43.33,
-      "toLon": 5.35,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ROTTERDAM",
-      "to": "Riom (Clermont Ferrand)",
-      "fromLat": 51.92,
-      "fromLon": 4.48,
-      "toLat": 45.89,
-      "toLon": 3.11,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "ROTTERDAM",
-      "to": "Terminal conteneurs Nord de Strasbourg - Naviland",
-      "fromLat": 51.92,
-      "fromLon": 4.48,
-      "toLat": 48.62,
-      "toLon": 7.74,
-      "freq": 6,
-      "operators": [
-        "Naviland Cargo"
-      ]
-    },
-    {
-      "from": "St Pierre des Corps (Tours)",
-      "to": "Marseille",
-      "fromLat": 47.39,
-      "fromLon": 0.74,
-      "toLat": 43.3,
-      "toLon": 5.37,
+      "from": "Marseille",
+      "to": "St Pierre des Corps (Tours)",
+      "fromLat": 43.3,
+      "fromLon": 5.37,
+      "toLat": 47.39,
+      "toLon": 0.74,
       "freq": 4,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Terminal conteneurs Nord de Strasbourg - Naviland",
-      "to": "Anvers Main Hub",
-      "fromLat": 48.62,
-      "fromLon": 7.74,
-      "toLat": 51.26,
-      "toLon": 4.35,
+      "from": "Anvers Main Hub",
+      "to": "Terminal conteneurs Nord de Strasbourg - Naviland",
+      "fromLat": 51.26,
+      "fromLon": 4.35,
+      "toLat": 48.62,
+      "toLon": 7.74,
       "freq": 7,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Terminal conteneurs Nord de Strasbourg - Naviland",
-      "to": "Fenouillet (Toulouse) - Naviland",
-      "fromLat": 48.62,
-      "fromLon": 7.74,
-      "toLat": 43.67,
-      "toLon": 1.39,
+      "from": "Fenouillet (Toulouse) - Naviland",
+      "to": "Terminal conteneurs Nord de Strasbourg - Naviland",
+      "fromLat": 43.67,
+      "fromLon": 1.39,
+      "toLat": 48.62,
+      "toLon": 7.74,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Terminal conteneurs Nord de Strasbourg - Naviland",
-      "to": "Marseille",
-      "fromLat": 48.62,
-      "fromLon": 7.74,
-      "toLat": 43.3,
-      "toLon": 5.37,
+      "from": "Marseille",
+      "to": "Terminal conteneurs Nord de Strasbourg - Naviland",
+      "fromLat": 43.3,
+      "fromLon": 5.37,
+      "toLat": 48.62,
+      "toLon": 7.74,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Terminal conteneurs Nord de Strasbourg - Naviland",
-      "to": "Rotterdam",
-      "fromLat": 48.62,
-      "fromLon": 7.74,
-      "toLat": 51.92,
-      "toLon": 4.48,
+      "from": "Rotterdam",
+      "to": "Terminal conteneurs Nord de Strasbourg - Naviland",
+      "fromLat": 51.92,
+      "fromLon": 4.48,
+      "toLat": 48.62,
+      "toLon": 7.74,
       "freq": 7,
       "operators": [
         "Naviland Cargo"
       ]
     },
     {
-      "from": "Valenton - Naviland Cargo",
-      "to": "Marseille",
-      "fromLat": 48.77,
-      "fromLon": 2.49,
-      "toLat": 43.3,
-      "toLon": 5.37,
+      "from": "Marseille",
+      "to": "Valenton - Naviland Cargo",
+      "fromLat": 43.3,
+      "fromLon": 5.37,
+      "toLat": 48.77,
+      "toLon": 2.49,
       "freq": 5,
       "operators": [
         "Naviland Cargo"
@@ -3910,12 +3646,12 @@
       ]
     },
     {
-      "from": "Lille Conteneurs Terminal",
-      "to": "Avignon Courtine",
-      "fromLat": 50.63,
-      "fromLon": 3.07,
-      "toLat": 43.95,
-      "toLon": 4.81,
+      "from": "Avignon Courtine",
+      "to": "Lille Conteneurs Terminal",
+      "fromLat": 43.95,
+      "fromLon": 4.81,
+      "toLat": 50.63,
+      "toLon": 3.07,
       "freq": 5,
       "operators": [
         "T3M"
@@ -3946,12 +3682,12 @@
       ]
     },
     {
-      "from": "Terminal Ouest Provence - Miramas",
-      "to": "Avignon Courtine",
-      "fromLat": 43.58,
-      "fromLon": 5,
-      "toLat": 43.95,
-      "toLon": 4.81,
+      "from": "Avignon Courtine",
+      "to": "Terminal Ouest Provence - Miramas",
+      "fromLat": 43.95,
+      "fromLon": 4.81,
+      "toLat": 43.58,
+      "toLon": 5,
       "freq": 5,
       "operators": [
         "T3M"
@@ -3988,19 +3724,7 @@
       "fromLon": 6.1,
       "toLat": 42.52,
       "toLon": 2.83,
-      "freq": 46,
-      "operators": [
-        "VIIA"
-      ]
-    },
-    {
-      "from": "Bettembourg",
-      "to": "Le Boulou Autoroute ferroviaire",
-      "fromLat": 49.52,
-      "fromLon": 6.1,
-      "toLat": 42.52,
-      "toLon": 2.83,
-      "freq": 46,
+      "freq": 54,
       "operators": [
         "VIIA"
       ]
@@ -4031,24 +3755,12 @@
     },
     {
       "from": "Calais autoroute ferroviaire",
-      "to": "Le Boulou Autoroute ferroviaire",
-      "fromLat": 50.95,
-      "fromLon": 1.86,
-      "toLat": 42.52,
-      "toLon": 2.83,
-      "freq": 18,
-      "operators": [
-        "VIIA"
-      ]
-    },
-    {
-      "from": "Calais autoroute ferroviaire",
       "to": "Port Edouard Hérriot (Lyon)",
       "fromLat": 50.95,
       "fromLon": 1.86,
       "toLat": 45.73,
       "toLon": 4.84,
-      "freq": 12,
+      "freq": 24,
       "operators": [
         "VIIA"
       ]
@@ -4078,84 +3790,72 @@
       ]
     },
     {
-      "from": "Terminal Ouest Provence - Miramas",
-      "to": "Mortara",
-      "fromLat": 43.58,
-      "fromLon": 5,
-      "toLat": 45.25,
-      "toLon": 8.74,
+      "from": "Mortara",
+      "to": "Terminal Ouest Provence - Miramas",
+      "fromLat": 45.25,
+      "fromLon": 8.74,
+      "toLat": 43.58,
+      "toLon": 5,
       "freq": 1,
       "operators": [
         "Metrocargo italia srl"
       ]
     },
     {
-      "from": "Parma - Castelguelfo",
-      "to": "Valenton",
-      "fromLat": 44.81,
-      "fromLon": 10.33,
+      "from": "Dourges",
+      "to": "Parma - Castelguelfo",
+      "fromLat": 50.44,
+      "fromLon": 2.97,
+      "toLat": 44.81,
+      "toLon": 10.33,
+      "freq": 10,
+      "operators": [
+        "Metrocargo italia srl"
+      ]
+    },
+    {
+      "from": "Noisy le Sec",
+      "to": "Parma - Castelguelfo",
+      "fromLat": 48.89,
+      "fromLon": 2.45,
+      "toLat": 44.81,
+      "toLon": 10.33,
+      "freq": 2,
+      "operators": [
+        "Metrocargo italia srl"
+      ]
+    },
+    {
+      "from": "Noisy le Sec",
+      "to": "San Giuseppe di Cairo",
+      "fromLat": 48.89,
+      "fromLon": 2.45,
+      "toLat": 44.41,
+      "toLon": 8.26,
+      "freq": 2,
+      "operators": [
+        "Metrocargo italia srl"
+      ]
+    },
+    {
+      "from": "Livorno",
+      "to": "Terminal Ouest Provence - Miramas",
+      "fromLat": 43.55,
+      "fromLon": 10.31,
+      "toLat": 43.58,
+      "toLon": 5,
+      "freq": 2,
+      "operators": [
+        "Metrocargo italia srl"
+      ]
+    },
+    {
+      "from": "Terminal conteneur du Port Metz",
+      "to": "Valenton - Novatrans",
+      "fromLat": 49.12,
+      "fromLon": 6.18,
       "toLat": 48.77,
       "toLon": 2.49,
-      "freq": 10,
-      "operators": [
-        "Metrocargo italia srl"
-      ]
-    },
-    {
-      "from": "Parma - Castelguelfo",
-      "to": "Dourges",
-      "fromLat": 44.81,
-      "fromLon": 10.33,
-      "toLat": 50.44,
-      "toLon": 2.97,
-      "freq": 10,
-      "operators": [
-        "Metrocargo italia srl"
-      ]
-    },
-    {
-      "from": "Parma - Castelguelfo",
-      "to": "Noisy le Sec",
-      "fromLat": 44.81,
-      "fromLon": 10.33,
-      "toLat": 48.89,
-      "toLon": 2.45,
-      "freq": 2,
-      "operators": [
-        "Metrocargo italia srl"
-      ]
-    },
-    {
-      "from": "San Giuseppe di Cairo",
-      "to": "Noisy le Sec",
-      "fromLat": 44.41,
-      "fromLon": 8.26,
-      "toLat": 48.89,
-      "toLon": 2.45,
-      "freq": 2,
-      "operators": [
-        "Metrocargo italia srl"
-      ]
-    },
-    {
-      "from": "Terminal Ouest Provence - Miramas",
-      "to": "Livorno",
-      "fromLat": 43.58,
-      "fromLon": 5,
-      "toLat": 43.55,
-      "toLon": 10.31,
-      "freq": 2,
-      "operators": [
-        "Metrocargo italia srl"
-      ]
-    },
-    {
-      "from": "Valenton - Novatrans",
-      "to": "Terminal conteneur du Port Metz",
-      "fromLat": 48.77,
-      "fromLon": 2.49,
-      "toLat": 49.12,
-      "toLon": 6.18,
       "freq": 10,
       "operators": [
         "DB Cargo France"

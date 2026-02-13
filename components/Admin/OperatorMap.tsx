@@ -17,8 +17,11 @@ interface Props {
   routes: AggregatedRoute[];
   services: Service[];
   operator: string;
+  highlightedSite?: string | null;
+  onSiteSelect?: (site: string | null) => void;
+  extraRailGeometries?: Record<string, [number, number][]>;
 }
 
-export default function OperatorMap({ platforms, routes, services, operator }: Props) {
-  return <OperatorMapInner platforms={platforms} routes={routes} services={services} operator={operator} />;
+export default function OperatorMap({ platforms, routes, services, operator, highlightedSite, onSiteSelect, extraRailGeometries }: Props) {
+  return <OperatorMapInner platforms={platforms} routes={routes} services={services} operator={operator} highlightedSite={highlightedSite} onSiteSelect={onSiteSelect} extraRailGeometries={extraRailGeometries} />;
 }
