@@ -98,7 +98,7 @@ export async function PUT(request: NextRequest) {
 
   for (const key of allowedFields) {
     if (key in fields) {
-      updateData[key] = fields[key];
+      updateData[key] = (fields as Record<string, unknown>)[key];
     }
   }
 
