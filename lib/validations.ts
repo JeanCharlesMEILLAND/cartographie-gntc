@@ -11,7 +11,7 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  id: z.number({ required_error: 'ID requis' }),
+  id: z.number({ error: 'ID requis' }),
   email: z.string().email('Email invalide').optional(),
   password: z.string().min(6, 'Mot de passe : 6 caractères minimum').optional(),
   name: z.string().min(1).optional(),
@@ -33,7 +33,7 @@ export const createOperatorSchema = z.object({
 });
 
 export const updateOperatorSchema = z.object({
-  id: z.number({ required_error: 'ID requis' }),
+  id: z.number({ error: 'ID requis' }),
   name: z.string().min(1).optional(),
   logo: z.string().nullish(),
   description: z.string().nullish(),
