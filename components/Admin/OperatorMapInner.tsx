@@ -168,13 +168,14 @@ export default function OperatorMapInner({ platforms, routes, services, operator
   const selectedSite = highlightedSite !== undefined ? highlightedSite : internalSelected;
   const setSelectedSite = onSiteSelect || setInternalSelected;
   const [baseRailGeometries, setBaseRailGeometries] = useState<Record<string, [number, number][]>>({});
+  const [railLoaded, setRailLoaded] = useState(false);
 
   // Load rail geometries (same as main map page.tsx)
   useEffect(() => {
     fetch('/rail-geometries.json')
       .then((res) => res.json())
-      .then((data) => setBaseRailGeometries(data))
-      .catch(() => {/* silent - will fallback to bezier */});
+      .then((data) => { setBaseRailGeometries(data); setRailLoaded(true); })
+      .catch(() => { setRailLoaded(true); /* fallback to bezier */ });
   }, []);
 
   // Merge base + extra geometries
@@ -256,8 +257,8 @@ export default function OperatorMapInner({ platforms, routes, services, operator
         />
         <AutoFitBounds platforms={operatorPlatforms} />
 
-        {/* Routes — same rendering logic as RouteLayer.tsx */}
-        {operatorRoutes.map((route, i) => {
+        {/* Routes — same rendering logic as RouteLayer.tsx (wait for rail geometries to avoid bezier flash) */}
+        {railLoaded && operatorRoutes.map((route, i) => {
           // Try rail geometry first (both key orders) — exact same logic as RouteLayer
           const key1 = `${route.from}||${route.to}`;
           const key2 = `${route.to}||${route.from}`;
