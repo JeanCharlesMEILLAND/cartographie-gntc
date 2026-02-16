@@ -38,8 +38,9 @@ function normalizeYesNo(raw: string): string {
   return 'Non';
 }
 
-/** Parse a CSV string (semicolon or comma separated) into Service objects */
-export function parseCsvServices(csvText: string): CsvImportResult {
+/** Parse a CSV string (semicolon or comma separated) into Service objects.
+ *  If defaultOperator is provided, the "Opérateur" column becomes optional. */
+export function parseCsvServices(csvText: string, defaultOperator?: string): CsvImportResult {
   const lines = csvText.split(/\r?\n/).filter((l) => l.trim());
   if (lines.length < 2) {
     return { services: [], errors: ['Fichier vide ou sans données'], skipped: 0 };
@@ -76,7 +77,7 @@ export function parseCsvServices(csvText: string): CsvImportResult {
   let skipped = 0;
 
   // Check required fields
-  if (colMap.operator === undefined) errors.push('Colonne "Opérateur" non trouvée');
+  if (colMap.operator === undefined && !defaultOperator) errors.push('Colonne "Opérateur" non trouvée');
   if (colMap.from === undefined) errors.push('Colonne "Départ" non trouvée');
   if (colMap.to === undefined) errors.push('Colonne "Destination" non trouvée');
 
@@ -85,7 +86,7 @@ export function parseCsvServices(csvText: string): CsvImportResult {
   for (let i = 1; i < lines.length; i++) {
     const cells = lines[i].split(sep).map((c) => c.trim().replace(/^"(.*)"$/, '$1'));
 
-    const operator = cells[colMap.operator]?.trim();
+    const operator = colMap.operator !== undefined ? cells[colMap.operator]?.trim() : defaultOperator;
     const from = cells[colMap.from]?.trim();
     const to = cells[colMap.to]?.trim();
 

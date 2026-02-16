@@ -1,14 +1,14 @@
 import { auth } from '@/lib/auth';
-import { redirect } from 'next/navigation';
 import DashboardClient from './DashboardClient';
+import OperatorDashboardClient from './OperatorDashboardClient';
 
 export default async function AdminRootPage() {
   const session = await auth();
+  const isAdmin = (session?.user as Record<string, unknown>)?.role === 'admin';
 
-  // Operators get redirected to their activity dashboard
-  if ((session?.user as Record<string, unknown>)?.role !== 'admin') {
-    redirect('/admin/activite');
+  if (isAdmin) {
+    return <DashboardClient />;
   }
 
-  return <DashboardClient />;
+  return <OperatorDashboardClient />;
 }

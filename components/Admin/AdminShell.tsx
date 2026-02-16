@@ -65,19 +65,7 @@ function AdminHeader() {
 
         {/* Droite */}
         <div className="flex items-center gap-3">
-          {!isAdmin && (
-            <a
-              href="/admin/profil"
-              className="flex items-center gap-1.5 text-xs text-muted hover:text-blue transition-colors"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              Mon profil
-            </a>
-          )}
-          <span className="text-xs text-muted">{session?.user?.email}</span>
+          <span className="text-xs text-muted hidden sm:inline">{session?.user?.email}</span>
           {message && (
             <span className={`text-xs ${message.includes('Erreur') ? 'text-red-400' : 'text-green-400'}`}>
               {message}
