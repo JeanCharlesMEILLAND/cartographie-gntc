@@ -2,14 +2,15 @@
 
 import { useState, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { TransportData } from '@/lib/types';
+import Link from 'next/link';
+import { TransportData, Service } from '@/lib/types';
 import { useAdminNav } from '@/lib/useAdminNav';
 import { exportServices } from '@/lib/exportCsv';
 import { parseCsvServices } from '@/lib/importCsv';
 import FilterSelect from './shared/FilterSelect';
 import { MaterialDot } from './shared/MaterialBadge';
 
-const COLS = [
+const ALL_COLS = [
   { key: 'operator', label: 'Opérateur', width: 'min-w-[120px]' },
   { key: 'from', label: 'Départ', width: 'min-w-[150px]' },
   { key: 'to', label: 'Destination', width: 'min-w-[150px]' },
@@ -25,6 +26,7 @@ const COLS = [
 ] as const;
 
 const MATERIAL_COLS = new Set(['acceptsCM', 'acceptsCont', 'acceptsSemiPre', 'acceptsSemiNon', 'acceptsP400']);
+const DAYS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
 
 interface Props {
   data: TransportData;
@@ -32,6 +34,11 @@ interface Props {
   saving: boolean;
   userOperator?: string;
 }
+
+const EMPTY_NEW_SERVICE = {
+  from: '', to: '', dayDep: 'Lu', timeDep: '', dayArr: 'Lu', timeArr: '',
+  acceptsCM: 'Non', acceptsCont: 'Non', acceptsSemiPre: 'Non', acceptsSemiNon: 'Non', acceptsP400: 'Non',
+};
 
 export default function FluxTable({ data, onSave, saving, userOperator }: Props) {
   const searchParams = useSearchParams();
@@ -48,6 +55,14 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
   const perPage = 50;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importResult, setImportResult] = useState<{ added: number; errors: string[] } | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newService, setNewService] = useState({ ...EMPTY_NEW_SERVICE });
+
+  // Hide operator column for operators
+  const COLS = useMemo(() => {
+    if (userOperator) return ALL_COLS.filter((c) => c.key !== 'operator');
+    return ALL_COLS;
+  }, [userOperator]);
 
   // Apply external operator filter from store navigation
   const effectiveOperatorFilter = userOperator || fluxOperatorFilter || filterOperator;
@@ -72,6 +87,11 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
   const dayList = useMemo(
     () => [...new Set(baseServices.map((s) => s.dayDep).filter(Boolean))].sort(),
     [baseServices]
+  );
+
+  const platformNames = useMemo(
+    () => data.platforms.map((p) => p.site).sort(),
+    [data.platforms]
   );
 
   const filtered = useMemo(() => {
@@ -116,13 +136,35 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
     setEditCell(null);
   };
 
+  const handleDelete = (service: Service) => {
+    const realIndex = data.services.findIndex(
+      (s) => s.operator === service.operator && s.from === service.from && s.to === service.to && s.dayDep === service.dayDep && s.timeDep === service.timeDep
+    );
+    if (realIndex === -1) return;
+    const updated = { ...data };
+    updated.services = data.services.filter((_, i) => i !== realIndex);
+    onSave(updated);
+  };
+
+  const handleAddService = () => {
+    if (!newService.from || !newService.to) return;
+    const operator = userOperator || '';
+    if (!operator && !userOperator) return;
+    const svc: Service = { operator, ...newService };
+    const updated = { ...data };
+    updated.services = [...data.services, svc];
+    onSave(updated);
+    setNewService({ ...EMPTY_NEW_SERVICE });
+    setShowAddForm(false);
+  };
+
   const handleCsvImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
       const text = reader.result as string;
-      const result = parseCsvServices(text);
+      const result = parseCsvServices(text, userOperator);
       if (result.errors.length > 0) {
         setImportResult({ added: 0, errors: result.errors });
         return;
@@ -162,8 +204,11 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
 
   const hasFilters = effectiveOperatorFilter || filterFrom || filterTo || filterDay || search;
 
+  const selectCls = 'text-[10px] bg-white border border-border rounded px-1.5 py-1 text-text focus:outline-none focus:border-blue/40';
+  const inputCls = 'text-[10px] bg-white border border-border rounded px-1.5 py-1 text-text font-mono focus:outline-none focus:border-blue/40 w-16';
+
   return (
-    <div>
+    <div className="pb-20 md:pb-0">
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-3">
         <input
@@ -193,6 +238,24 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
           </button>
         )}
         <span className="text-[10px] text-muted ml-auto">{filtered.length} / {baseServices.length} services</span>
+
+        {/* Add service button */}
+        {userOperator && (
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className={`text-xs px-3 py-1.5 rounded-md border transition-colors flex items-center gap-1.5 ${
+              showAddForm
+                ? 'border-orange/20 text-orange hover:bg-orange/5'
+                : 'border-cyan/20 text-cyan hover:bg-cyan/5'
+            }`}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              {showAddForm ? <path d="M3 7H11" /> : <><path d="M7 3V11" /><path d="M3 7H11" /></>}
+            </svg>
+            {showAddForm ? 'Annuler' : 'Ajouter'}
+          </button>
+        )}
+
         <button
           onClick={() => exportServices(filtered)}
           className="text-xs px-3 py-1.5 rounded-md border border-cyan/20 text-cyan hover:bg-cyan/5 transition-colors flex items-center gap-1.5"
@@ -218,7 +281,90 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
             </button>
           </>
         )}
+        {userOperator && (
+          <Link
+            href="/admin/import"
+            className="text-xs px-3 py-1.5 rounded-md border border-blue/20 text-blue hover:bg-blue/5 transition-colors flex items-center gap-1.5"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            Import CSV
+          </Link>
+        )}
       </div>
+
+      {/* Add service form */}
+      {showAddForm && userOperator && (
+        <div className="mb-3 glass-panel rounded-lg p-3 border border-cyan/20">
+          <div className="flex flex-wrap items-end gap-2">
+            <div>
+              <label className="text-[9px] text-muted block mb-0.5">Départ</label>
+              <select
+                value={newService.from}
+                onChange={(e) => setNewService({ ...newService, from: e.target.value })}
+                className={selectCls + ' w-40'}
+              >
+                <option value="">— Choisir —</option>
+                {platformNames.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[9px] text-muted block mb-0.5">Destination</label>
+              <select
+                value={newService.to}
+                onChange={(e) => setNewService({ ...newService, to: e.target.value })}
+                className={selectCls + ' w-40'}
+              >
+                <option value="">— Choisir —</option>
+                {platformNames.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[9px] text-muted block mb-0.5">J.Dép</label>
+              <select value={newService.dayDep} onChange={(e) => setNewService({ ...newService, dayDep: e.target.value })} className={selectCls}>
+                {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[9px] text-muted block mb-0.5">HLR</label>
+              <input value={newService.timeDep} onChange={(e) => setNewService({ ...newService, timeDep: e.target.value })} placeholder="08:30" className={inputCls} />
+            </div>
+            <div>
+              <label className="text-[9px] text-muted block mb-0.5">J.Arr</label>
+              <select value={newService.dayArr} onChange={(e) => setNewService({ ...newService, dayArr: e.target.value })} className={selectCls}>
+                {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[9px] text-muted block mb-0.5">MAD</label>
+              <input value={newService.timeArr} onChange={(e) => setNewService({ ...newService, timeArr: e.target.value })} placeholder="14:00" className={inputCls} />
+            </div>
+            {['CM', 'Cont', 'S.Pr', 'S.NP', 'P400'].map((label, idx) => {
+              const keys = ['acceptsCM', 'acceptsCont', 'acceptsSemiPre', 'acceptsSemiNon', 'acceptsP400'] as const;
+              const key = keys[idx];
+              return (
+                <label key={key} className="flex items-center gap-1 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newService[key] === 'Oui'}
+                    onChange={(e) => setNewService({ ...newService, [key]: e.target.checked ? 'Oui' : 'Non' })}
+                    className="accent-cyan w-3 h-3"
+                  />
+                  <span className="text-[9px] text-muted">{label}</span>
+                </label>
+              );
+            })}
+            <button
+              onClick={handleAddService}
+              disabled={!newService.from || !newService.to || saving}
+              className="text-[10px] px-3 py-1.5 rounded-md bg-cyan text-white hover:bg-cyan/90 transition-colors disabled:opacity-40"
+            >
+              Ajouter
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Import result */}
       {importResult && (
@@ -233,6 +379,14 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
         </div>
       )}
 
+      {/* Edit hint */}
+      <div className="flex items-center gap-1.5 mb-2 text-[10px] text-muted">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8.5 1.5L10.5 3.5L4 10H2V8L8.5 1.5Z" />
+        </svg>
+        Double-cliquez sur une cellule pour la modifier
+      </div>
+
       <div className="overflow-x-auto border border-border rounded-lg">
         <table className="w-full text-xs">
           <thead>
@@ -242,27 +396,28 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
                   {col.label}
                 </th>
               ))}
+              <th className="w-8 px-1 py-2"></th>
             </tr>
           </thead>
           <tbody>
             {pageData.map((service, i) => (
-              <tr key={`${service.from}-${service.to}-${service.dayDep}-${i}`} className="border-t border-border hover:bg-blue/5">
+              <tr key={`${service.from}-${service.to}-${service.dayDep}-${service.timeDep}-${i}`} className="border-t border-border hover:bg-blue/5 group">
                 {COLS.map((col) => {
                   const value = String((service as unknown as Record<string, unknown>)[col.key] || '');
                   const isEditing = editCell?.row === i && editCell?.col === col.key;
                   const isMaterial = MATERIAL_COLS.has(col.key);
-                  const isClickable = col.key === 'from' || col.key === 'to';
+                  const isClickable = !userOperator && (col.key === 'from' || col.key === 'to');
 
                   if (isMaterial && !isEditing) {
                     return (
-                      <td key={col.key} className={`px-2 py-1.5 text-center ${col.width}`} onDoubleClick={() => startEdit(i, col.key, value)}>
+                      <td key={col.key} className={`px-2 py-1.5 text-center cursor-pointer hover:bg-blue/10 transition-colors ${col.width}`} onDoubleClick={() => startEdit(i, col.key, value)} title="Double-clic pour modifier">
                         <MaterialDot value={value} />
                       </td>
                     );
                   }
 
                   return (
-                    <td key={col.key} className={`px-2 py-1.5 ${col.width}`} onDoubleClick={() => startEdit(i, col.key, value)}>
+                    <td key={col.key} className={`px-2 py-1.5 cursor-pointer hover:bg-blue/10 transition-colors ${col.width}`} onDoubleClick={() => startEdit(i, col.key, value)} title="Double-clic pour modifier">
                       {isEditing ? (
                         <input
                           autoFocus
@@ -288,6 +443,17 @@ export default function FluxTable({ data, onSave, saving, userOperator }: Props)
                     </td>
                   );
                 })}
+                <td className="px-1 py-1.5 w-8">
+                  <button
+                    onClick={() => handleDelete(service)}
+                    className="opacity-0 group-hover:opacity-100 text-muted hover:text-orange transition-all"
+                    title="Supprimer ce service"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                      <path d="M2 3H10M4 3V2H8V3M5 5V9M7 5V9M3 3L3.5 10H8.5L9 3" />
+                    </svg>
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
