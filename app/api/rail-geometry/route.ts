@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 import { railGeometrySchema, parseBody } from '@/lib/validations';
+import { readRailGeometries, writeRailGeometries } from '@/lib/db/transportData';
 
 const BROUTER_URL = 'https://brouter.de/brouter';
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
-const GEO_PATH = path.join(process.cwd(), 'public', 'rail-geometries.json');
 
 // Mêmes offsets que fetch-rail-routes-v2.mjs
 const MICRO_OFFSETS: [number, number][] = [
@@ -92,8 +90,7 @@ export async function POST(req: Request) {
     const reverseKey = `${to}||${from}`;
 
     // Vérifier si déjà existant
-    let existing: Record<string, [number, number][]> = {};
-    try { existing = JSON.parse(fs.readFileSync(GEO_PATH, 'utf-8')); } catch { /* empty */ }
+    const existing = await readRailGeometries();
     if (existing[key] || existing[reverseKey]) {
       return NextResponse.json({ key, geometry: existing[key] || existing[reverseKey], cached: true });
     }
@@ -157,9 +154,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ key, geometry: null, error: 'No rail route found' });
     }
 
-    // Sauvegarder dans le fichier pour persistance
+    // Sauvegarder dans la base de données
     existing[key] = geometry;
-    fs.writeFileSync(GEO_PATH, JSON.stringify(existing), 'utf-8');
+    await writeRailGeometries(existing);
 
     return NextResponse.json({ key, geometry, cached: false });
   } catch (err) {

@@ -4,6 +4,7 @@ import { CircleMarker, Tooltip, Marker, useMapEvents, useMap } from 'react-leafl
 import { useFilterStore } from '@/store/useFilterStore';
 import { useSearchStore } from '@/store/useSearchStore';
 import { Platform, AggregatedRoute } from '@/lib/types';
+import { getOperatorColor } from '@/lib/colors';
 
 import L from 'leaflet';
 import { useMemo, useState } from 'react';
@@ -81,6 +82,23 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
       m.set(r.to, (m.get(r.to) || 0) + r.freq);
     }
     return m;
+  }, [routes]);
+
+  // Per-platform: unique operators and liaison count
+  const platformMeta = useMemo(() => {
+    const ops = new Map<string, Set<string>>();
+    const liaisons = new Map<string, number>();
+    for (const r of routes) {
+      if (!ops.has(r.from)) ops.set(r.from, new Set());
+      if (!ops.has(r.to)) ops.set(r.to, new Set());
+      for (const o of r.operators) {
+        ops.get(r.from)!.add(o);
+        ops.get(r.to)!.add(o);
+      }
+      liaisons.set(r.from, (liaisons.get(r.from) || 0) + 1);
+      liaisons.set(r.to, (liaisons.get(r.to) || 0) + 1);
+    }
+    return { ops, liaisons };
   }, [routes]);
 
   if (!showPlatforms) return null;
@@ -208,12 +226,56 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
               }}
             >
               <Tooltip direction="top" offset={[0, -size]} opacity={0.95}>
-                <div className="text-xs">
-                  <strong>{platform.site}</strong>
-                  <br />
-                  {platform.ville && <span>{platform.ville} — </span>}
-                  <span className="font-mono">{volume} trains/sem</span>
-                </div>
+                {(() => {
+                  const operators = platformMeta.ops.get(platform.site);
+                  const liaisons = platformMeta.liaisons.get(platform.site) || 0;
+                  const opList = operators ? [...operators] : [];
+                  return (
+                    <div className="text-xs min-w-[160px]">
+                      <strong className="text-[13px]">{platform.site}</strong>
+                      {platform.ville && (
+                        <div className="text-[10px] opacity-70 mb-1.5">
+                          {platform.ville}{platform.pays ? ` — ${platform.pays}` : ''}
+                        </div>
+                      )}
+                      <div className="flex gap-3 py-1.5 border-t border-gray-200 mb-1.5" style={{ borderColor: 'rgba(128,128,128,0.2)' }}>
+                        <div className="text-center">
+                          <div className="font-mono font-bold text-[13px]" style={{ color: '#38d9f5' }}>{volume}</div>
+                          <div className="text-[9px] opacity-60">trains/sem</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-mono font-bold text-[13px]" style={{ color: '#587bbd' }}>{liaisons}</div>
+                          <div className="text-[9px] opacity-60">liaisons</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-mono font-bold text-[13px]" style={{ color: '#a78bfa' }}>{opList.length}</div>
+                          <div className="text-[9px] opacity-60">opérateurs</div>
+                        </div>
+                      </div>
+                      {opList.length > 0 && (
+                        <div className="space-y-0.5 mb-1.5">
+                          {opList.slice(0, 4).map((op) => (
+                            <div key={op} className="flex items-center gap-1.5">
+                              <span
+                                className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: getOperatorColor(op) }}
+                              />
+                              <span className="text-[10px] truncate">{op}</span>
+                            </div>
+                          ))}
+                          {opList.length > 4 && (
+                            <div className="text-[10px] opacity-60 ml-3.5">
+                              +{opList.length - 4} autre{opList.length - 4 > 1 ? 's' : ''}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="text-[9px] opacity-50 text-center pt-1 border-t" style={{ borderColor: 'rgba(128,128,128,0.2)' }}>
+                        Cliquer pour voir les détails
+                      </div>
+                    </div>
+                  );
+                })()}
               </Tooltip>
             </CircleMarker>
             {showName && labelIcon && (

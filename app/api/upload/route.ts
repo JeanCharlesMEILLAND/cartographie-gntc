@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { parseTransportExcel } from '@/lib/parseExcel';
 import { TransportData } from '@/lib/types';
-import fs from 'fs';
-import path from 'path';
+import { writeTransportData } from '@/lib/db/transportData';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,16 +40,7 @@ export async function POST(request: NextRequest) {
       fileName: file.name,
     };
 
-    // Save to data/current.json
-    const dataDir = path.join(process.cwd(), 'data');
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    fs.writeFileSync(
-      path.join(dataDir, 'current.json'),
-      JSON.stringify(transportData, null, 2),
-      'utf-8'
-    );
+    await writeTransportData(transportData);
 
     return NextResponse.json({
       success: true,

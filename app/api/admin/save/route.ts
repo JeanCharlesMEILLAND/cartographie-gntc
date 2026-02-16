@@ -3,8 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { auditLog } from '@/lib/db/schema';
 import { transportDataSchema, parseBody } from '@/lib/validations';
-import fs from 'fs';
-import path from 'path';
+import { readTransportData, writeTransportData } from '@/lib/db/transportData';
 
 interface ServiceRecord {
   operator: string;
@@ -39,27 +38,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
     const data = parsed.data;
-    const dataDir = path.join(process.cwd(), 'data');
-    const filePath = path.join(dataDir, 'current.json');
 
-    let oldData: { services: ServiceRecord[]; platforms: unknown[] } | null = null;
-    if (fs.existsSync(filePath)) {
-      oldData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    }
+    const oldData = await readTransportData();
+    const hasOldData = oldData.uploadedAt !== '';
 
     // Operator scope validation: only allow modifying own services
-    if (role === 'operator' && userOperator && oldData) {
-      // Check platforms unchanged
-      if (JSON.stringify(oldData.platforms) !== JSON.stringify(data.platforms)) {
-        return NextResponse.json({ error: 'Non autorisé: modification des plateformes interdite' }, { status: 403 });
-      }
+    if (role === 'operator' && userOperator && hasOldData) {
+      // Operators cannot modify platforms: force server-side platforms
+      data.platforms = oldData.platforms;
 
       // Check other operators' services unchanged
-      const otherServicesOld = oldData.services.filter(
-        (s: ServiceRecord) => s.operator !== userOperator
+      const otherServicesOld = (oldData.services as unknown as ServiceRecord[]).filter(
+        (s) => s.operator !== userOperator
       );
-      const otherServicesNew = data.services.filter(
-        (s: ServiceRecord) => s.operator !== userOperator
+      const otherServicesNew = (data.services as unknown as ServiceRecord[]).filter(
+        (s) => s.operator !== userOperator
       );
       if (JSON.stringify(otherServicesOld) !== JSON.stringify(otherServicesNew)) {
         return NextResponse.json({ error: 'Non autorisé: modification hors périmètre' }, { status: 403 });
@@ -67,18 +60,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Compute audit diffs before saving
-    if (oldData) {
+    if (hasOldData) {
       try {
-        await writeAuditLogs(oldData.services, data.services, userId, userName);
+        await writeAuditLogs(oldData.services as unknown as ServiceRecord[], data.services, userId, userName);
       } catch {
         // Audit logging failure should not block the save
       }
     }
 
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    await writeTransportData(data);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Erreur sauvegarde' }, { status: 500 });

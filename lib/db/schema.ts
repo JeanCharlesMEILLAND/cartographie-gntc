@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, serial, varchar, integer } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, serial, varchar, integer, jsonb } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -34,4 +34,18 @@ export const auditLog = pgTable('audit_log', {
   oldValue: text('old_value'),
   newValue: text('new_value'),
   timestamp: timestamp('timestamp').defaultNow().notNull(),
+});
+
+export const transportData = pgTable('transport_data', {
+  id: serial('id').primaryKey(),
+  data: jsonb('data').notNull(),
+  fileName: varchar('file_name', { length: 500 }),
+  uploadedAt: timestamp('uploaded_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const railGeometries = pgTable('rail_geometries', {
+  id: serial('id').primaryKey(),
+  data: jsonb('data').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

@@ -4,8 +4,7 @@ import { db } from '@/lib/db';
 import { operators } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { OPERATOR_COLORS } from '@/lib/colors';
-import fs from 'fs';
-import path from 'path';
+import { readTransportData } from '@/lib/db/transportData';
 
 export async function POST() {
   const session = await auth();
@@ -14,12 +13,11 @@ export async function POST() {
   }
 
   try {
-    const filePath = path.join(process.cwd(), 'data', 'current.json');
-    if (!fs.existsSync(filePath)) {
-      return NextResponse.json({ error: 'Fichier current.json introuvable' }, { status: 404 });
+    const data = await readTransportData();
+    if (!data.uploadedAt) {
+      return NextResponse.json({ error: 'Aucune donnée transport importée' }, { status: 404 });
     }
 
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     const operatorNames: string[] = data.operators || [];
 
     let created = 0;
