@@ -20,6 +20,64 @@ function serviceKey(s: ServiceRecord) {
   return `${s.operator}||${s.from}||${s.to}||${s.dayDep}||${s.timeDep}`;
 }
 
+interface PlatformRecord {
+  site: string;
+  lat: number;
+  lon: number;
+  [key: string]: unknown;
+}
+
+interface RouteRecord {
+  from: string;
+  to: string;
+  fromLat: number;
+  fromLon: number;
+  toLat: number;
+  toLon: number;
+  freq: number;
+  operators: string[];
+}
+
+function rebuildRoutes(services: ServiceRecord[], platforms: PlatformRecord[]): RouteRecord[] {
+  const coordMap = new Map<string, { lat: number; lon: number }>();
+  for (const p of platforms) {
+    if (p.lat && p.lon) coordMap.set(p.site, { lat: p.lat, lon: p.lon });
+  }
+
+  // Group services by sorted site pair
+  const pairMap = new Map<string, { from: string; to: string; operators: Set<string>; freq: number }>();
+  for (const s of services) {
+    if (!s.from || !s.to || s.from === s.to) continue;
+    const key = [s.from, s.to].sort().join('||');
+    let entry = pairMap.get(key);
+    if (!entry) {
+      const [a, b] = key.split('||');
+      entry = { from: a, to: b, operators: new Set(), freq: 0 };
+      pairMap.set(key, entry);
+    }
+    if (s.operator) entry.operators.add(s.operator);
+    entry.freq++;
+  }
+
+  const routes: RouteRecord[] = [];
+  for (const entry of pairMap.values()) {
+    const c1 = coordMap.get(entry.from);
+    const c2 = coordMap.get(entry.to);
+    if (!c1 || !c2) continue;
+    routes.push({
+      from: entry.from,
+      to: entry.to,
+      fromLat: c1.lat,
+      fromLon: c1.lon,
+      toLat: c2.lat,
+      toLon: c2.lon,
+      freq: entry.freq,
+      operators: Array.from(entry.operators),
+    });
+  }
+  return routes;
+}
+
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session) {
@@ -66,6 +124,9 @@ export async function POST(request: NextRequest) {
       if (s.operator) operatorSet.add(s.operator);
     }
     data.operators = Array.from(operatorSet).sort();
+
+    // Rebuild routes from merged services to ensure consistency
+    data.routes = rebuildRoutes(data.services, data.platforms);
 
     // Compute audit diffs before saving
     if (hasOldData) {
