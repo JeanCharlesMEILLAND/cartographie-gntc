@@ -70,6 +70,7 @@ const EMPTY_SERVICE: Omit<Service, 'operator'> = {
 
 const miniSelectCls = 'text-[10px] bg-white border border-border rounded px-1.5 py-1 text-text focus:outline-none focus:border-blue/40';
 const miniInputCls = 'text-[10px] bg-white border border-border rounded px-1.5 py-1 text-text font-mono placeholder:text-muted/50 focus:outline-none focus:border-blue/40 w-14';
+const modalInputCls = 'w-full text-xs bg-white border border-border rounded-md px-3 py-1.5 text-text placeholder:text-muted/50 focus:outline-none focus:border-blue/50';
 
 interface Props {
   data: TransportData;
@@ -91,6 +92,10 @@ export default function OperatorView({ data, operator, onSave, saving }: Props) 
   const [addingSite, setAddingSite] = useState(false);
   const [newSiteTarget, setNewSiteTarget] = useState('');
   const [newSiteFrom, setNewSiteFrom] = useState('');
+  const [showNewPlatformModal, setShowNewPlatformModal] = useState(false);
+  const [newPlatformForm, setNewPlatformForm] = useState({ site: '', ville: '', exploitant: '', groupe: '', departement: '', pays: 'France', lat: '', lon: '' });
+  const [newPlatformChantier, setNewPlatformChantier] = useState(false);
+  const [newPlatformError, setNewPlatformError] = useState('');
   const [extraRailGeo, setExtraRailGeo] = useState<Record<string, [number, number][]>>({});
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -232,13 +237,40 @@ export default function OperatorView({ data, operator, onSave, saving }: Props) 
         acceptsCM: 'Non', acceptsCont: 'Non', acceptsSemiPre: 'Non', acceptsSemiNon: 'Non', acceptsP400: 'Non',
       });
     }
-    saveWithRoutes(newServices);
+    const routes = patchRoutes(data.routes, newServices, data.platforms, operator);
+    onSave({ ...data, services: newServices, routes });
     // Fetch géométrie rail en arrière-plan
     if (from !== to) fetchRailGeometry(from, to);
     setSelectedSite(newSiteTarget);
     setNewSiteTarget('');
     setNewSiteFrom('');
     setAddingSite(false);
+  };
+
+  const handleNewPlatformSubmit = () => {
+    const site = newPlatformForm.site.trim();
+    if (!site) { setNewPlatformError('Le nom du site est requis'); return; }
+    if (data.platforms.some((p) => p.site === site)) { setNewPlatformError('Ce site existe déjà'); return; }
+    const lat = parseFloat(newPlatformForm.lat);
+    const lon = parseFloat(newPlatformForm.lon);
+    if (isNaN(lat) || isNaN(lon)) { setNewPlatformError('Latitude et longitude sont requises'); return; }
+
+    const newPlatform: Platform = {
+      site,
+      ville: newPlatformForm.ville.trim(),
+      exploitant: newPlatformForm.exploitant.trim(),
+      groupe: newPlatformForm.groupe.trim(),
+      departement: newPlatformForm.departement.trim(),
+      pays: newPlatformForm.pays.trim() || 'France',
+      lat, lon,
+      chantierSNCF: newPlatformChantier,
+    };
+
+    // Add platform to data immediately (will be sent with next save)
+    data.platforms = [...data.platforms, newPlatform];
+    setNewSiteTarget(site);
+    setShowNewPlatformModal(false);
+    setNewPlatformError('');
   };
 
   const handleAddSchedule = (from: string, to: string) => {
@@ -318,10 +350,20 @@ export default function OperatorView({ data, operator, onSave, saving }: Props) 
                 <div className="text-[9px] text-muted uppercase tracking-wider font-semibold">Ajouter un site</div>
                 <select
                   value={newSiteTarget}
-                  onChange={(e) => setNewSiteTarget(e.target.value)}
+                  onChange={(e) => {
+                    if (e.target.value === '__NEW__') {
+                      setShowNewPlatformModal(true);
+                      setNewPlatformForm({ site: '', ville: '', exploitant: '', groupe: '', departement: '', pays: 'France', lat: '', lon: '' });
+                      setNewPlatformChantier(false);
+                      setNewPlatformError('');
+                    } else {
+                      setNewSiteTarget(e.target.value);
+                    }
+                  }}
                   className={miniSelectCls + ' w-full'}
                 >
-                  <option value="">Nouveau site...</option>
+                  <option value="">Choisir un site...</option>
+                  <option value="__NEW__">+ Créer un nouveau site...</option>
                   {availableSites.map((n) => <option key={n} value={n}>{n}</option>)}
                 </select>
                 {newSiteTarget && usedSites.size > 0 && (
@@ -667,6 +709,61 @@ export default function OperatorView({ data, operator, onSave, saving }: Props) 
 
 
       {saving && <div className="text-[10px] text-cyan animate-pulse fixed bottom-4 right-4 glass-panel rounded-md px-3 py-1.5">Sauvegarde en cours...</div>}
+
+      {/* Modale création nouveau site */}
+      {showNewPlatformModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowNewPlatformModal(false)} />
+          <div className="relative glass-panel rounded-xl p-5 w-[420px] max-w-[90vw] border border-blue/30 shadow-xl">
+            <h3 className="text-sm font-display font-bold text-text mb-4">Nouveau site</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className="text-[10px] text-muted uppercase block mb-1">Nom du site *</label>
+                <input value={newPlatformForm.site} onChange={(e) => setNewPlatformForm({ ...newPlatformForm, site: e.target.value })} className={modalInputCls} placeholder="Ex: Terminal Lyon Sud" autoFocus />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted uppercase block mb-1">Ville</label>
+                <input value={newPlatformForm.ville} onChange={(e) => setNewPlatformForm({ ...newPlatformForm, ville: e.target.value })} className={modalInputCls} />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted uppercase block mb-1">Département</label>
+                <input value={newPlatformForm.departement} onChange={(e) => setNewPlatformForm({ ...newPlatformForm, departement: e.target.value })} className={modalInputCls} placeholder="Ex: 69" />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted uppercase block mb-1">Exploitant</label>
+                <input value={newPlatformForm.exploitant} onChange={(e) => setNewPlatformForm({ ...newPlatformForm, exploitant: e.target.value })} className={modalInputCls} />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted uppercase block mb-1">Groupe</label>
+                <input value={newPlatformForm.groupe} onChange={(e) => setNewPlatformForm({ ...newPlatformForm, groupe: e.target.value })} className={modalInputCls} />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted uppercase block mb-1">Pays</label>
+                <input value={newPlatformForm.pays} onChange={(e) => setNewPlatformForm({ ...newPlatformForm, pays: e.target.value })} className={modalInputCls} />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-xs text-text cursor-pointer mt-5">
+                  <input type="checkbox" checked={newPlatformChantier} onChange={(e) => setNewPlatformChantier(e.target.checked)} className="rounded" />
+                  Chantier SNCF
+                </label>
+              </div>
+              <div>
+                <label className="text-[10px] text-muted uppercase block mb-1">Latitude *</label>
+                <input type="number" step="any" value={newPlatformForm.lat} onChange={(e) => setNewPlatformForm({ ...newPlatformForm, lat: e.target.value })} className={modalInputCls} placeholder="46.5" />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted uppercase block mb-1">Longitude *</label>
+                <input type="number" step="any" value={newPlatformForm.lon} onChange={(e) => setNewPlatformForm({ ...newPlatformForm, lon: e.target.value })} className={modalInputCls} placeholder="2.3" />
+              </div>
+            </div>
+            {newPlatformError && <p className="text-[10px] text-orange mt-2">{newPlatformError}</p>}
+            <div className="flex gap-2 mt-4">
+              <button onClick={handleNewPlatformSubmit} className="text-xs px-4 py-1.5 rounded-md bg-blue text-white hover:bg-blue/90 transition-colors">Créer le site</button>
+              <button onClick={() => setShowNewPlatformModal(false)} className="text-xs px-3 py-1.5 rounded-md border border-border text-muted hover:text-text transition-colors">Annuler</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -44,8 +44,10 @@ export async function POST(request: NextRequest) {
 
     // Operator scope validation: only allow modifying own services
     if (role === 'operator' && userOperator && hasOldData) {
-      // Operators cannot modify platforms: force server-side platforms
-      data.platforms = oldData.platforms;
+      // Operators can add new platforms but not modify/delete existing ones
+      const serverSites = new Set((oldData.platforms as { site: string }[]).map((p) => p.site));
+      const newPlatforms = data.platforms.filter((p) => !serverSites.has(p.site));
+      data.platforms = [...(oldData.platforms as typeof data.platforms), ...newPlatforms];
 
       // Operators can only modify their own services:
       // keep their services from the client, force all others from the server
