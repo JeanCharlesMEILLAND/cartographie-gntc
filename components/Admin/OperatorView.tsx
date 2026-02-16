@@ -31,10 +31,17 @@ function patchRoutes(existingRoutes: AggregatedRoute[], services: Service[], pla
     routeKeys.add([r.from, r.to].sort().join('||'));
   }
 
-  // 1) Ajouter les routes manquantes
+  // 1) Ajouter les routes manquantes OU ajouter l'opérateur aux routes existantes
   const newRoutes = [...existingRoutes];
   for (const key of activePairs) {
-    if (routeKeys.has(key)) continue;
+    if (routeKeys.has(key)) {
+      // Route existe déjà — s'assurer que cet opérateur est dans la liste
+      const existing = newRoutes.find((r) => [r.from, r.to].sort().join('||') === key);
+      if (existing && !existing.operators.includes(op)) {
+        existing.operators = [...existing.operators, op];
+      }
+      continue;
+    }
     const [a, b] = key.split('||');
     const c1 = coordMap.get(a);
     const c2 = coordMap.get(b);

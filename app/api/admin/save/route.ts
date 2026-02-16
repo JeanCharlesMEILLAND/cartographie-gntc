@@ -60,6 +60,13 @@ export async function POST(request: NextRequest) {
       data.services = [...otherServices, ...myServices] as typeof data.services;
     }
 
+    // Recompute operators list from actual services to keep it in sync
+    const operatorSet = new Set<string>();
+    for (const s of data.services) {
+      if (s.operator) operatorSet.add(s.operator);
+    }
+    data.operators = Array.from(operatorSet).sort();
+
     // Compute audit diffs before saving
     if (hasOldData) {
       try {
