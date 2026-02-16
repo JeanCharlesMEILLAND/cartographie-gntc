@@ -47,16 +47,15 @@ export async function POST(request: NextRequest) {
       // Operators cannot modify platforms: force server-side platforms
       data.platforms = oldData.platforms;
 
-      // Check other operators' services unchanged
-      const otherServicesOld = (oldData.services as unknown as ServiceRecord[]).filter(
+      // Operators can only modify their own services:
+      // keep their services from the client, force all others from the server
+      const myServices = data.services.filter(
+        (s) => s.operator === userOperator
+      );
+      const otherServices = (oldData.services as unknown as ServiceRecord[]).filter(
         (s) => s.operator !== userOperator
       );
-      const otherServicesNew = (data.services as unknown as ServiceRecord[]).filter(
-        (s) => s.operator !== userOperator
-      );
-      if (JSON.stringify(otherServicesOld) !== JSON.stringify(otherServicesNew)) {
-        return NextResponse.json({ error: 'Non autorisé: modification hors périmètre' }, { status: 403 });
-      }
+      data.services = [...otherServices, ...myServices] as typeof data.services;
     }
 
     // Compute audit diffs before saving
