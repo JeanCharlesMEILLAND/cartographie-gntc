@@ -75,14 +75,23 @@ export default function InfoCard({ platforms, routes, services }: InfoCardProps)
     }))
     .sort((a, b) => b.total - a.total);
 
+  // Keep card fully visible between header (58px) and bottom edge
+  const bottomPx = showClock ? 90 : 16;
+  const topReserve = 66; // header + gap
+
   return (
-    <div className={clsx(
-      'absolute left-4 right-4 z-[1000] glass-panel rounded-lg w-auto max-h-[70vh] sm:max-h-[600px] overflow-y-auto',
-      showClock ? 'bottom-[90px] sm:bottom-4' : 'bottom-4',
-      searchOpen
-        ? 'sm:right-auto sm:left-4 sm:w-[380px]'
-        : 'sm:left-auto sm:right-4 sm:w-[380px]'
-    )}>
+    <div
+      className={clsx(
+        'fixed left-4 right-4 z-[1000] glass-panel rounded-lg w-auto overflow-y-auto',
+        showClock ? 'bottom-[90px] sm:bottom-4' : 'bottom-4',
+        searchOpen
+          ? 'sm:right-auto sm:left-4 sm:w-[380px]'
+          : 'sm:left-auto sm:right-4 sm:w-[380px]'
+      )}
+      style={{
+        maxHeight: `calc(100dvh - ${topReserve + bottomPx}px)`,
+      }}
+    >
       {/* Header */}
       <div className="flex items-start justify-between p-3 border-b border-border sticky top-0 glass-panel z-10">
         <div>
