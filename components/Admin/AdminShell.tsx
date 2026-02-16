@@ -103,13 +103,21 @@ function AdminHeader() {
   );
 }
 
+function AccentBar() {
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as Record<string, unknown>)?.role === 'admin';
+  if (!isAdmin) return null;
+  return <div className="h-[2px] gntc-gradient" />;
+}
+
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <AdminProvider>
       <div className="min-h-screen bg-bg text-text">
         <AdminHeader />
+        <AccentBar />
         <AdminNav />
-        <div className="p-4">{children}</div>
+        <div className="p-4 md:p-6">{children}</div>
       </div>
     </AdminProvider>
   );

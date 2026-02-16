@@ -13,6 +13,14 @@ function IconBarChart() {
     </svg>
   );
 }
+function IconMapPin() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 6C11 9.5 7 13 7 13S3 9.5 3 6C3 3.79 4.79 2 7 2C9.21 2 11 3.79 11 6Z" />
+      <circle cx="7" cy="6" r="1.5" />
+    </svg>
+  );
+}
 function IconMap() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
@@ -45,6 +53,33 @@ function IconUser() {
     </svg>
   );
 }
+function IconGroup() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="5" cy="4" r="2" />
+      <path d="M1 11C1 9 2.8 7.5 5 7.5C7.2 7.5 9 9 9 11" />
+      <circle cx="10" cy="4.5" r="1.5" />
+      <path d="M10 7.5C11.7 7.5 13 8.8 13 10.5" />
+    </svg>
+  );
+}
+function IconUserPlus() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="6" cy="4.5" r="2.5" />
+      <path d="M1.5 12.5C1.5 10 3.5 8 6 8C8.5 8 10.5 10 10.5 12.5" />
+      <path d="M11.5 4V7.5M10 5.75H13" />
+    </svg>
+  );
+}
+function IconClock() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="7" cy="7" r="5.5" />
+      <path d="M7 4V7L9 8.5" />
+    </svg>
+  );
+}
 
 export default function AdminNav() {
   const pathname = usePathname();
@@ -56,11 +91,11 @@ export default function AdminNav() {
 
   const adminLinks = [
     { href: '/admin', label: 'Tableau de bord', icon: IconBarChart },
-    { href: '/admin/plateformes', label: `Plateformes${data ? ` (${data.platforms.length})` : ''}`, icon: IconMap },
-    { href: '/admin/operateurs', label: `Opérateurs${data ? ` (${data.operators.length})` : ''}`, icon: IconUser },
+    { href: '/admin/plateformes', label: `Plateformes${data ? ` (${data.platforms.length})` : ''}`, icon: IconMapPin },
+    { href: '/admin/operateurs', label: `Opérateurs${data ? ` (${data.operators.length})` : ''}`, icon: IconGroup },
     { href: '/admin/flux', label: `Flux${data ? ` (${data.services.length})` : ''}`, icon: IconTable },
-    { href: '/admin/utilisateurs', label: 'Utilisateurs', icon: IconUser },
-    { href: '/admin/historique', label: 'Historique', icon: IconBarChart },
+    { href: '/admin/utilisateurs', label: 'Utilisateurs', icon: IconUserPlus },
+    { href: '/admin/historique', label: 'Historique', icon: IconClock },
   ];
 
   const opServiceCount = data && userOperator
