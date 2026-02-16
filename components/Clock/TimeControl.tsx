@@ -102,6 +102,16 @@ export default function TimeControl({ trainCount }: TimeControlProps) {
 
   return (
     <div className="absolute bottom-2 sm:bottom-4 left-2 right-2 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[1001] glass-panel rounded-lg px-2 sm:px-4 py-2 sm:py-2.5 sm:max-w-[720px] sm:w-auto">
+      {/* Disclaimer */}
+      <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" className="flex-shrink-0 text-orange">
+          <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
+          <path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+        <span className="text-[9px] text-muted leading-tight">
+          Simulation basée sur les horaires théoriques — ne reflète pas les retards ou annulations
+        </span>
+      </div>
       {/* Mobile: 2 rows / Desktop: 1 row */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
         {/* Row 1: Controls */}
@@ -150,10 +160,13 @@ export default function TimeControl({ trainCount }: TimeControlProps) {
                 ? 'border-red-400/50 bg-red-500/10 text-red-600'
                 : 'border-border text-muted hover:text-blue hover:border-blue/30'
             }`}
-            title="Temps réel"
+            title="Caler sur l'heure actuelle"
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${clockLive ? 'bg-red-500 animate-pulse' : 'bg-red-400/50'}`} />
-            Live
+            <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="flex-shrink-0">
+              <circle cx="7" cy="7" r="5" />
+              <path d="M7 4.5V7l2 1.5" />
+            </svg>
+            Maintenant
           </button>
 
           {/* Close */}

@@ -278,12 +278,13 @@ export default function Home() {
                 ? 'text-cyan border-cyan/30 bg-cyan/10'
                 : 'text-blue hover:text-cyan border-border hover:border-blue/30'
             }`}
-            title="Trafic en direct"
+            title="Simulation horaire"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
-              <path d="M2 10V8M5 10V5M8 10V3M11 10V6" />
+              <circle cx="7" cy="7" r="5.5" />
+              <path d="M7 4v3.5l2.5 1.5" />
             </svg>
-            <span className="text-[9px] sm:text-xs"><span className="sm:hidden">Live</span><span className="hidden sm:inline">Trafic live</span></span>
+            <span className="text-[9px] sm:text-xs"><span className="sm:hidden">Horaires</span><span className="hidden sm:inline">Simulation horaire</span></span>
           </button>
 
           {/* Export button */}
