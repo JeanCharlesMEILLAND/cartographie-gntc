@@ -7,6 +7,8 @@ import {
   findPlatformsAsync,
   findRoutes,
   FoundRoute,
+  haversineKm,
+  geocodeCity,
 } from '@/lib/routeFinder';
 import { getOperatorContact } from '@/lib/operatorContacts';
 import { useSearchStore } from '@/store/useSearchStore';
@@ -79,6 +81,87 @@ function cleanCityName(raw: string): string {
     .replace(/\b(mes|les|des|nos|vos|leurs|du|de la|poires|marchandises|produits|colis|palettes|conteneurs|containers|camions|lots)\b/gi, '')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+// Detect proximity queries: "plateforme proche de X", "à partir de X", "depuis X", etc.
+function parseProximityQuery(text: string): string | null {
+  const normalized = text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
+  const patterns = [
+    /(?:plateforme|terminal|gare|site)s?\s+(?:la |le )?(?:plus\s+)?proch(?:e|es)\s+(?:de|d'|du|a|à)\s+(.+?)(?:\s*[?.!]|$)/,
+    /(?:a\s+partir|au\s+depart|depuis)\s+(?:de\s+)?(.+?)(?:\s+(?:quelle|quel|ou|comment|vers|la|le)).*?(?:plateforme|terminal|gare|site)/i,
+    /(?:a\s+partir|au\s+depart|depuis)\s+(?:de\s+)?(.+?)(?:\s*[?.!]|$)/,
+    /(?:transport|transporter|expedier|envoyer).*?(?:a\s+partir|au\s+depart|depuis)\s+(?:de\s+)?(.+?)(?:\s*[?.!]|$)/,
+    /(?:proch(?:e|es)\s+(?:de|d'|du))\s+(.+?)(?:\s*[?.!]|$)/,
+    /(?:autour|pres|a\s+cote)\s+(?:de|d'|du)\s+([a-zA-ZÀ-ÿ\s-]+?)(?:\s*[,?.!]|\s+(?:ou|quel|comment|le|la|les|il))/,
+    /(?:desser(?:t|vent|vi))\s+(.+?)(?:\s*[?.!]|$)/,
+    /(?:quelle|quel)s?\s+(?:plateforme|terminal|site)s?.*?(?:pour|a|à|pres|proche|depuis|de)\s+(.+?)(?:\s*[?.!]|$)/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = normalized.match(pattern);
+    if (match) {
+      const city = cleanCityName(match[1]);
+      if (city.length >= 2) return city;
+    }
+  }
+
+  return null;
+}
+
+// Find nearest platforms to a city
+async function findNearestPlatforms(
+  city: string,
+  platforms: Platform[],
+  maxResults = 5
+): Promise<{ platform: Platform; distance: number }[]> {
+  // Try geocoding the city
+  const coords = await geocodeCity(city);
+  if (!coords) return [];
+
+  return platforms
+    .map((p) => ({
+      platform: p,
+      distance: Math.round(haversineKm(coords.lat, coords.lon, p.lat, p.lon)),
+    }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, maxResults);
+}
+
+// Format proximity results
+function formatProximityResults(
+  nearest: { platform: Platform; distance: number }[],
+  city: string
+): string {
+  if (nearest.length === 0) {
+    return `Impossible de localiser **${city}**. Vérifiez l'orthographe ou essayez une ville voisine.`;
+  }
+
+  let msg = `Plateformes les plus proches de **${city}** :\n\n`;
+
+  for (let i = 0; i < nearest.length; i++) {
+    const { platform: p, distance } = nearest[i];
+    msg += `**${i + 1}. ${p.site}**\n`;
+    msg += `   ${p.ville} (${p.departement}) — ${distance} km`;
+    if (p.exploitant) msg += ` — ${p.exploitant}`;
+    msg += '\n';
+
+    const contact = getOperatorContact(p.exploitant);
+    if (contact?.phone || contact?.email) {
+      const parts: string[] = [];
+      if (contact.phone) parts.push(contact.phone);
+      if (contact.email) parts.push(contact.email);
+      msg += `   Contact : ${parts.join(' | ')}\n`;
+    }
+    msg += '\n';
+  }
+
+  msg += `Utilisez **"Trouver un transport"** pour chercher un itinéraire depuis l'une de ces plateformes.`;
+  return msg;
 }
 
 // Format route results as a markdown chat message
@@ -218,6 +301,38 @@ export default function ChatWidget({ platforms, services }: ChatWidgetProps) {
           updated[updated.length - 1] = {
             role: 'assistant',
             content: 'Erreur lors de la recherche. Utilisez le bouton **"Trouver un transport"** pour chercher manuellement.',
+          };
+          return updated;
+        });
+      } finally {
+        setStreaming(false);
+      }
+      return;
+    }
+
+    // Check if it's a proximity query ("plateforme proche de X", "à partir de X")
+    const proximityCity = parseProximityQuery(text);
+
+    if (proximityCity && platforms) {
+      setStreaming(true);
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Recherche des plateformes proches...' }]);
+
+      try {
+        const nearest = await findNearestPlatforms(proximityCity, platforms, 5);
+        const formattedCity = proximityCity.charAt(0).toUpperCase() + proximityCity.slice(1);
+        const response = formatProximityResults(nearest, formattedCity);
+
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: 'assistant', content: response };
+          return updated;
+        });
+      } catch {
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            role: 'assistant',
+            content: 'Erreur lors de la recherche. Utilisez la carte pour localiser les plateformes.',
           };
           return updated;
         });
