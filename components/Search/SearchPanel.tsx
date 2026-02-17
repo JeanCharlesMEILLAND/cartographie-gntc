@@ -9,6 +9,8 @@ import {
   getDirectDestinationCities,
   findRoutes,
   getTrainVolume,
+  geocodeCity,
+  haversineKm,
   FoundRoute,
   RouteLeg,
   CitySuggestion,
@@ -382,18 +384,64 @@ function LegDetail({ leg }: { leg: RouteLeg }) {
   );
 }
 
+/** Pre/post road routing info */
+interface RoadRouting {
+  originCity: string;
+  originLat: number;
+  originLon: number;
+  destCity: string;
+  destLat: number;
+  destLon: number;
+}
+
+/** Road segment display (truck icon + city → platform + distance) */
+function RoadSegment({ from, to, distKm }: { from: string; to: string; distKm: number }) {
+  return (
+    <div className="flex items-center gap-1.5 text-[10px] text-muted">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0 text-orange-400">
+        <rect x="1" y="4" width="8" height="6" rx="1" stroke="currentColor" strokeWidth="1" />
+        <path d="M9 6H11.5L13 8V10H9" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="4" cy="11.5" r="1" stroke="currentColor" strokeWidth="0.8" />
+        <circle cx="11" cy="11.5" r="1" stroke="currentColor" strokeWidth="0.8" />
+      </svg>
+      <span className="truncate">
+        <span className="text-text">{from}</span>
+        {' → '}
+        <span className="text-text">{to}</span>
+      </span>
+      <span className="font-mono text-orange-400 flex-shrink-0">{distKm} km</span>
+    </div>
+  );
+}
+
 function RouteCard({
   route,
   index,
   isHighlighted,
   onHighlight,
+  roadRouting,
 }: {
   route: FoundRoute;
   index: number;
   isHighlighted: boolean;
   onHighlight: (i: number | null) => void;
+  roadRouting?: RoadRouting | null;
 }) {
   const [expanded, setExpanded] = useState(false);
+
+  // Calculate pre/post routing distances
+  const firstLeg = route.legs[0];
+  const lastLeg = route.legs[route.legs.length - 1];
+
+  const preRoutingDist = roadRouting
+    ? Math.round(haversineKm(roadRouting.originLat, roadRouting.originLon, firstLeg.fromLat, firstLeg.fromLon))
+    : 0;
+  const postRoutingDist = roadRouting
+    ? Math.round(haversineKm(roadRouting.destLat, roadRouting.destLon, lastLeg.toLat, lastLeg.toLon))
+    : 0;
+
+  const showPreRouting = preRoutingDist > 5;
+  const showPostRouting = postRoutingDist > 5;
 
   return (
     <div
@@ -436,19 +484,40 @@ function RouteCard({
           </div>
         </div>
 
-        {/* Route path */}
-        <div className="flex items-center gap-1 text-xs">
-          {route.legs.map((leg, i) => (
-            <div key={i} className="flex items-center gap-1 min-w-0">
-              {i === 0 && (
-                <span className="text-text font-medium truncate">{leg.from}</span>
-              )}
-              <svg width="12" height="8" viewBox="0 0 12 8" fill="none" className="flex-shrink-0">
-                <path d="M1 4H11M11 4L8 1M11 4L8 7" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ color: getOperatorColor(leg.operator) }} />
-              </svg>
-              <span className="text-text font-medium truncate">{leg.to}</span>
-            </div>
-          ))}
+        {/* Full route path with pre/post routing */}
+        <div className="space-y-1">
+          {/* Pre-routing: truck from origin to departure platform */}
+          {showPreRouting && roadRouting && (
+            <RoadSegment from={roadRouting.originCity} to={firstLeg.from} distKm={preRoutingDist} />
+          )}
+
+          {/* Rail legs */}
+          <div className="flex items-center gap-1 text-xs">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0 text-cyan">
+              <rect x="3" y="1" width="8" height="10" rx="2" stroke="currentColor" strokeWidth="1" />
+              <line x1="3" y1="5" x2="11" y2="5" stroke="currentColor" strokeWidth="0.8" />
+              <circle cx="5" cy="13" r="0.8" fill="currentColor" />
+              <circle cx="9" cy="13" r="0.8" fill="currentColor" />
+              <line x1="5" y1="11" x2="5" y2="13" stroke="currentColor" strokeWidth="0.8" />
+              <line x1="9" y1="11" x2="9" y2="13" stroke="currentColor" strokeWidth="0.8" />
+            </svg>
+            {route.legs.map((leg, i) => (
+              <div key={i} className="flex items-center gap-1 min-w-0">
+                {i === 0 && (
+                  <span className="text-text font-medium truncate">{leg.from}</span>
+                )}
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" className="flex-shrink-0">
+                  <path d="M1 4H11M11 4L8 1M11 4L8 7" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ color: getOperatorColor(leg.operator) }} />
+                </svg>
+                <span className="text-text font-medium truncate">{leg.to}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Post-routing: truck from arrival platform to destination */}
+          {showPostRouting && roadRouting && (
+            <RoadSegment from={lastLeg.to} to={roadRouting.destCity} distKm={postRoutingDist} />
+          )}
         </div>
 
         {/* Operators */}
@@ -539,6 +608,7 @@ function RouteCard({
 
 export default function SearchPanel({ platforms, services, routes }: SearchPanelProps) {
   const [formCollapsed, setFormCollapsed] = useState(false);
+  const [roadRouting, setRoadRouting] = useState<RoadRouting | null>(null);
   const {
     searchOpen,
     setSearchOpen,
@@ -627,6 +697,24 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
       setResults([]);
       setSearching(false);
       return;
+    }
+
+    // Geocode origin/destination cities for pre/post routing display
+    const [originGeo, destGeo] = await Promise.all([
+      geocodeCity(departureQuery),
+      geocodeCity(arrivalQuery),
+    ]);
+    if (originGeo && destGeo) {
+      setRoadRouting({
+        originCity: departureCitySuggestion?.city || departureQuery,
+        originLat: originGeo.lat,
+        originLon: originGeo.lon,
+        destCity: arrivalCitySuggestion?.city || arrivalQuery,
+        destLat: destGeo.lat,
+        destLon: destGeo.lon,
+      });
+    } else {
+      setRoadRouting(null);
     }
 
     const found = findRoutes(depPlatforms, arrPlatforms, platforms, services, selectedUTI);
@@ -838,7 +926,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
                 {results.length} solution{results.length > 1 ? 's' : ''} disponible{results.length > 1 ? 's' : ''}
               </span>
               <button
-                onClick={() => { clearSearch(); setFormCollapsed(false); }}
+                onClick={() => { clearSearch(); setFormCollapsed(false); setRoadRouting(null); }}
                 className="text-[10px] text-muted hover:text-orange transition-colors"
               >
                 Effacer
@@ -851,6 +939,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
                 index={i}
                 isHighlighted={highlightedRouteIndex === i}
                 onHighlight={setHighlightedRouteIndex}
+                roadRouting={roadRouting}
               />
             ))}
           </>
