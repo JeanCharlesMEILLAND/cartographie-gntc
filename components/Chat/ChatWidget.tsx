@@ -256,8 +256,8 @@ export default function ChatWidget({ platforms, services }: ChatWidgetProps) {
   const searchLocalRoutes = useCallback(async (from: string, to: string): Promise<FoundRoute[]> => {
     if (!platforms || !services) return [];
 
-    const depSuggestions = await findPlatformsAsync(from, platforms, 5);
-    const arrSuggestions = await findPlatformsAsync(to, platforms, 5);
+    const depSuggestions = await findPlatformsAsync(from, platforms, 5, services);
+    const arrSuggestions = await findPlatformsAsync(to, platforms, 5, services);
 
     const depPlatforms = depSuggestions.map((s) => s.platform);
     const arrPlatforms = arrSuggestions.map((s) => s.platform);

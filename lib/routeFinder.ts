@@ -65,6 +65,16 @@ export interface CitySuggestion {
   distance: number | null; // km if geo-matched, null if text-matched
 }
 
+/** Get the set of all platform names that appear in services (have active traffic) */
+export function getActiveSites(services: Service[]): Set<string> {
+  const sites = new Set<string>();
+  for (const s of services) {
+    sites.add(s.from);
+    sites.add(s.to);
+  }
+  return sites;
+}
+
 /** Find platforms near a geocoded location, sorted by distance */
 export function findPlatformsByLocation(
   lat: number,
@@ -84,13 +94,17 @@ export function findPlatformsByLocation(
     .slice(0, maxResults);
 }
 
-/** Combined search: text matching first, then geocode fallback */
+/** Combined search: text matching first, then geocode fallback.
+ *  When services are provided, ensures results include platforms with active traffic. */
 export async function findPlatformsAsync(
   query: string,
   platforms: Platform[],
-  maxResults = 6
+  maxResults = 6,
+  services?: Service[]
 ): Promise<PlatformSuggestion[]> {
   if (!query.trim() || query.length < 2) return [];
+
+  const activeSites = services ? getActiveSites(services) : null;
 
   // 1. Try text matching first — only keep results with a strong score
   const scored = platforms
@@ -100,14 +114,61 @@ export async function findPlatformsAsync(
     .slice(0, maxResults);
 
   if (scored.length > 0) {
-    return scored.map((s) => ({ platform: s.platform, distance: null, matchType: 'text' as const }));
+    const results = scored.map((s) => ({ platform: s.platform, distance: null, matchType: 'text' as const }));
+
+    // Check if any result has active services
+    if (activeSites && !results.some((r) => activeSites.has(r.platform.site))) {
+      // None of the text-matched platforms have services — find nearest active ones
+      const refPlatform = results[0].platform;
+      const activeNearby = platforms
+        .filter((p) => activeSites.has(p.site))
+        .map((p) => ({
+          platform: p,
+          distance: haversineKm(refPlatform.lat, refPlatform.lon, p.lat, p.lon),
+          matchType: 'geo' as const,
+        }))
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, maxResults);
+      // Merge: original results + nearest active platforms (deduplicated)
+      const seen = new Set(results.map((r) => r.platform.site));
+      for (const ap of activeNearby) {
+        if (!seen.has(ap.platform.site)) {
+          results.push(ap);
+          seen.add(ap.platform.site);
+        }
+      }
+    }
+
+    return results.slice(0, maxResults + 3); // Allow a few extra for active platforms
   }
 
   // 2. Fallback: geocode the city and find nearest platforms by distance
   const coords = await geocodeCity(query);
   if (!coords) return [];
 
-  return findPlatformsByLocation(coords.lat, coords.lon, platforms, maxResults);
+  const geoResults = findPlatformsByLocation(coords.lat, coords.lon, platforms, maxResults);
+
+  // Also ensure some active platforms are included
+  if (activeSites && !geoResults.some((r) => activeSites.has(r.platform.site))) {
+    const activeNearby = platforms
+      .filter((p) => activeSites.has(p.site))
+      .map((p) => ({
+        platform: p,
+        distance: haversineKm(coords.lat, coords.lon, p.lat, p.lon),
+        matchType: 'geo' as const,
+      }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, maxResults);
+    const seen = new Set(geoResults.map((r) => r.platform.site));
+    for (const ap of activeNearby) {
+      if (!seen.has(ap.platform.site)) {
+        geoResults.push(ap);
+        seen.add(ap.platform.site);
+      }
+    }
+  }
+
+  return geoResults.slice(0, maxResults + 3);
 }
 
 /** Combined search grouped by city: text matching first, then geocode fallback */

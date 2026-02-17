@@ -609,7 +609,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
     } else if (departureCitySuggestion) {
       depPlatforms = departureCitySuggestion.platforms;
     } else {
-      const depSuggestions = await findPlatformsAsync(departureQuery, platforms, 5);
+      const depSuggestions = await findPlatformsAsync(departureQuery, platforms, 5, services);
       depPlatforms = depSuggestions.map((s) => s.platform);
     }
 
@@ -618,7 +618,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
     } else if (arrivalCitySuggestion) {
       arrPlatforms = arrivalCitySuggestion.platforms;
     } else {
-      const arrSuggestions = await findPlatformsAsync(arrivalQuery, platforms, 5);
+      const arrSuggestions = await findPlatformsAsync(arrivalQuery, platforms, 5, services);
       arrPlatforms = arrSuggestions.map((s) => s.platform);
     }
 
