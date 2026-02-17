@@ -16,6 +16,7 @@ import { dayTimeToMinutes, getTrainProgress } from '@/lib/trainClock';
 import { exportSynthese } from '@/lib/exportCsv';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import LoadingScreen from '@/components/LoadingScreen';
+import ChatWidget from '@/components/Chat/ChatWidget';
 
 export default function Home() {
   const [data, setData] = useState<TransportData | null>(null);
@@ -254,20 +255,20 @@ export default function Home() {
 
         {/* Action buttons */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          {/* Search button */}
+          {/* Search button — primary CTA */}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
-            className={`flex items-center gap-1.5 text-xs transition-colors px-2 sm:px-3 py-1.5 rounded-md border flex-shrink-0 ${
+            className={`flex items-center gap-1.5 text-xs font-semibold transition-all px-3 sm:px-4 py-2 rounded-lg flex-shrink-0 shadow-sm ${
               searchOpen
-                ? 'text-cyan border-cyan/30 bg-cyan/10'
-                : 'text-blue hover:text-cyan border-border hover:border-blue/30'
+                ? 'gntc-gradient-bg text-white shadow-md'
+                : 'gntc-gradient-bg text-white hover:shadow-md hover:scale-[1.02]'
             }`}
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="2" cy="7" r="1.5" stroke="currentColor" strokeWidth="1" />
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="2" cy="8" r="1.5" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity="0.3" />
             </svg>
-            <span className="text-[9px] sm:text-xs"><span className="sm:hidden">Trajet</span><span className="hidden sm:inline">Planificateur</span></span>
+            <span className="text-[10px] sm:text-xs">Trouver un transport</span>
           </button>
 
           {/* Live traffic button */}
@@ -343,6 +344,13 @@ export default function Home() {
 
       {/* Train Clock */}
       <TimeControl trainCount={clockTrainCount} />
+
+      {/* IA k LEFER Chat Widget */}
+      <ChatWidget
+        platforms={data?.platforms}
+        services={data?.services}
+        routes={filteredRoutes}
+      />
 
       {/* Unmatched platforms warning - only show if significant */}
       {data && data.unmatchedPlatforms.length > 3 && (

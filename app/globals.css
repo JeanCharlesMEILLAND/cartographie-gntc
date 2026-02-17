@@ -238,3 +238,58 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--blue);
 }
+
+/* Chat widget animations */
+.animate-in {
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Chat markdown styling */
+.chat-markdown p {
+  margin: 0.25em 0;
+}
+.chat-markdown p:first-child {
+  margin-top: 0;
+}
+.chat-markdown p:last-child {
+  margin-bottom: 0;
+}
+.chat-markdown ul,
+.chat-markdown ol {
+  margin: 0.3em 0;
+  padding-left: 1.2em;
+}
+.chat-markdown li {
+  margin: 0.15em 0;
+}
+.chat-markdown strong {
+  font-weight: 600;
+  color: var(--text);
+}
+.chat-markdown a {
+  color: var(--blue);
+  text-decoration: underline;
+}
+.chat-markdown code {
+  background: rgba(88, 123, 189, 0.08);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+.chat-markdown h3,
+.chat-markdown h4 {
+  font-weight: 600;
+  margin: 0.5em 0 0.2em;
+  font-size: 1em;
+}

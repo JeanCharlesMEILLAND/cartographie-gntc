@@ -677,18 +677,23 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
   return (
     <div className="absolute top-[50px] right-0 bottom-0 z-[999] glass-panel w-[320px] sm:w-[360px] flex flex-col transition-transform duration-300">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-border">
-        <h2 className="text-sm font-display font-semibold text-blue uppercase tracking-wider">
-          Planificateur
-        </h2>
-        <button
-          onClick={() => setSearchOpen(false)}
-          className="text-muted hover:text-text transition-colors p-1"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </button>
+      <div className="p-3 pb-2 border-b border-border">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-sm font-display font-bold gntc-gradient">
+            Trouver un transport
+          </h2>
+          <button
+            onClick={() => setSearchOpen(false)}
+            className="text-muted hover:text-text transition-colors p-1"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+        <p className="text-[10px] text-muted leading-snug">
+          Indiquez votre point de départ et d&apos;arrivée pour découvrir les solutions de transport combiné disponibles.
+        </p>
       </div>
 
       {/* Search form */}
@@ -696,7 +701,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
         {/* Departure */}
         <div>
           <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
-            Ville de depart
+            D&apos;où partent vos marchandises ?
           </label>
           <CityInput
             value={departureQuery}
@@ -727,7 +732,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
         {/* Arrival */}
         <div>
           <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
-            Ville d&apos;arrivee
+            Où doivent-elles arriver ?
           </label>
           <CityInput
             value={arrivalQuery}
@@ -746,7 +751,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
         {/* UTI Filter */}
         <div>
           <label className="text-[10px] text-muted uppercase tracking-wider mb-1.5 block">
-            Type de produit (optionnel)
+            Type de chargement (optionnel)
           </label>
           <div className="flex flex-wrap gap-1.5">
             {UTI_OPTIONS.map((uti) => {
@@ -777,9 +782,9 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
         <button
           onClick={wrappedHandleSearch}
           disabled={!departureQuery.trim() || !arrivalQuery.trim() || searching}
-          className="w-full text-xs py-2 rounded-md bg-blue/20 text-blue hover:bg-blue/30 border border-blue/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-medium"
+          className="w-full text-xs py-2.5 rounded-lg gntc-gradient-bg text-white font-semibold transition-all hover:shadow-md hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:scale-100"
         >
-          {searching ? 'Recherche...' : 'Rechercher un trajet'}
+          {searching ? 'Recherche en cours...' : 'Trouver les solutions disponibles'}
         </button>
       </div>
 
@@ -789,7 +794,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
           <>
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-muted uppercase tracking-wider">
-                {results.length} itineraire{results.length > 1 ? 's' : ''} trouve{results.length > 1 ? 's' : ''}
+                {results.length} solution{results.length > 1 ? 's' : ''} disponible{results.length > 1 ? 's' : ''}
               </span>
               <button
                 onClick={clearSearch}
@@ -811,22 +816,36 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
         )}
 
         {results.length === 0 && !searching && departureQuery && arrivalQuery && (
-          <div className="text-center py-8">
-            <div className="text-muted text-xs">Aucun itineraire trouve</div>
-            <div className="text-[10px] text-muted mt-1">
-              Essayez d&apos;elargir votre recherche ou de modifier le type de produit
+          <div className="text-center py-8 px-4">
+            <div className="text-text text-xs font-medium">Aucune solution trouvée</div>
+            <div className="text-[10px] text-muted mt-1.5 leading-relaxed">
+              Aucune liaison directe ou avec correspondance n&apos;a été trouvée pour ce trajet.
+              Essayez de retirer le filtre de chargement ou de chercher une ville voisine.
             </div>
           </div>
         )}
 
         {!departureQuery && !arrivalQuery && (
-          <div className="text-center py-8">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="mx-auto mb-2 text-muted">
-              <path d="M6 16H26M26 16L20 10M26 16L20 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="6" cy="16" r="3" stroke="currentColor" strokeWidth="1.5" />
+          <div className="text-center py-8 px-4">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="mx-auto mb-3">
+              <rect x="2" y="2" width="36" height="36" rx="8" stroke="url(#gntcGrad)" strokeWidth="1.5" fill="none" />
+              <circle cx="12" cy="20" r="3" stroke="url(#gntcGrad)" strokeWidth="1.5" />
+              <circle cx="28" cy="20" r="3" stroke="url(#gntcGrad)" strokeWidth="1.5" />
+              <path d="M15 20H25" stroke="url(#gntcGrad)" strokeWidth="1.5" strokeDasharray="2 2" />
+              <path d="M10 13L12 11L14 13" stroke="url(#gntcGrad)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M26 27L28 29L30 27" stroke="url(#gntcGrad)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+              <defs>
+                <linearGradient id="gntcGrad" x1="0" y1="0" x2="40" y2="40">
+                  <stop stopColor="#587bbd" />
+                  <stop offset="1" stopColor="#7dc243" />
+                </linearGradient>
+              </defs>
             </svg>
-            <div className="text-xs text-muted">
-              Saisissez une ville de depart et d&apos;arrivee pour trouver les itineraires disponibles
+            <div className="text-xs text-text font-medium mb-1">
+              Trouvez votre solution de transport combiné
+            </div>
+            <div className="text-[10px] text-muted leading-relaxed">
+              Renseignez un point de départ et d&apos;arrivée pour voir les liaisons rail-route, les opérateurs et leurs contacts.
             </div>
           </div>
         )}
