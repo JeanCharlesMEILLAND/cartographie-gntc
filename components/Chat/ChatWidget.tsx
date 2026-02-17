@@ -165,7 +165,13 @@ function formatProximityResults(
 }
 
 // Format route results as a markdown chat message
-function formatRouteResults(routes: FoundRoute[], from: string, to: string): string {
+function formatRouteResults(
+  routes: FoundRoute[],
+  from: string,
+  to: string,
+  originCoords?: { lat: number; lon: number } | null,
+  destCoords?: { lat: number; lon: number } | null
+): string {
   if (routes.length === 0) {
     return `**Aucune solution trouvée** pour le trajet **${from}** → **${to}**.\n\nEssayez avec des villes voisines ou utilisez le bouton **"Trouver un transport"** pour une recherche plus large.`;
   }
@@ -176,11 +182,30 @@ function formatRouteResults(routes: FoundRoute[], from: string, to: string): str
   for (let i = 0; i < maxShow; i++) {
     const r = routes[i];
     const badge = r.type === 'direct' ? 'Direct' : 'Correspondance';
-    const path = r.legs.map((l) => l.from).concat(r.legs[r.legs.length - 1].to).join(' → ');
+    const firstLeg = r.legs[0];
+    const lastLeg = r.legs[r.legs.length - 1];
 
     msg += `**${i + 1}. ${badge}** — ${r.operators.join(', ')}\n`;
-    msg += `${path}\n`;
-    msg += `${r.totalFreq} train${r.totalFreq > 1 ? 's' : ''}/semaine\n`;
+
+    // Pre-routing (first km by truck)
+    if (originCoords) {
+      const preDist = Math.round(haversineKm(originCoords.lat, originCoords.lon, firstLeg.fromLat, firstLeg.fromLon));
+      if (preDist > 5) {
+        msg += `🚛 ${from} → ${firstLeg.from} (${preDist} km par route)\n`;
+      }
+    }
+
+    // Rail legs
+    const path = r.legs.map((l) => l.from).concat(lastLeg.to).join(' → ');
+    msg += `🚂 ${path} — ${r.totalFreq} train${r.totalFreq > 1 ? 's' : ''}/sem\n`;
+
+    // Post-routing (last km by truck)
+    if (destCoords) {
+      const postDist = Math.round(haversineKm(destCoords.lat, destCoords.lon, lastLeg.toLat, lastLeg.toLon));
+      if (postDist > 5) {
+        msg += `🚛 ${lastLeg.to} → ${to} (${postDist} km par route)\n`;
+      }
+    }
 
     // Add operator contact info
     for (const op of r.operators) {
@@ -287,7 +312,11 @@ export default function ChatWidget({ platforms, services }: ChatWidgetProps) {
         const routes = await searchLocalRoutes(routeQuery.from, routeQuery.to);
         const formattedFrom = routeQuery.from.charAt(0).toUpperCase() + routeQuery.from.slice(1);
         const formattedTo = routeQuery.to.charAt(0).toUpperCase() + routeQuery.to.slice(1);
-        const response = formatRouteResults(routes, formattedFrom, formattedTo);
+
+        // Geocode origin/destination for first/last km info
+        const originGeo = await geocodeCity(routeQuery.from);
+        const destGeo = originGeo ? await geocodeCity(routeQuery.to) : null;
+        const response = formatRouteResults(routes, formattedFrom, formattedTo, originGeo, destGeo);
 
         setLastRouteQuery({ from: formattedFrom, to: formattedTo });
         setMessages((prev) => {
