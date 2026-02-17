@@ -114,7 +114,7 @@ export async function findPlatformsAsync(
     .slice(0, maxResults);
 
   if (scored.length > 0) {
-    const results = scored.map((s) => ({ platform: s.platform, distance: null, matchType: 'text' as const }));
+    const results: PlatformSuggestion[] = scored.map((s) => ({ platform: s.platform, distance: null, matchType: 'text' as const }));
 
     // Check if any result has active services
     if (activeSites && !results.some((r) => activeSites.has(r.platform.site))) {
