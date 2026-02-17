@@ -668,6 +668,9 @@ function RouteCard({
 export default function SearchPanel({ platforms, services, routes }: SearchPanelProps) {
   const [formCollapsed, setFormCollapsed] = useState(false);
   const [roadRouting, setRoadRouting] = useState<RoadRouting | null>(null);
+  // Track what the user originally typed (before city dropdown replaces it)
+  const [typedDepCity, setTypedDepCity] = useState('');
+  const [typedArrCity, setTypedArrCity] = useState('');
   const {
     searchOpen,
     setSearchOpen,
@@ -693,6 +696,19 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
     setHighlightedRouteIndex,
     clearSearch,
   } = useSearchStore();
+
+  // Track original typed city names (before dropdown selection replaces them)
+  useEffect(() => {
+    if (!departureCitySuggestion && departureQuery.trim()) {
+      setTypedDepCity(departureQuery);
+    }
+  }, [departureQuery, departureCitySuggestion]);
+
+  useEffect(() => {
+    if (!arrivalCitySuggestion && arrivalQuery.trim()) {
+      setTypedArrCity(arrivalQuery);
+    }
+  }, [arrivalQuery, arrivalCitySuggestion]);
 
   // Compute direct destinations when departure is selected
   const directDestinations = useMemo(() => {
@@ -758,31 +774,36 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
       return;
     }
 
-    // Geocode origin/destination cities for pre/post routing display
-    const [originGeo, destGeo] = await Promise.all([
-      geocodeCity(departureQuery),
-      geocodeCity(arrivalQuery),
-    ]);
-    if (originGeo && destGeo) {
-      setRoadRouting({
-        originCity: departureCitySuggestion?.city || departureQuery,
-        originLat: originGeo.lat,
-        originLon: originGeo.lon,
-        destCity: arrivalCitySuggestion?.city || arrivalQuery,
-        destLat: destGeo.lat,
-        destLon: destGeo.lon,
-      });
-    } else {
-      setRoadRouting(null);
-    }
-
+    // Find routes FIRST (fast, no external API call)
     const found = findRoutes(depPlatforms, arrPlatforms, platforms, services, selectedUTI);
     setResults(found);
     setSearching(false);
-    // Auto-select first result and collapse form to maximize result space
     if (found.length > 0) {
       setHighlightedRouteIndex(0);
       setFormCollapsed(true);
+    }
+
+    // Then geocode origin/destination for road routing display (non-blocking)
+    // Use the ORIGINAL typed city names, not the dropdown-selected platform names
+    const depCityName = typedDepCity || departureQuery;
+    const arrCityName = typedArrCity || arrivalQuery;
+    try {
+      const originGeo = await geocodeCity(depCityName);
+      const destGeo = originGeo ? await geocodeCity(arrCityName) : null; // sequential to respect Nominatim rate limit
+      if (originGeo && destGeo) {
+        setRoadRouting({
+          originCity: depCityName.charAt(0).toUpperCase() + depCityName.slice(1),
+          originLat: originGeo.lat,
+          originLon: originGeo.lon,
+          destCity: arrCityName.charAt(0).toUpperCase() + arrCityName.slice(1),
+          destLat: destGeo.lat,
+          destLon: destGeo.lon,
+        });
+      } else {
+        setRoadRouting(null);
+      }
+    } catch {
+      setRoadRouting(null);
     }
   }, [
     departureQuery, arrivalQuery, selectedUTI, platforms, services,
@@ -855,11 +876,11 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
             className="w-full flex items-center gap-2 text-left group"
           >
             <div className="flex-1 min-w-0 flex items-center gap-1.5 text-xs">
-              <span className="font-medium text-text truncate">{departureQuery || '?'}</span>
+              <span className="font-medium text-text truncate">{typedDepCity || departureQuery || '?'}</span>
               <svg width="14" height="10" viewBox="0 0 14 10" fill="none" className="flex-shrink-0 text-muted">
                 <path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span className="font-medium text-text truncate">{arrivalQuery || '?'}</span>
+              <span className="font-medium text-text truncate">{typedArrCity || arrivalQuery || '?'}</span>
             </div>
             <span className="text-[10px] text-muted group-hover:text-blue transition-colors flex-shrink-0">
               Modifier
@@ -984,7 +1005,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
               {results.length} solution{results.length > 1 ? 's' : ''} disponible{results.length > 1 ? 's' : ''}
             </span>
             <button
-              onClick={() => { clearSearch(); setFormCollapsed(false); setRoadRouting(null); }}
+              onClick={() => { clearSearch(); setFormCollapsed(false); setRoadRouting(null); setTypedDepCity(''); setTypedArrCity(''); }}
               className="text-[10px] text-muted hover:text-orange transition-colors"
             >
               Effacer
