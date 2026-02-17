@@ -244,21 +244,34 @@ function CityInput({
           </button>
         </div>
       ) : (
-        /* State B: No city selected — show input */
-        <input
-          ref={inputRef}
-          type="text"
-          value={value}
-          onChange={(e) => {
-            onChange(e.target.value);
-            setSelectedIndex(-1);
-          }}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setTimeout(() => setFocused(false), 200)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className="w-full text-xs bg-white border border-border rounded-md px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 transition-colors"
-        />
+        /* State B: No city selected — show input with clear button */
+        <div className="relative">
+          <input
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={(e) => {
+              onChange(e.target.value);
+              setSelectedIndex(-1);
+            }}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setTimeout(() => setFocused(false), 200)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            className="w-full text-xs bg-white border border-border rounded-md pl-3 pr-7 py-2 text-text placeholder:text-muted focus:outline-none focus:border-blue/50 transition-colors"
+          />
+          {value.trim() && (
+            <button
+              onClick={() => { onChange(''); setTimeout(() => inputRef.current?.focus(), 50); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-text transition-colors p-0.5"
+              tabIndex={-1}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M3 3L9 9M3 9L9 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
+        </div>
       )}
 
       {/* City suggestions dropdown */}
