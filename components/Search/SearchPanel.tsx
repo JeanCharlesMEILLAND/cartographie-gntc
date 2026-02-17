@@ -538,6 +538,7 @@ function RouteCard({
 }
 
 export default function SearchPanel({ platforms, services, routes }: SearchPanelProps) {
+  const [formCollapsed, setFormCollapsed] = useState(false);
   const {
     searchOpen,
     setSearchOpen,
@@ -631,9 +632,10 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
     const found = findRoutes(depPlatforms, arrPlatforms, platforms, services, selectedUTI);
     setResults(found);
     setSearching(false);
-    // Auto-select first result to show on map
+    // Auto-select first result and collapse form to maximize result space
     if (found.length > 0) {
       setHighlightedRouteIndex(0);
+      setFormCollapsed(true);
     }
   }, [
     departureQuery, arrivalQuery, selectedUTI, platforms, services,
@@ -672,121 +674,160 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
     setArrivalSelectedPlatforms(depPlats);
   };
 
+  // Reset form collapse state when panel reopens with no results
+  useEffect(() => {
+    if (searchOpen && results.length === 0) {
+      setFormCollapsed(false);
+    }
+  }, [searchOpen, results.length]);
+
   if (!searchOpen) return null;
 
   return (
     <div className="absolute top-[50px] right-0 bottom-0 z-[999] glass-panel w-[320px] sm:w-[360px] flex flex-col transition-transform duration-300">
       {/* Header */}
-      <div className="p-3 pb-2 border-b border-border">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-sm font-display font-bold gntc-gradient">
-            Trouver un transport
-          </h2>
-          <button
-            onClick={() => setSearchOpen(false)}
-            className="text-muted hover:text-text transition-colors p-1"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-        <p className="text-[10px] text-muted leading-snug">
-          Indiquez votre point de départ et d&apos;arrivée pour découvrir les solutions de transport combiné disponibles.
-        </p>
-      </div>
-
-      {/* Search form */}
-      <div className="p-3 space-y-3 border-b border-border">
-        {/* Departure */}
-        <div>
-          <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
-            D&apos;où partent vos marchandises ?
-          </label>
-          <CityInput
-            value={departureQuery}
-            onChange={setDepartureQuery}
-            placeholder="Ex: Lyon, Marseille, Paris..."
-            platforms={platforms}
-            routes={routes}
-            selectedCity={departureCitySuggestion}
-            onCitySelect={setDepartureCitySuggestion}
-            selectedPlatforms={departureSelectedPlatforms}
-            onPlatformsChange={setDepartureSelectedPlatforms}
-          />
-        </div>
-
-        {/* Swap button */}
-        <div className="flex justify-center">
-          <button
-            onClick={handleSwap}
-            className="text-muted hover:text-blue transition-colors p-1 rounded-md hover:bg-blue/8"
-            title="Inverser"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M5 3V13M5 13L2 10M5 13L8 10M11 13V3M11 3L8 6M11 3L14 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Arrival */}
-        <div>
-          <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
-            Où doivent-elles arriver ?
-          </label>
-          <CityInput
-            value={arrivalQuery}
-            onChange={setArrivalQuery}
-            placeholder="Ex: Bordeaux, Lille, Fos..."
-            platforms={platforms}
-            routes={routes}
-            selectedCity={arrivalCitySuggestion}
-            onCitySelect={setArrivalCitySuggestion}
-            selectedPlatforms={arrivalSelectedPlatforms}
-            onPlatformsChange={setArrivalSelectedPlatforms}
-            directDestinations={directDestinations}
-          />
-        </div>
-
-        {/* UTI Filter */}
-        <div>
-          <label className="text-[10px] text-muted uppercase tracking-wider mb-1.5 block">
-            Type de chargement (optionnel)
-          </label>
-          <div className="flex flex-wrap gap-1.5">
-            {UTI_OPTIONS.map((uti) => {
-              const active = selectedUTI.has(uti.key);
-              const disabled = availableUTI !== null && !availableUTI.has(uti.key);
-              return (
-                <button
-                  key={uti.key}
-                  onClick={() => !disabled && toggleUTI(uti.key)}
-                  disabled={disabled}
-                  className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${
-                    disabled
-                      ? 'border-border/50 text-muted/40 cursor-not-allowed line-through'
-                      : active
-                        ? 'border-cyan/50 bg-cyan/10 text-cyan'
-                        : 'border-border text-muted hover:text-text hover:border-blue/30'
-                  }`}
-                  title={disabled ? `${uti.desc} — non disponible sur cette liaison` : uti.desc}
-                >
-                  {uti.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Search button */}
+      <div className="px-3 py-2 border-b border-border flex items-center justify-between">
+        <h2 className="text-sm font-display font-bold gntc-gradient">
+          Trouver un transport
+        </h2>
         <button
-          onClick={wrappedHandleSearch}
-          disabled={!departureQuery.trim() || !arrivalQuery.trim() || searching}
-          className="w-full text-xs py-2.5 rounded-lg gntc-gradient-bg text-white font-semibold transition-all hover:shadow-md hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:scale-100"
+          onClick={() => setSearchOpen(false)}
+          className="text-muted hover:text-text transition-colors p-1"
         >
-          {searching ? 'Recherche en cours...' : 'Trouver les solutions disponibles'}
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
         </button>
       </div>
+
+      {/* Collapsed form summary — shown when results are displayed */}
+      {formCollapsed && results.length > 0 ? (
+        <div className="px-3 py-2 border-b border-border">
+          <button
+            onClick={() => setFormCollapsed(false)}
+            className="w-full flex items-center gap-2 text-left group"
+          >
+            <div className="flex-1 min-w-0 flex items-center gap-1.5 text-xs">
+              <span className="font-medium text-text truncate">{departureQuery || '?'}</span>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none" className="flex-shrink-0 text-muted">
+                <path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="font-medium text-text truncate">{arrivalQuery || '?'}</span>
+            </div>
+            <span className="text-[10px] text-muted group-hover:text-blue transition-colors flex-shrink-0">
+              Modifier
+            </span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="flex-shrink-0 text-muted group-hover:text-blue transition-colors">
+              <path d="M9 2.5L10 3.5L4.5 9H3.5V8L9 2.5Z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          {selectedUTI.size > 0 && (
+            <div className="flex gap-1 mt-1">
+              {UTI_OPTIONS.filter((u) => selectedUTI.has(u.key)).map((u) => (
+                <span key={u.key} className="text-[9px] px-1.5 py-0.5 rounded border border-cyan/30 text-cyan bg-cyan/5">{u.label}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Full search form */
+        <div className="p-3 space-y-3 border-b border-border overflow-y-auto max-h-[50vh]">
+          {!formCollapsed && !results.length && (
+            <p className="text-[10px] text-muted leading-snug">
+              Indiquez votre point de départ et d&apos;arrivée pour découvrir les solutions de transport combiné disponibles.
+            </p>
+          )}
+
+          {/* Departure */}
+          <div>
+            <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
+              D&apos;où partent vos marchandises ?
+            </label>
+            <CityInput
+              value={departureQuery}
+              onChange={setDepartureQuery}
+              placeholder="Ex: Lyon, Marseille, Paris..."
+              platforms={platforms}
+              routes={routes}
+              selectedCity={departureCitySuggestion}
+              onCitySelect={setDepartureCitySuggestion}
+              selectedPlatforms={departureSelectedPlatforms}
+              onPlatformsChange={setDepartureSelectedPlatforms}
+            />
+          </div>
+
+          {/* Swap button */}
+          <div className="flex justify-center">
+            <button
+              onClick={handleSwap}
+              className="text-muted hover:text-blue transition-colors p-1 rounded-md hover:bg-blue/8"
+              title="Inverser"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M5 3V13M5 13L2 10M5 13L8 10M11 13V3M11 3L8 6M11 3L14 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Arrival */}
+          <div>
+            <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
+              Où doivent-elles arriver ?
+            </label>
+            <CityInput
+              value={arrivalQuery}
+              onChange={setArrivalQuery}
+              placeholder="Ex: Bordeaux, Lille, Fos..."
+              platforms={platforms}
+              routes={routes}
+              selectedCity={arrivalCitySuggestion}
+              onCitySelect={setArrivalCitySuggestion}
+              selectedPlatforms={arrivalSelectedPlatforms}
+              onPlatformsChange={setArrivalSelectedPlatforms}
+              directDestinations={directDestinations}
+            />
+          </div>
+
+          {/* UTI Filter */}
+          <div>
+            <label className="text-[10px] text-muted uppercase tracking-wider mb-1.5 block">
+              Type de chargement (optionnel)
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {UTI_OPTIONS.map((uti) => {
+                const active = selectedUTI.has(uti.key);
+                const disabled = availableUTI !== null && !availableUTI.has(uti.key);
+                return (
+                  <button
+                    key={uti.key}
+                    onClick={() => !disabled && toggleUTI(uti.key)}
+                    disabled={disabled}
+                    className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${
+                      disabled
+                        ? 'border-border/50 text-muted/40 cursor-not-allowed line-through'
+                        : active
+                          ? 'border-cyan/50 bg-cyan/10 text-cyan'
+                          : 'border-border text-muted hover:text-text hover:border-blue/30'
+                    }`}
+                    title={disabled ? `${uti.desc} — non disponible sur cette liaison` : uti.desc}
+                  >
+                    {uti.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Search button */}
+          <button
+            onClick={wrappedHandleSearch}
+            disabled={!departureQuery.trim() || !arrivalQuery.trim() || searching}
+            className="w-full text-xs py-2.5 rounded-lg gntc-gradient-bg text-white font-semibold transition-all hover:shadow-md hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:scale-100"
+          >
+            {searching ? 'Recherche en cours...' : 'Trouver les solutions disponibles'}
+          </button>
+        </div>
+      )}
 
       {/* Results */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -797,7 +838,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
                 {results.length} solution{results.length > 1 ? 's' : ''} disponible{results.length > 1 ? 's' : ''}
               </span>
               <button
-                onClick={clearSearch}
+                onClick={() => { clearSearch(); setFormCollapsed(false); }}
                 className="text-[10px] text-muted hover:text-orange transition-colors"
               >
                 Effacer
