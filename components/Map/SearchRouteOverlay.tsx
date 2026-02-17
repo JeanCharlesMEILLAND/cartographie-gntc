@@ -66,55 +66,54 @@ export default function SearchRouteOverlay({ railGeometries }: SearchRouteOverla
   return (
     <>
       {/* Pre-routing: road from origin city to departure platform */}
-      {showPreRouting && roadRouting && (
-        <Fragment>
-          {/* Glow */}
-          <Polyline
-            positions={[
-              [roadRouting.originLat, roadRouting.originLon],
-              [firstLeg.fromLat, firstLeg.fromLon],
-            ]}
-            pathOptions={{
-              color: ROAD_COLOR,
-              weight: 10,
-              opacity: 0.15,
-              lineCap: 'round',
-              lineJoin: 'round',
-            }}
-          />
-          {/* Dashed road line */}
-          <Polyline
-            positions={[
-              [roadRouting.originLat, roadRouting.originLon],
-              [firstLeg.fromLat, firstLeg.fromLon],
-            ]}
-            pathOptions={{
-              color: ROAD_COLOR,
-              weight: 4,
-              opacity: 0.9,
-              dashArray: '10, 8',
-              lineCap: 'round',
-              lineJoin: 'round',
-            }}
-          />
-          {/* Origin city marker */}
-          <CircleMarker
-            center={[roadRouting.originLat, roadRouting.originLon]}
-            radius={8}
-            pathOptions={{
-              fillColor: ROAD_COLOR,
-              fillOpacity: 0.9,
-              color: '#fff',
-              weight: 3,
-              opacity: 1,
-            }}
-          >
-            <Tooltip permanent direction="top" offset={[0, -10]} className="search-tooltip">
-              {roadRouting.originCity} ({Math.round(preRoutingDist)} km)
-            </Tooltip>
-          </CircleMarker>
-        </Fragment>
-      )}
+      {showPreRouting && roadRouting && (() => {
+        const prePositions: [number, number][] = roadRouting.preRouteGeometry && roadRouting.preRouteGeometry.length > 0
+          ? roadRouting.preRouteGeometry
+          : [[roadRouting.originLat, roadRouting.originLon], [firstLeg.fromLat, firstLeg.fromLon]];
+        return (
+          <Fragment>
+            {/* Glow */}
+            <Polyline
+              positions={prePositions}
+              pathOptions={{
+                color: ROAD_COLOR,
+                weight: 10,
+                opacity: 0.15,
+                lineCap: 'round',
+                lineJoin: 'round',
+              }}
+            />
+            {/* Dashed road line */}
+            <Polyline
+              positions={prePositions}
+              pathOptions={{
+                color: ROAD_COLOR,
+                weight: 4,
+                opacity: 0.9,
+                dashArray: '10, 8',
+                lineCap: 'round',
+                lineJoin: 'round',
+              }}
+            />
+            {/* Origin city marker */}
+            <CircleMarker
+              center={[roadRouting.originLat, roadRouting.originLon]}
+              radius={8}
+              pathOptions={{
+                fillColor: ROAD_COLOR,
+                fillOpacity: 0.9,
+                color: '#fff',
+                weight: 3,
+                opacity: 1,
+              }}
+            >
+              <Tooltip permanent direction="top" offset={[0, -10]} className="search-tooltip">
+                {roadRouting.originCity} ({Math.round(preRoutingDist)} km)
+              </Tooltip>
+            </CircleMarker>
+          </Fragment>
+        );
+      })()}
 
       {/* Rail legs */}
       {route.legs.map((leg, i) => {
@@ -187,55 +186,54 @@ export default function SearchRouteOverlay({ railGeometries }: SearchRouteOverla
       })}
 
       {/* Post-routing: road from arrival platform to destination city */}
-      {showPostRouting && roadRouting && (
-        <Fragment>
-          {/* Glow */}
-          <Polyline
-            positions={[
-              [lastLeg.toLat, lastLeg.toLon],
-              [roadRouting.destLat, roadRouting.destLon],
-            ]}
-            pathOptions={{
-              color: ROAD_COLOR,
-              weight: 10,
-              opacity: 0.15,
-              lineCap: 'round',
-              lineJoin: 'round',
-            }}
-          />
-          {/* Dashed road line */}
-          <Polyline
-            positions={[
-              [lastLeg.toLat, lastLeg.toLon],
-              [roadRouting.destLat, roadRouting.destLon],
-            ]}
-            pathOptions={{
-              color: ROAD_COLOR,
-              weight: 4,
-              opacity: 0.9,
-              dashArray: '10, 8',
-              lineCap: 'round',
-              lineJoin: 'round',
-            }}
-          />
-          {/* Destination city marker */}
-          <CircleMarker
-            center={[roadRouting.destLat, roadRouting.destLon]}
-            radius={8}
-            pathOptions={{
-              fillColor: ROAD_COLOR,
-              fillOpacity: 0.9,
-              color: '#fff',
-              weight: 3,
-              opacity: 1,
-            }}
-          >
-            <Tooltip permanent direction="top" offset={[0, -10]} className="search-tooltip">
-              {roadRouting.destCity} ({Math.round(postRoutingDist)} km)
-            </Tooltip>
-          </CircleMarker>
-        </Fragment>
-      )}
+      {showPostRouting && roadRouting && (() => {
+        const postPositions: [number, number][] = roadRouting.postRouteGeometry && roadRouting.postRouteGeometry.length > 0
+          ? roadRouting.postRouteGeometry
+          : [[lastLeg.toLat, lastLeg.toLon], [roadRouting.destLat, roadRouting.destLon]];
+        return (
+          <Fragment>
+            {/* Glow */}
+            <Polyline
+              positions={postPositions}
+              pathOptions={{
+                color: ROAD_COLOR,
+                weight: 10,
+                opacity: 0.15,
+                lineCap: 'round',
+                lineJoin: 'round',
+              }}
+            />
+            {/* Dashed road line */}
+            <Polyline
+              positions={postPositions}
+              pathOptions={{
+                color: ROAD_COLOR,
+                weight: 4,
+                opacity: 0.9,
+                dashArray: '10, 8',
+                lineCap: 'round',
+                lineJoin: 'round',
+              }}
+            />
+            {/* Destination city marker */}
+            <CircleMarker
+              center={[roadRouting.destLat, roadRouting.destLon]}
+              radius={8}
+              pathOptions={{
+                fillColor: ROAD_COLOR,
+                fillOpacity: 0.9,
+                color: '#fff',
+                weight: 3,
+                opacity: 1,
+              }}
+            >
+              <Tooltip permanent direction="top" offset={[0, -10]} className="search-tooltip">
+                {roadRouting.destCity} ({Math.round(postRoutingDist)} km)
+              </Tooltip>
+            </CircleMarker>
+          </Fragment>
+        );
+      })()}
     </>
   );
 }

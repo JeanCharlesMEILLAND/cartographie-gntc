@@ -11,6 +11,8 @@ export interface RoadRouting {
   destCity: string;
   destLat: number;
   destLon: number;
+  preRouteGeometry?: [number, number][];  // real road path: origin → first platform
+  postRouteGeometry?: [number, number][]; // real road path: last platform → destination
 }
 
 interface SearchState {

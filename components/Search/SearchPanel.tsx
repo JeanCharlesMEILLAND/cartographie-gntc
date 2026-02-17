@@ -10,6 +10,7 @@ import {
   findRoutes,
   getTrainVolume,
   geocodeCity,
+  fetchRoadRoute,
   haversineKm,
   FoundRoute,
   RouteLeg,
@@ -794,7 +795,30 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
     try {
       const originGeo = await geocodeCity(depCityName);
       const destGeo = originGeo ? await geocodeCity(arrCityName) : null; // sequential to respect Nominatim rate limit
-      if (originGeo && destGeo) {
+      if (originGeo && destGeo && found.length > 0) {
+        const firstLeg = found[0].legs[0];
+        const lastLeg = found[0].legs[found[0].legs.length - 1];
+
+        // Fetch real road routes from OSRM (parallel, separate from Nominatim)
+        const preDist = haversineKm(originGeo.lat, originGeo.lon, firstLeg.fromLat, firstLeg.fromLon);
+        const postDist = haversineKm(destGeo.lat, destGeo.lon, lastLeg.toLat, lastLeg.toLon);
+
+        const [preGeo, postGeo] = await Promise.all([
+          preDist > 5 ? fetchRoadRoute(originGeo.lat, originGeo.lon, firstLeg.fromLat, firstLeg.fromLon) : null,
+          postDist > 5 ? fetchRoadRoute(lastLeg.toLat, lastLeg.toLon, destGeo.lat, destGeo.lon) : null,
+        ]);
+
+        setRoadRouting({
+          originCity: depCityName.charAt(0).toUpperCase() + depCityName.slice(1),
+          originLat: originGeo.lat,
+          originLon: originGeo.lon,
+          destCity: arrCityName.charAt(0).toUpperCase() + arrCityName.slice(1),
+          destLat: destGeo.lat,
+          destLon: destGeo.lon,
+          preRouteGeometry: preGeo || undefined,
+          postRouteGeometry: postGeo || undefined,
+        });
+      } else if (originGeo && destGeo) {
         setRoadRouting({
           originCity: depCityName.charAt(0).toUpperCase() + depCityName.slice(1),
           originLat: originGeo.lat,

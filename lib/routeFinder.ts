@@ -31,6 +31,27 @@ export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: numb
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/** Fetch road route geometry from OSRM (returns lat/lon pairs for the road path) */
+export async function fetchRoadRoute(
+  fromLat: number, fromLon: number,
+  toLat: number, toLon: number
+): Promise<[number, number][] | null> {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${fromLon},${fromLat};${toLon},${toLat}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.routes || data.routes.length === 0) return null;
+    // OSRM returns [lon, lat], convert to [lat, lon] for Leaflet
+    const coords: [number, number][] = data.routes[0].geometry.coordinates.map(
+      (c: [number, number]) => [c[1], c[0]] as [number, number]
+    );
+    return coords;
+  } catch {
+    return null;
+  }
+}
+
 /** Geocode a city name using Nominatim (OpenStreetMap) */
 export async function geocodeCity(query: string): Promise<{ lat: number; lon: number } | null> {
   try {
