@@ -5,6 +5,7 @@ import { Polyline, CircleMarker, Tooltip } from 'react-leaflet';
 import { useSearchStore } from '@/store/useSearchStore';
 import { getBezierPoints } from '@/lib/bezier';
 import { getOperatorColor } from '@/lib/colors';
+import { haversineKm } from '@/lib/routeFinder';
 
 interface SearchRouteOverlayProps {
   railGeometries?: Record<string, [number, number][]>;
@@ -39,15 +40,83 @@ function getPoints(
   return getBezierPoints(fromLat, fromLon, toLat, toLon);
 }
 
+const ROAD_COLOR = '#F59E0B'; // amber/orange for road segments
+const ROAD_MIN_DISTANCE = 5; // km — don't show road segment if < 5km
+
 export default function SearchRouteOverlay({ railGeometries }: SearchRouteOverlayProps) {
-  const { results, highlightedRouteIndex } = useSearchStore();
+  const { results, highlightedRouteIndex, roadRouting } = useSearchStore();
 
   if (highlightedRouteIndex === null || !results[highlightedRouteIndex]) return null;
 
   const route = results[highlightedRouteIndex];
+  const firstLeg = route.legs[0];
+  const lastLeg = route.legs[route.legs.length - 1];
+
+  // Calculate road distances
+  const preRoutingDist = roadRouting
+    ? haversineKm(roadRouting.originLat, roadRouting.originLon, firstLeg.fromLat, firstLeg.fromLon)
+    : 0;
+  const postRoutingDist = roadRouting
+    ? haversineKm(roadRouting.destLat, roadRouting.destLon, lastLeg.toLat, lastLeg.toLon)
+    : 0;
+
+  const showPreRouting = preRoutingDist > ROAD_MIN_DISTANCE;
+  const showPostRouting = postRoutingDist > ROAD_MIN_DISTANCE;
 
   return (
     <>
+      {/* Pre-routing: road from origin city to departure platform */}
+      {showPreRouting && roadRouting && (
+        <Fragment>
+          {/* Glow */}
+          <Polyline
+            positions={[
+              [roadRouting.originLat, roadRouting.originLon],
+              [firstLeg.fromLat, firstLeg.fromLon],
+            ]}
+            pathOptions={{
+              color: ROAD_COLOR,
+              weight: 10,
+              opacity: 0.15,
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
+          />
+          {/* Dashed road line */}
+          <Polyline
+            positions={[
+              [roadRouting.originLat, roadRouting.originLon],
+              [firstLeg.fromLat, firstLeg.fromLon],
+            ]}
+            pathOptions={{
+              color: ROAD_COLOR,
+              weight: 4,
+              opacity: 0.9,
+              dashArray: '10, 8',
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
+          />
+          {/* Origin city marker */}
+          <CircleMarker
+            center={[roadRouting.originLat, roadRouting.originLon]}
+            radius={8}
+            pathOptions={{
+              fillColor: ROAD_COLOR,
+              fillOpacity: 0.9,
+              color: '#fff',
+              weight: 3,
+              opacity: 1,
+            }}
+          >
+            <Tooltip permanent direction="top" offset={[0, -10]} className="search-tooltip">
+              {roadRouting.originCity} ({Math.round(preRoutingDist)} km)
+            </Tooltip>
+          </CircleMarker>
+        </Fragment>
+      )}
+
+      {/* Rail legs */}
       {route.legs.map((leg, i) => {
         const color = getOperatorColor(leg.operator);
         const points = getPoints(
@@ -116,6 +185,57 @@ export default function SearchRouteOverlay({ railGeometries }: SearchRouteOverla
           </Fragment>
         );
       })}
+
+      {/* Post-routing: road from arrival platform to destination city */}
+      {showPostRouting && roadRouting && (
+        <Fragment>
+          {/* Glow */}
+          <Polyline
+            positions={[
+              [lastLeg.toLat, lastLeg.toLon],
+              [roadRouting.destLat, roadRouting.destLon],
+            ]}
+            pathOptions={{
+              color: ROAD_COLOR,
+              weight: 10,
+              opacity: 0.15,
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
+          />
+          {/* Dashed road line */}
+          <Polyline
+            positions={[
+              [lastLeg.toLat, lastLeg.toLon],
+              [roadRouting.destLat, roadRouting.destLon],
+            ]}
+            pathOptions={{
+              color: ROAD_COLOR,
+              weight: 4,
+              opacity: 0.9,
+              dashArray: '10, 8',
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
+          />
+          {/* Destination city marker */}
+          <CircleMarker
+            center={[roadRouting.destLat, roadRouting.destLon]}
+            radius={8}
+            pathOptions={{
+              fillColor: ROAD_COLOR,
+              fillOpacity: 0.9,
+              color: '#fff',
+              weight: 3,
+              opacity: 1,
+            }}
+          >
+            <Tooltip permanent direction="top" offset={[0, -10]} className="search-tooltip">
+              {roadRouting.destCity} ({Math.round(postRoutingDist)} km)
+            </Tooltip>
+          </CircleMarker>
+        </Fragment>
+      )}
     </>
   );
 }

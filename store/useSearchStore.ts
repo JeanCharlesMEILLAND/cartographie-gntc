@@ -4,6 +4,15 @@ import { Platform } from '@/lib/types';
 
 export type UTIType = 'cm' | 'cont' | 'semiPre' | 'semiNon' | 'p400';
 
+export interface RoadRouting {
+  originCity: string;
+  originLat: number;
+  originLon: number;
+  destCity: string;
+  destLat: number;
+  destLon: number;
+}
+
 interface SearchState {
   // Panel visibility
   searchOpen: boolean;
@@ -23,6 +32,7 @@ interface SearchState {
   results: FoundRoute[];
   searching: boolean;
   highlightedRouteIndex: number | null;
+  roadRouting: RoadRouting | null;
 
   // Actions
   setSearchOpen: (open: boolean) => void;
@@ -36,6 +46,7 @@ interface SearchState {
   setResults: (r: FoundRoute[]) => void;
   setSearching: (s: boolean) => void;
   setHighlightedRouteIndex: (i: number | null) => void;
+  setRoadRouting: (r: RoadRouting | null) => void;
   clearSearch: () => void;
 }
 
@@ -51,6 +62,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   results: [],
   searching: false,
   highlightedRouteIndex: null,
+  roadRouting: null,
 
   setSearchOpen: (open) => {
     if (!open) {
@@ -59,6 +71,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
         searchOpen: false,
         results: [],
         highlightedRouteIndex: null,
+        roadRouting: null,
         departureCitySuggestion: null,
         arrivalCitySuggestion: null,
         departureSelectedPlatforms: [],
@@ -86,6 +99,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   setResults: (r) => set({ results: r }),
   setSearching: (s) => set({ searching: s }),
   setHighlightedRouteIndex: (i) => set({ highlightedRouteIndex: i }),
+  setRoadRouting: (r) => set({ roadRouting: r }),
   clearSearch: () =>
     set({
       departureQuery: '',
@@ -97,5 +111,6 @@ export const useSearchStore = create<SearchState>((set, get) => ({
       arrivalSelectedPlatforms: [],
       results: [],
       highlightedRouteIndex: null,
+      roadRouting: null,
     }),
 }));

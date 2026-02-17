@@ -20,6 +20,7 @@ import RouteLayer from './RouteLayer';
 import TrainMarkers from './TrainMarkers';
 import AnimatedFluxDots from './AnimatedFluxDots';
 import PlatformMarkers from './PlatformMarkers';
+import SearchRouteOverlay from './SearchRouteOverlay';
 import 'leaflet/dist/leaflet.css';
 
 interface MapInnerProps {
@@ -74,6 +75,7 @@ export default function MapInner({ platforms, routes, railGeometries, services, 
       {services && allPlatforms && (
         <TrainMarkers services={services} platforms={allPlatforms} railGeometries={railGeometries} />
       )}
+      <SearchRouteOverlay railGeometries={railGeometries} />
       <PlatformMarkers platforms={platforms} routes={routes} />
     </LeafletMap>
   );

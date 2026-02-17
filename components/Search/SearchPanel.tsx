@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { useSearchStore, UTIType } from '@/store/useSearchStore';
+import { useSearchStore, UTIType, RoadRouting } from '@/store/useSearchStore';
 import { Platform, Service, AggregatedRoute } from '@/lib/types';
 import {
   findPlatformsAsync,
@@ -398,16 +398,6 @@ function LegDetail({ leg }: { leg: RouteLeg }) {
   );
 }
 
-/** Pre/post road routing info */
-interface RoadRouting {
-  originCity: string;
-  originLat: number;
-  originLon: number;
-  destCity: string;
-  destLat: number;
-  destLon: number;
-}
-
 /** Road segment display (truck icon + city → platform + distance) */
 function RoadSegment({ from, to, distKm }: { from: string; to: string; distKm: number }) {
   return (
@@ -680,7 +670,6 @@ function RouteCard({
 
 export default function SearchPanel({ platforms, services, routes }: SearchPanelProps) {
   const [formCollapsed, setFormCollapsed] = useState(false);
-  const [roadRouting, setRoadRouting] = useState<RoadRouting | null>(null);
   // Track what the user originally typed (before city dropdown replaces it)
   const [typedDepCity, setTypedDepCity] = useState('');
   const [typedArrCity, setTypedArrCity] = useState('');
@@ -707,6 +696,8 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
     setResults,
     setSearching,
     setHighlightedRouteIndex,
+    roadRouting,
+    setRoadRouting,
     clearSearch,
   } = useSearchStore();
 
