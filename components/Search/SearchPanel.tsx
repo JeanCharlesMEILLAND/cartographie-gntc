@@ -877,172 +877,131 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
           )}
         </div>
       ) : (
-        /* Full search form */
-        <>
-          <div className="p-3 pb-2 space-y-2.5 border-b border-border overflow-y-auto flex-shrink" style={{ maxHeight: 'calc(100vh - 220px)' }}>
-            {!formCollapsed && !results.length && (
-              <p className="text-[10px] text-muted leading-snug">
-                Indiquez votre point de départ et d&apos;arrivée pour découvrir les solutions disponibles.
-              </p>
-            )}
+        /* Full search form — takes all space when no results */
+        <div className={`p-3 pb-2 space-y-2.5 overflow-y-auto ${results.length > 0 ? 'border-b border-border' : 'flex-1'}`}>
+          {!results.length && (
+            <p className="text-[10px] text-muted leading-snug">
+              Indiquez votre point de départ et d&apos;arrivée pour découvrir les solutions disponibles.
+            </p>
+          )}
 
-            {/* Departure */}
-            <div>
-              <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
-                D&apos;où partent vos marchandises ?
-              </label>
-              <CityInput
-                value={departureQuery}
-                onChange={setDepartureQuery}
-                placeholder="Ex: Lyon, Marseille, Paris..."
-                platforms={platforms}
-                routes={routes}
-                selectedCity={departureCitySuggestion}
-                onCitySelect={setDepartureCitySuggestion}
-                selectedPlatforms={departureSelectedPlatforms}
-                onPlatformsChange={setDepartureSelectedPlatforms}
-              />
-            </div>
-
-            {/* Swap button */}
-            <div className="flex justify-center -my-1">
-              <button
-                onClick={handleSwap}
-                className="text-muted hover:text-blue transition-colors p-1 rounded-md hover:bg-blue/8"
-                title="Inverser"
-              >
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <path d="M5 3V13M5 13L2 10M5 13L8 10M11 13V3M11 3L8 6M11 3L14 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Arrival */}
-            <div>
-              <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
-                Où doivent-elles arriver ?
-              </label>
-              <CityInput
-                value={arrivalQuery}
-                onChange={setArrivalQuery}
-                placeholder="Ex: Bordeaux, Lille, Fos..."
-                platforms={platforms}
-                routes={routes}
-                selectedCity={arrivalCitySuggestion}
-                onCitySelect={setArrivalCitySuggestion}
-                selectedPlatforms={arrivalSelectedPlatforms}
-                onPlatformsChange={setArrivalSelectedPlatforms}
-                directDestinations={directDestinations}
-              />
-            </div>
-
-            {/* UTI Filter */}
-            <div>
-              <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
-                Type de chargement (optionnel)
-              </label>
-              <div className="flex flex-wrap gap-1">
-                {UTI_OPTIONS.map((uti) => {
-                  const active = selectedUTI.has(uti.key);
-                  const disabled = availableUTI !== null && !availableUTI.has(uti.key);
-                  return (
-                    <button
-                      key={uti.key}
-                      onClick={() => !disabled && toggleUTI(uti.key)}
-                      disabled={disabled}
-                      className={`text-[10px] px-2 py-0.5 rounded-md border transition-colors ${
-                        disabled
-                          ? 'border-border/50 text-muted/40 cursor-not-allowed line-through'
-                          : active
-                            ? 'border-cyan/50 bg-cyan/10 text-cyan'
-                            : 'border-border text-muted hover:text-text hover:border-blue/30'
-                      }`}
-                      title={disabled ? `${uti.desc} — non disponible sur cette liaison` : uti.desc}
-                    >
-                      {uti.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+          {/* Departure */}
+          <div>
+            <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
+              D&apos;où partent vos marchandises ?
+            </label>
+            <CityInput
+              value={departureQuery}
+              onChange={setDepartureQuery}
+              placeholder="Ex: Lyon, Marseille, Paris..."
+              platforms={platforms}
+              routes={routes}
+              selectedCity={departureCitySuggestion}
+              onCitySelect={setDepartureCitySuggestion}
+              selectedPlatforms={departureSelectedPlatforms}
+              onPlatformsChange={setDepartureSelectedPlatforms}
+            />
           </div>
 
-          {/* Search button — always visible, outside scroll area */}
-          <div className="px-3 py-2 border-b border-border flex-shrink-0">
+          {/* Swap button */}
+          <div className="flex justify-center -my-1">
             <button
-              onClick={wrappedHandleSearch}
-              disabled={!departureQuery.trim() || !arrivalQuery.trim() || searching}
-              className="w-full text-xs py-2 rounded-lg gntc-gradient-bg text-white font-semibold transition-all hover:shadow-md hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:scale-100"
+              onClick={handleSwap}
+              className="text-muted hover:text-blue transition-colors p-1 rounded-md hover:bg-blue/8"
+              title="Inverser"
             >
-              {searching ? 'Recherche en cours...' : 'Trouver les solutions disponibles'}
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M5 3V13M5 13L2 10M5 13L8 10M11 13V3M11 3L8 6M11 3L14 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
           </div>
-        </>
+
+          {/* Arrival */}
+          <div>
+            <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
+              Où doivent-elles arriver ?
+            </label>
+            <CityInput
+              value={arrivalQuery}
+              onChange={setArrivalQuery}
+              placeholder="Ex: Bordeaux, Lille, Fos..."
+              platforms={platforms}
+              routes={routes}
+              selectedCity={arrivalCitySuggestion}
+              onCitySelect={setArrivalCitySuggestion}
+              selectedPlatforms={arrivalSelectedPlatforms}
+              onPlatformsChange={setArrivalSelectedPlatforms}
+              directDestinations={directDestinations}
+            />
+          </div>
+
+          {/* UTI Filter */}
+          <div>
+            <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
+              Type de chargement (optionnel)
+            </label>
+            <div className="flex flex-wrap gap-1">
+              {UTI_OPTIONS.map((uti) => {
+                const active = selectedUTI.has(uti.key);
+                const disabled = availableUTI !== null && !availableUTI.has(uti.key);
+                return (
+                  <button
+                    key={uti.key}
+                    onClick={() => !disabled && toggleUTI(uti.key)}
+                    disabled={disabled}
+                    className={`text-[10px] px-2 py-0.5 rounded-md border transition-colors ${
+                      disabled
+                        ? 'border-border/50 text-muted/40 cursor-not-allowed line-through'
+                        : active
+                          ? 'border-cyan/50 bg-cyan/10 text-cyan'
+                          : 'border-border text-muted hover:text-text hover:border-blue/30'
+                    }`}
+                    title={disabled ? `${uti.desc} — non disponible sur cette liaison` : uti.desc}
+                  >
+                    {uti.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Search button — inside form when no results */}
+          <button
+            onClick={wrappedHandleSearch}
+            disabled={!departureQuery.trim() || !arrivalQuery.trim() || searching}
+            className="w-full text-xs py-2 rounded-lg gntc-gradient-bg text-white font-semibold transition-all hover:shadow-md hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:scale-100"
+          >
+            {searching ? 'Recherche en cours...' : 'Trouver les solutions disponibles'}
+          </button>
+        </div>
       )}
 
-      {/* Results */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {results.length > 0 && (
-          <>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted uppercase tracking-wider">
-                {results.length} solution{results.length > 1 ? 's' : ''} disponible{results.length > 1 ? 's' : ''}
-              </span>
-              <button
-                onClick={() => { clearSearch(); setFormCollapsed(false); setRoadRouting(null); }}
-                className="text-[10px] text-muted hover:text-orange transition-colors"
-              >
-                Effacer
-              </button>
-            </div>
-            {results.map((route, i) => (
-              <RouteCard
-                key={i}
-                route={route}
-                index={i}
-                isHighlighted={highlightedRouteIndex === i}
-                onHighlight={setHighlightedRouteIndex}
-                roadRouting={roadRouting}
-              />
-            ))}
-          </>
-        )}
-
-        {results.length === 0 && !searching && departureQuery && arrivalQuery && (
-          <div className="text-center py-8 px-4">
-            <div className="text-text text-xs font-medium">Aucune solution trouvée</div>
-            <div className="text-[10px] text-muted mt-1.5 leading-relaxed">
-              Aucune liaison directe ou avec correspondance n&apos;a été trouvée pour ce trajet.
-              Essayez de retirer le filtre de chargement ou de chercher une ville voisine.
-            </div>
+      {/* Results — only shown when there are results */}
+      {results.length > 0 && (
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-muted uppercase tracking-wider">
+              {results.length} solution{results.length > 1 ? 's' : ''} disponible{results.length > 1 ? 's' : ''}
+            </span>
+            <button
+              onClick={() => { clearSearch(); setFormCollapsed(false); setRoadRouting(null); }}
+              className="text-[10px] text-muted hover:text-orange transition-colors"
+            >
+              Effacer
+            </button>
           </div>
-        )}
-
-        {!departureQuery && !arrivalQuery && (
-          <div className="text-center py-8 px-4">
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="mx-auto mb-3">
-              <rect x="2" y="2" width="36" height="36" rx="8" stroke="url(#gntcGrad)" strokeWidth="1.5" fill="none" />
-              <circle cx="12" cy="20" r="3" stroke="url(#gntcGrad)" strokeWidth="1.5" />
-              <circle cx="28" cy="20" r="3" stroke="url(#gntcGrad)" strokeWidth="1.5" />
-              <path d="M15 20H25" stroke="url(#gntcGrad)" strokeWidth="1.5" strokeDasharray="2 2" />
-              <path d="M10 13L12 11L14 13" stroke="url(#gntcGrad)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M26 27L28 29L30 27" stroke="url(#gntcGrad)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-              <defs>
-                <linearGradient id="gntcGrad" x1="0" y1="0" x2="40" y2="40">
-                  <stop stopColor="#587bbd" />
-                  <stop offset="1" stopColor="#7dc243" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="text-xs text-text font-medium mb-1">
-              Trouvez votre solution de transport combiné
-            </div>
-            <div className="text-[10px] text-muted leading-relaxed">
-              Renseignez un point de départ et d&apos;arrivée pour voir les liaisons rail-route, les opérateurs et leurs contacts.
-            </div>
-          </div>
-        )}
-      </div>
+          {results.map((route, i) => (
+            <RouteCard
+              key={i}
+              route={route}
+              index={i}
+              isHighlighted={highlightedRouteIndex === i}
+              onHighlight={setHighlightedRouteIndex}
+              roadRouting={roadRouting}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
