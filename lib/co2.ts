@@ -1,11 +1,12 @@
 import { AggregatedRoute, Platform } from './types';
 
 // ADEME 2024 emission factors (g CO2 / tonne-km)
-const CO2_RAIL = 5.4;    // Electric rail freight (France avg)
-const CO2_ROAD = 68;     // Heavy goods vehicle
+export const CO2_RAIL = 5.4;    // Electric rail freight (France avg)
+export const CO2_ROAD = 68;     // Heavy goods vehicle
 const DIESEL_PER_TKM = 0.00032; // Liters diesel per tonne-km (road)
-const AVG_LOAD_TONNES = 20;     // Average load per UTI
+export const AVG_LOAD_TONNES = 20;     // Average load per UTI
 const UTI_PER_TRAIN = 30;       // Average UTIs per train
+export const ROAD_FACTOR = 1.3; // Road distance ≈ 1.3× straight-line
 
 /** Haversine distance in km between two coordinates */
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {

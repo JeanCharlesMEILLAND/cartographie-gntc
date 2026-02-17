@@ -17,6 +17,7 @@ import {
 } from '@/lib/routeFinder';
 import { getOperatorColor } from '@/lib/colors';
 import { getOperatorContact, hasContact, getOperatorLogo } from '@/lib/operatorContacts';
+import { CO2_RAIL, CO2_ROAD, AVG_LOAD_TONNES, ROAD_FACTOR } from '@/lib/co2';
 
 interface SearchPanelProps {
   platforms: Platform[];
@@ -540,6 +541,64 @@ function RouteCard({
           })}
         </div>
 
+        {/* CO2 comparison: combined transport vs full road */}
+        {roadRouting && (() => {
+          // Rail distance (sum of all legs)
+          const railKm = route.legs.reduce((sum, l) => sum + haversineKm(l.fromLat, l.fromLon, l.toLat, l.toLon), 0);
+          // Full road distance: origin → destination (haversine × road factor)
+          const fullRoadKm = haversineKm(roadRouting.originLat, roadRouting.originLon, roadRouting.destLat, roadRouting.destLon) * ROAD_FACTOR;
+          // Combined: road pre + rail + road post (per UTI = 20t)
+          const co2Combined = Math.round(
+            (preRoutingDist * ROAD_FACTOR * AVG_LOAD_TONNES * CO2_ROAD +
+             railKm * AVG_LOAD_TONNES * CO2_RAIL +
+             postRoutingDist * ROAD_FACTOR * AVG_LOAD_TONNES * CO2_ROAD) / 1000
+          );
+          // Full road (per UTI = 20t)
+          const co2FullRoad = Math.round((fullRoadKm * AVG_LOAD_TONNES * CO2_ROAD) / 1000);
+          const savingsPercent = co2FullRoad > 0 ? Math.round((1 - co2Combined / co2FullRoad) * 100) : 0;
+          const savingsKg = co2FullRoad - co2Combined;
+          // Energy savings: diesel saved in liters (road diesel per km vs electric rail)
+          const dieselFullRoad = Math.round(fullRoadKm * 0.32); // ~0.32 L/km for a 40t truck
+          const dieselCombined = Math.round((preRoutingDist * ROAD_FACTOR + postRoutingDist * ROAD_FACTOR) * 0.32);
+          const dieselSaved = dieselFullRoad - dieselCombined;
+
+          if (co2FullRoad <= 0) return null;
+
+          const barWidth = Math.max(5, Math.round((co2Combined / co2FullRoad) * 100));
+
+          return (
+            <div className="mt-2 rounded-md border border-green-500/20 bg-green-500/5 p-2 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-[10px] font-medium text-green-400">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="flex-shrink-0">
+                  <path d="M6 1C3 1 2 4 2 6C2 8 4 11 6 11C8 11 10 8 10 6C10 4 9 1 6 1Z" stroke="currentColor" strokeWidth="1" />
+                  <path d="M6 4V7M4.5 5.5L6 7L7.5 5.5" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                -{savingsPercent}% CO₂ vs tout routier
+              </div>
+              {/* Visual bars */}
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-[9px]">
+                  <span className="text-muted w-[52px] flex-shrink-0">Routier</span>
+                  <div className="flex-1 h-3 rounded-full bg-red-500/15 relative overflow-hidden">
+                    <div className="h-full rounded-full bg-red-400/60" style={{ width: '100%' }} />
+                  </div>
+                  <span className="font-mono text-red-400 w-[46px] text-right flex-shrink-0">{co2FullRoad} kg</span>
+                </div>
+                <div className="flex items-center gap-2 text-[9px]">
+                  <span className="text-muted w-[52px] flex-shrink-0">Combiné</span>
+                  <div className="flex-1 h-3 rounded-full bg-green-500/15 relative overflow-hidden">
+                    <div className="h-full rounded-full bg-green-400/60" style={{ width: `${barWidth}%` }} />
+                  </div>
+                  <span className="font-mono text-green-400 w-[46px] text-right flex-shrink-0">{co2Combined} kg</span>
+                </div>
+              </div>
+              <div className="text-[9px] text-muted">
+                Économie : <span className="text-green-400 font-medium">{savingsKg} kg CO₂</span> et <span className="text-green-400 font-medium">{dieselSaved} L</span> de diesel par envoi (20t)
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Operator contacts */}
         {route.operators.some(hasContact) && (
           <div className="mt-2 space-y-1 border-t border-border/50 pt-1.5">
@@ -819,102 +878,106 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
         </div>
       ) : (
         /* Full search form */
-        <div className="p-3 space-y-3 border-b border-border overflow-y-auto max-h-[50vh]">
-          {!formCollapsed && !results.length && (
-            <p className="text-[10px] text-muted leading-snug">
-              Indiquez votre point de départ et d&apos;arrivée pour découvrir les solutions de transport combiné disponibles.
-            </p>
-          )}
+        <>
+          <div className="p-3 pb-2 space-y-2.5 border-b border-border overflow-y-auto flex-shrink" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+            {!formCollapsed && !results.length && (
+              <p className="text-[10px] text-muted leading-snug">
+                Indiquez votre point de départ et d&apos;arrivée pour découvrir les solutions disponibles.
+              </p>
+            )}
 
-          {/* Departure */}
-          <div>
-            <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
-              D&apos;où partent vos marchandises ?
-            </label>
-            <CityInput
-              value={departureQuery}
-              onChange={setDepartureQuery}
-              placeholder="Ex: Lyon, Marseille, Paris..."
-              platforms={platforms}
-              routes={routes}
-              selectedCity={departureCitySuggestion}
-              onCitySelect={setDepartureCitySuggestion}
-              selectedPlatforms={departureSelectedPlatforms}
-              onPlatformsChange={setDepartureSelectedPlatforms}
-            />
-          </div>
+            {/* Departure */}
+            <div>
+              <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
+                D&apos;où partent vos marchandises ?
+              </label>
+              <CityInput
+                value={departureQuery}
+                onChange={setDepartureQuery}
+                placeholder="Ex: Lyon, Marseille, Paris..."
+                platforms={platforms}
+                routes={routes}
+                selectedCity={departureCitySuggestion}
+                onCitySelect={setDepartureCitySuggestion}
+                selectedPlatforms={departureSelectedPlatforms}
+                onPlatformsChange={setDepartureSelectedPlatforms}
+              />
+            </div>
 
-          {/* Swap button */}
-          <div className="flex justify-center">
-            <button
-              onClick={handleSwap}
-              className="text-muted hover:text-blue transition-colors p-1 rounded-md hover:bg-blue/8"
-              title="Inverser"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M5 3V13M5 13L2 10M5 13L8 10M11 13V3M11 3L8 6M11 3L14 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
+            {/* Swap button */}
+            <div className="flex justify-center -my-1">
+              <button
+                onClick={handleSwap}
+                className="text-muted hover:text-blue transition-colors p-1 rounded-md hover:bg-blue/8"
+                title="Inverser"
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M5 3V13M5 13L2 10M5 13L8 10M11 13V3M11 3L8 6M11 3L14 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
 
-          {/* Arrival */}
-          <div>
-            <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
-              Où doivent-elles arriver ?
-            </label>
-            <CityInput
-              value={arrivalQuery}
-              onChange={setArrivalQuery}
-              placeholder="Ex: Bordeaux, Lille, Fos..."
-              platforms={platforms}
-              routes={routes}
-              selectedCity={arrivalCitySuggestion}
-              onCitySelect={setArrivalCitySuggestion}
-              selectedPlatforms={arrivalSelectedPlatforms}
-              onPlatformsChange={setArrivalSelectedPlatforms}
-              directDestinations={directDestinations}
-            />
-          </div>
+            {/* Arrival */}
+            <div>
+              <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
+                Où doivent-elles arriver ?
+              </label>
+              <CityInput
+                value={arrivalQuery}
+                onChange={setArrivalQuery}
+                placeholder="Ex: Bordeaux, Lille, Fos..."
+                platforms={platforms}
+                routes={routes}
+                selectedCity={arrivalCitySuggestion}
+                onCitySelect={setArrivalCitySuggestion}
+                selectedPlatforms={arrivalSelectedPlatforms}
+                onPlatformsChange={setArrivalSelectedPlatforms}
+                directDestinations={directDestinations}
+              />
+            </div>
 
-          {/* UTI Filter */}
-          <div>
-            <label className="text-[10px] text-muted uppercase tracking-wider mb-1.5 block">
-              Type de chargement (optionnel)
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {UTI_OPTIONS.map((uti) => {
-                const active = selectedUTI.has(uti.key);
-                const disabled = availableUTI !== null && !availableUTI.has(uti.key);
-                return (
-                  <button
-                    key={uti.key}
-                    onClick={() => !disabled && toggleUTI(uti.key)}
-                    disabled={disabled}
-                    className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${
-                      disabled
-                        ? 'border-border/50 text-muted/40 cursor-not-allowed line-through'
-                        : active
-                          ? 'border-cyan/50 bg-cyan/10 text-cyan'
-                          : 'border-border text-muted hover:text-text hover:border-blue/30'
-                    }`}
-                    title={disabled ? `${uti.desc} — non disponible sur cette liaison` : uti.desc}
-                  >
-                    {uti.label}
-                  </button>
-                );
-              })}
+            {/* UTI Filter */}
+            <div>
+              <label className="text-[10px] text-muted uppercase tracking-wider mb-1 block">
+                Type de chargement (optionnel)
+              </label>
+              <div className="flex flex-wrap gap-1">
+                {UTI_OPTIONS.map((uti) => {
+                  const active = selectedUTI.has(uti.key);
+                  const disabled = availableUTI !== null && !availableUTI.has(uti.key);
+                  return (
+                    <button
+                      key={uti.key}
+                      onClick={() => !disabled && toggleUTI(uti.key)}
+                      disabled={disabled}
+                      className={`text-[10px] px-2 py-0.5 rounded-md border transition-colors ${
+                        disabled
+                          ? 'border-border/50 text-muted/40 cursor-not-allowed line-through'
+                          : active
+                            ? 'border-cyan/50 bg-cyan/10 text-cyan'
+                            : 'border-border text-muted hover:text-text hover:border-blue/30'
+                      }`}
+                      title={disabled ? `${uti.desc} — non disponible sur cette liaison` : uti.desc}
+                    >
+                      {uti.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* Search button */}
-          <button
-            onClick={wrappedHandleSearch}
-            disabled={!departureQuery.trim() || !arrivalQuery.trim() || searching}
-            className="w-full text-xs py-2.5 rounded-lg gntc-gradient-bg text-white font-semibold transition-all hover:shadow-md hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:scale-100"
-          >
-            {searching ? 'Recherche en cours...' : 'Trouver les solutions disponibles'}
-          </button>
-        </div>
+          {/* Search button — always visible, outside scroll area */}
+          <div className="px-3 py-2 border-b border-border flex-shrink-0">
+            <button
+              onClick={wrappedHandleSearch}
+              disabled={!departureQuery.trim() || !arrivalQuery.trim() || searching}
+              className="w-full text-xs py-2 rounded-lg gntc-gradient-bg text-white font-semibold transition-all hover:shadow-md hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:scale-100"
+            >
+              {searching ? 'Recherche en cours...' : 'Trouver les solutions disponibles'}
+            </button>
+          </div>
+        </>
       )}
 
       {/* Results */}
