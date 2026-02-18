@@ -101,8 +101,6 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
     return { ops, liaisons };
   }, [routes]);
 
-  if (!showPlatforms) return null;
-
   const searchActive = highlightedRouteIndex !== null && results.length > 0;
   const searchSites = useMemo(() => {
     if (!searchActive) return null;
@@ -121,6 +119,8 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
     if (arrivalCitySuggestion) arrivalCitySuggestion.platforms.forEach((p) => sites.add(p.site));
     return sites.size > 0 ? sites : null;
   }, [searchActive, departureCitySuggestion, arrivalCitySuggestion]);
+
+  if (!showPlatforms) return null;
 
   const connectedSites = new Set<string>();
   if (selectedPlatform) {
