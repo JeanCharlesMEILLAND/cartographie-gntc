@@ -45,21 +45,42 @@ function filterNavigable(fc: FeatureCollection): FeatureCollection {
   };
 }
 
-// Keep only ports with commerce/fret activity (filter out pure plaisance/pêche)
+// Freight-focused port filter:
+// - Maritime ports: must have "Commerce" activity
+// - Fluvial/Fluvio-maritime ports: keep unless ONLY plaisance/pêche
+//   (Sandre doesn't tag fluvial ports with "Commerce" even when they do freight)
 function filterFretPorts(fc: FeatureCollection): FeatureCollection {
   return {
     type: 'FeatureCollection',
     features: fc.features.filter((f) => {
       const p = f.properties || {};
-      // Check all activity fields for "Commerce" (code 1)
-      for (let i = 1; i <= 6; i++) {
-        const activity = p[`MnActivitePortuaire_${i}`] || '';
-        if (activity === 'Commerce') return true;
-      }
-      // Also include fluvial ports regardless of activity
       const nature = p['MnNaturePort'] || '';
-      if (nature === 'Fluvial' || nature === 'Fluvio-maritime') return true;
-      return false;
+
+      // Collect all activities
+      const activities: string[] = [];
+      for (let i = 1; i <= 6; i++) {
+        const act = p[`MnActivitePortuaire_${i}`] || '';
+        if (act) activities.push(act);
+      }
+
+      const hasCommerce = activities.includes('Commerce');
+
+      // Maritime: only if Commerce (fret)
+      if (nature === 'Maritime') return hasCommerce;
+
+      // Fluvial / Fluvio-maritime: keep unless exclusively plaisance/pêche
+      if (nature === 'Fluvial' || nature === 'Fluvio-maritime') {
+        if (hasCommerce) return true;
+        // No activities listed → likely freight infrastructure, keep it
+        if (activities.length === 0) return true;
+        // Exclude if ALL activities are plaisance/pêche only
+        const fretExcluded = new Set(['Plaisance', 'Peche', 'Pêche']);
+        const onlyLeisure = activities.every((a) => fretExcluded.has(a));
+        return !onlyLeisure;
+      }
+
+      // Unknown nature: only if Commerce
+      return hasCommerce;
     }),
   };
 }

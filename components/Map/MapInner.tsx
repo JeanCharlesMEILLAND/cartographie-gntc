@@ -20,6 +20,7 @@ import RouteLayer from './RouteLayer';
 import TrainMarkers from './TrainMarkers';
 import WaterwayLayer from './WaterwayLayer';
 import PortLayer from './PortLayer';
+import LocksLayer from './LocksLayer';
 import PlatformMarkers from './PlatformMarkers';
 import SearchRouteOverlay from './SearchRouteOverlay';
 import 'leaflet/dist/leaflet.css';
@@ -74,6 +75,7 @@ export default function MapInner({ platforms, routes, railGeometries, services, 
       <ITELayer />
       <WaterwayLayer />
       <PortLayer />
+      <LocksLayer />
       {services && allPlatforms && (
         <TrainMarkers services={services} platforms={allPlatforms} railGeometries={railGeometries} />
       )}

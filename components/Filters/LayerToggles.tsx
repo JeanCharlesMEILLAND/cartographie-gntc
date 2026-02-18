@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useFilterStore } from '@/store/useFilterStore';
 import clsx from 'clsx';
 
-type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification' | 'showWaterways' | 'showPorts';
+type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification' | 'showWaterways' | 'showPorts' | 'showLocks';
 
 const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showRoutes', label: 'Liaisons' },
@@ -12,6 +12,7 @@ const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showRailway', label: 'Réseau ferré' },
   { key: 'showWaterways', label: 'Voies navigables' },
   { key: 'showPorts', label: 'Ports fluviaux' },
+  { key: 'showLocks', label: 'Écluses' },
   { key: 'showITE', label: 'ITE utilisées' },
   { key: 'showITEDispo', label: 'ITE disponibles' },
   { key: 'showVoieUnique', label: 'Voie unique' },
