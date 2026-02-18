@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Outfit, JetBrains_Mono } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import './globals.css';
 
@@ -40,6 +42,8 @@ export default function RootLayout({
         <ErrorBoundary fallbackMessage="L'application a rencontré une erreur">
           {children}
         </ErrorBoundary>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
