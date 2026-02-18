@@ -24,7 +24,7 @@ function getRouteStyle(freq: number, operator: string) {
 }
 
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
-  const { showRoutes, animateFlux, selectedPlatform } = useFilterStore();
+  const { showRoutes, selectedPlatform } = useFilterStore();
   const { results, highlightedRouteIndex } = useSearchStore();
 
   // Build set of route pairs matching the search result
@@ -109,8 +109,6 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
               ...style,
               opacity: dimmed ? 0.08 : isConnected ? 1 : style.opacity,
               weight: isConnected ? style.weight + 1.5 : dimmed ? 1 : style.weight,
-              dashArray: animateFlux ? '8 12' : undefined,
-              className: animateFlux ? 'route-animated' : undefined,
             }}
           />
         );

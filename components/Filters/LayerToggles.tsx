@@ -4,18 +4,19 @@ import { useState } from 'react';
 import { useFilterStore } from '@/store/useFilterStore';
 import clsx from 'clsx';
 
-type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification' | 'animateFlux';
+type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification' | 'showWaterways' | 'showPorts';
 
 const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showRoutes', label: 'Liaisons' },
   { key: 'showPlatforms', label: 'Plateformes' },
   { key: 'showRailway', label: 'Réseau ferré' },
+  { key: 'showWaterways', label: 'Voies navigables' },
+  { key: 'showPorts', label: 'Ports fluviaux' },
   { key: 'showITE', label: 'ITE utilisées' },
   { key: 'showITEDispo', label: 'ITE disponibles' },
   { key: 'showVoieUnique', label: 'Voie unique' },
   { key: 'showVoieDouble', label: 'Double voie' },
   { key: 'showElectrification', label: 'Électrification' },
-  { key: 'animateFlux', label: 'Animation flux' },
 ];
 
 export default function LayerToggles() {
