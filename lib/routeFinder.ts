@@ -192,13 +192,26 @@ export async function findPlatformsAsync(
   return geoResults.slice(0, maxResults + 3);
 }
 
-/** Combined search grouped by city: text matching first, then geocode fallback */
+/** Combined search grouped by city: text matching first, then geocode fallback.
+ *  When services are provided, filters out cities with only inactive platforms. */
 export async function findCitySuggestionsAsync(
   query: string,
   platforms: Platform[],
-  maxResults = 8
+  maxResults = 8,
+  services?: Service[]
 ): Promise<CitySuggestion[]> {
   if (!query.trim() || query.length < 2) return [];
+
+  const activeSites = services ? getActiveSites(services) : null;
+
+  // Helper: filter cities to only those with at least one active platform
+  const filterActive = (cities: CitySuggestion[]): CitySuggestion[] => {
+    if (!activeSites) return cities;
+    const active = cities.filter((c) =>
+      c.platforms.some((p) => activeSites.has(p.site))
+    );
+    return active.length > 0 ? active : cities; // fallback to all if none active
+  };
 
   // 1. Score every platform
   const scored = platforms
@@ -249,23 +262,28 @@ export async function findCitySuggestionsAsync(
     }
 
     cities.sort((a, b) => b.bestScore - a.bestScore);
-    return cities.slice(0, maxResults);
+    return filterActive(cities).slice(0, maxResults);
   }
 
   // 2. Geocode fallback — group nearby platforms by ville within 50km
   const coords = await geocodeCity(query);
   if (!coords) return [];
 
-  const nearby = platforms
+  // Only consider active platforms when services are provided
+  const searchPlatforms = activeSites
+    ? platforms.filter((p) => activeSites.has(p.site))
+    : platforms;
+
+  const nearby = searchPlatforms
     .map((p) => ({ platform: p, dist: haversineKm(coords.lat, coords.lon, p.lat, p.lon) }))
-    .filter((s) => s.dist <= 50)
+    .filter((s) => s.dist <= 100)
     .sort((a, b) => a.dist - b.dist);
 
   if (nearby.length === 0) {
-    // Widen to 150km if nothing within 50km
-    const wider = platforms
+    // Widen to 200km if nothing within 100km
+    const wider = searchPlatforms
       .map((p) => ({ platform: p, dist: haversineKm(coords.lat, coords.lon, p.lat, p.lon) }))
-      .filter((s) => s.dist <= 150)
+      .filter((s) => s.dist <= 200)
       .sort((a, b) => a.dist - b.dist);
     return groupNearbyByCity(wider, maxResults);
   }

@@ -115,6 +115,7 @@ function CityInput({
   onChange,
   placeholder,
   platforms,
+  services,
   routes,
   selectedCity,
   onCitySelect,
@@ -126,6 +127,7 @@ function CityInput({
   onChange: (v: string) => void;
   placeholder: string;
   platforms: Platform[];
+  services: Service[];
   routes: AggregatedRoute[];
   selectedCity: CitySuggestion | null;
   onCitySelect: (c: CitySuggestion | null) => void;
@@ -159,7 +161,7 @@ function CityInput({
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
-      const results = await findCitySuggestionsAsync(value, platforms, 8);
+      const results = await findCitySuggestionsAsync(value, platforms, 8, services);
       // Sort direct destinations first when typing
       if (directDestinations && directDestinations.length > 0) {
         const directKeys = new Set(directDestinations.map((d) => d.city.toLowerCase().trim()));
@@ -174,7 +176,7 @@ function CityInput({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [value, platforms, selectedCity, directDestinations]);
+  }, [value, platforms, services, selectedCity, directDestinations]);
 
   const showSuggestions = focused && !selectedCity && (suggestions.length > 0 || loading);
 
@@ -944,6 +946,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
               onChange={setDepartureQuery}
               placeholder="Ex: Lyon, Marseille, Paris..."
               platforms={platforms}
+              services={services}
               routes={routes}
               selectedCity={departureCitySuggestion}
               onCitySelect={setDepartureCitySuggestion}
@@ -975,6 +978,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
               onChange={setArrivalQuery}
               placeholder="Ex: Bordeaux, Lille, Fos..."
               platforms={platforms}
+              services={services}
               routes={routes}
               selectedCity={arrivalCitySuggestion}
               onCitySelect={setArrivalCitySuggestion}
