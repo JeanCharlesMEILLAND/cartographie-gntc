@@ -6,6 +6,7 @@ import { Platform, Service, AggregatedRoute } from '@/lib/types';
 import {
   findPlatformsAsync,
   findRoutes,
+  getActiveSites,
   FoundRoute,
   haversineKm,
   geocodeCity,
@@ -113,17 +114,24 @@ function parseProximityQuery(text: string): string | null {
   return null;
 }
 
-// Find nearest platforms to a city
+// Find nearest platforms to a city (only active platforms when services provided)
 async function findNearestPlatforms(
   city: string,
   platforms: Platform[],
-  maxResults = 5
+  maxResults = 5,
+  services?: Service[]
 ): Promise<{ platform: Platform; distance: number }[]> {
   // Try geocoding the city
   const coords = await geocodeCity(city);
   if (!coords) return [];
 
-  return platforms
+  // Filter to only active platforms
+  const activeSites = services ? getActiveSites(services) : null;
+  const searchPlatforms = activeSites
+    ? platforms.filter((p) => activeSites.has(p.site))
+    : platforms;
+
+  return searchPlatforms
     .map((p) => ({
       platform: p,
       distance: Math.round(haversineKm(coords.lat, coords.lon, p.lat, p.lon)),
@@ -347,7 +355,7 @@ export default function ChatWidget({ platforms, services }: ChatWidgetProps) {
       setMessages((prev) => [...prev, { role: 'assistant', content: 'Recherche des plateformes proches...' }]);
 
       try {
-        const nearest = await findNearestPlatforms(proximityCity, platforms, 5);
+        const nearest = await findNearestPlatforms(proximityCity, platforms, 5, services);
         const formattedCity = proximityCity.charAt(0).toUpperCase() + proximityCity.slice(1);
         const response = formatProximityResults(nearest, formattedCity);
 
