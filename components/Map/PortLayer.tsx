@@ -83,7 +83,7 @@ export default function PortLayer() {
                     </span>
                   )}
                   {hasCommerce && (
-                    <span className="inline-flex items-center text-[9px] px-1.5 py-0.5 rounded font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    <span className="inline-flex items-center text-[9px] px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: 'rgba(125,194,67,0.2)', color: '#7dc243', borderWidth: 1, borderColor: 'rgba(125,194,67,0.3)' }}>
                       Commerce / Fret
                     </span>
                   )}

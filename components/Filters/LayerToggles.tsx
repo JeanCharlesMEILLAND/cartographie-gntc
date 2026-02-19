@@ -6,6 +6,22 @@ import clsx from 'clsx';
 
 type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showITE' | 'showITEDispo' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification' | 'showWaterways' | 'showPorts' | 'showLocks';
 
+// Color matching the map rendering for each layer
+const LAYER_COLORS: Record<LayerKey, string> = {
+  showRoutes: '#587bbd',
+  showPlatforms: '#587bbd',
+  showLabels: '#587bbd',
+  showRailway: '#64b5f6',
+  showWaterways: '#2196F3',
+  showPorts: '#0D47A1',
+  showLocks: '#FF6F00',
+  showITE: '#FDD835',
+  showITEDispo: '#42A5F5',
+  showVoieUnique: '#42A5F5',
+  showVoieDouble: '#FF9800',
+  showElectrification: '#EF5350',
+};
+
 const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showRoutes', label: 'Liaisons' },
   { key: 'showPlatforms', label: 'Plateformes' },
@@ -51,31 +67,40 @@ export default function LayerToggles() {
       {/* Accordion content */}
       {open && (
         <div className="mt-1 space-y-0.5">
-          {LAYERS.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => store.toggleLayer(key)}
-              className="flex items-center gap-1.5 w-full text-left hover:bg-blue/5 rounded px-2 py-0.5 transition-colors"
-            >
-              <div
-                className={clsx(
-                  'w-3 h-3 rounded-sm border transition-colors flex items-center justify-center flex-shrink-0',
-                  store[key]
-                    ? 'bg-blue border-blue'
-                    : 'border-muted'
-                )}
+          {LAYERS.map(({ key, label }) => {
+            const color = LAYER_COLORS[key];
+            return (
+              <button
+                key={key}
+                onClick={() => store.toggleLayer(key)}
+                className="flex items-center gap-1.5 w-full text-left hover:bg-blue/5 rounded px-2 py-0.5 transition-colors"
               >
-                {store[key] && (
-                  <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
-                    <path d="M2 5L4 7L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-              </div>
-              <span className={clsx('text-[11px]', store[key] ? 'text-text' : 'text-muted')}>
-                {label}
-              </span>
-            </button>
-          ))}
+                <div
+                  className={clsx(
+                    'w-3 h-3 rounded-sm border transition-colors flex items-center justify-center flex-shrink-0',
+                    store[key]
+                      ? 'border-transparent'
+                      : 'border-muted'
+                  )}
+                  style={store[key] ? { backgroundColor: color } : undefined}
+                >
+                  {store[key] && (
+                    <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
+                      <path d="M2 5L4 7L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </div>
+                {/* Color indicator dot */}
+                <span
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: color, opacity: store[key] ? 1 : 0.4 }}
+                />
+                <span className={clsx('text-[11px]', store[key] ? 'text-text' : 'text-muted')}>
+                  {label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
