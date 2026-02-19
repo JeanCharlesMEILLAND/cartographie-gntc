@@ -27,7 +27,7 @@ const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showPlatforms', label: 'Plateformes' },
   { key: 'showRailway', label: 'Réseau ferré' },
   { key: 'showWaterways', label: 'Voies navigables' },
-  { key: 'showPorts', label: 'Ports fluviaux' },
+  { key: 'showPorts', label: 'Ports de fret' },
   { key: 'showLocks', label: 'Écluses' },
   { key: 'showITE', label: 'ITE utilisées' },
   { key: 'showITEDispo', label: 'ITE disponibles' },

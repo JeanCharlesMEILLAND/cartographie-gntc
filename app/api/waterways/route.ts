@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import type { FeatureCollection, Feature, Point } from 'geojson';
+import type { FeatureCollection } from 'geojson';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,21 +13,6 @@ const WATERWAYS_URL =
 
 const PORTS_URL =
   `https://services.sandre.eaufrance.fr/geo/pts?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&typename=PortMaritime&SRSNAME=EPSG:4326&OUTPUTFORMAT=${GEOJSON_FORMAT}`;
-
-// Overpass query for industrial port areas in France bounding box
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
-const INLAND_PORTS_QUERY = `[out:json][timeout:120];(way["industrial"="port"](42.0,-5.5,51.5,8.5);relation["industrial"="port"](42.0,-5.5,51.5,8.5););out center tags;`;
-
-interface OverpassElement {
-  type: 'way' | 'relation';
-  id: number;
-  center?: { lat: number; lon: number };
-  tags?: Record<string, string>;
-}
-
-interface OverpassResponse {
-  elements: OverpassElement[];
-}
 
 interface WaterwayData {
   waterways: FeatureCollection;
@@ -60,48 +47,34 @@ function filterNavigable(fc: FeatureCollection): FeatureCollection {
   };
 }
 
-// Fetch inland/fluvial ports from OpenStreetMap via Overpass
-async function fetchInlandPorts(): Promise<Feature<Point>[]> {
-  try {
-    const res = await fetch(OVERPASS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `data=${encodeURIComponent(INLAND_PORTS_QUERY)}`,
-      next: { revalidate: 43200 },
-    });
-    if (!res.ok) return [];
-    const data: OverpassResponse = await res.json();
+// Load curated inland/fluvial ports from static GeoJSON (sourced from OSM)
+let inlandPortsCache: FeatureCollection | null = null;
 
-    return data.elements
-      .filter((el) => {
-        // Must have center coordinates
-        if (!el.center) return false;
-        // Exclude maritime/seaports (already from Sandre)
-        const tags = el.tags || {};
-        if (tags['seamark:type']) return false;
-        if (tags['port:type'] === 'seaport') return false;
-        return true;
-      })
-      .map((el) => ({
-        type: 'Feature' as const,
-        geometry: {
-          type: 'Point' as const,
-          coordinates: [el.center!.lon, el.center!.lat],
-        },
-        properties: {
-          NomPort: el.tags?.name || 'Port fluvial',
-          LbCommune: '',
-          MnNaturePort: 'Fluvial',
-          MnModeGestionPort: el.tags?.operator || '',
-          NomZonePortuaire: '',
-          MnActivitePortuaire_1: 'Commerce',
-          source: 'osm',
-          osmId: el.id,
-          cargo: el.tags?.cargo || '',
-        },
-      }));
+async function loadInlandPorts(): Promise<FeatureCollection> {
+  if (inlandPortsCache) return inlandPortsCache;
+  try {
+    const filePath = join(process.cwd(), 'public', 'data', 'inland-ports.geojson');
+    const raw = await readFile(filePath, 'utf-8');
+    const fc: FeatureCollection = JSON.parse(raw);
+    // Map properties to match Sandre port format for PortLayer compatibility
+    fc.features = fc.features.map((f) => ({
+      ...f,
+      properties: {
+        NomPort: f.properties?.name || 'Port fluvial',
+        LbCommune: '',
+        MnNaturePort: 'Fluvial',
+        MnModeGestionPort: f.properties?.operator || '',
+        NomZonePortuaire: '',
+        MnActivitePortuaire_1: 'Commerce',
+        source: 'osm',
+        osmId: f.properties?.osmId || 0,
+        cargo: f.properties?.cargo || '',
+      },
+    }));
+    inlandPortsCache = fc;
+    return fc;
   } catch {
-    return [];
+    return EMPTY_FC;
   }
 }
 
@@ -151,17 +124,17 @@ export async function GET() {
     return NextResponse.json(cache);
   }
 
-  const [rawWaterways, rawPorts, inlandPortFeatures] = await Promise.all([
+  const [rawWaterways, rawPorts, inlandPorts] = await Promise.all([
     fetchGeoJSON(WATERWAYS_URL),
     fetchGeoJSON(PORTS_URL),
-    fetchInlandPorts(),
+    loadInlandPorts(),
   ]);
 
-  // Combine Sandre maritime ports (filtered) + OSM inland ports
+  // Combine Sandre maritime ports (filtered) + static inland ports
   const maritimePorts = rawPorts ? filterFretPorts(rawPorts) : EMPTY_FC;
   const combinedPorts: FeatureCollection = {
     type: 'FeatureCollection',
-    features: [...maritimePorts.features, ...inlandPortFeatures],
+    features: [...maritimePorts.features, ...inlandPorts.features],
   };
 
   const data: WaterwayData = {
