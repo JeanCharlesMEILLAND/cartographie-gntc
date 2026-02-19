@@ -32,6 +32,7 @@ const FOOTER_NAV = [
 export default function SiteFooter() {
   return (
     <footer className="bg-[#1a1d23] text-gray-300">
+      <div className="h-[2px] gntc-gradient-bg" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand */}

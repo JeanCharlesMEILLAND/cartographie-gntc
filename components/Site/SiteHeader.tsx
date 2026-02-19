@@ -8,7 +8,7 @@ import clsx from 'clsx';
 interface NavItem {
   label: string;
   href: string;
-  children?: { label: string; href: string }[];
+  children?: { label: string; href: string; desc?: string }[];
 }
 
 const NAV: NavItem[] = [
@@ -16,19 +16,19 @@ const NAV: NavItem[] = [
     label: 'Qui sommes-nous',
     href: '/qui-sommes-nous',
     children: [
-      { label: 'Notre organisation', href: '/qui-sommes-nous/organisation' },
-      { label: 'Nos missions', href: '/qui-sommes-nous/missions' },
-      { label: 'Notre histoire', href: '/qui-sommes-nous/histoire' },
+      { label: 'Notre organisation', href: '/qui-sommes-nous/organisation', desc: 'Gouvernance et commissions' },
+      { label: 'Nos missions', href: '/qui-sommes-nous/missions', desc: 'Actions et dossiers majeurs' },
+      { label: 'Notre histoire', href: '/qui-sommes-nous/histoire', desc: 'De 1945 \u00e0 aujourd\u2019hui' },
     ],
   },
   {
     label: 'Transport combin\u00e9',
     href: '/transport-combine',
     children: [
-      { label: 'D\u00e9finition', href: '/transport-combine/definition' },
-      { label: 'Les flux en France', href: '/transport-combine/flux' },
-      { label: 'Durabilit\u00e9', href: '/transport-combine/durabilite' },
-      { label: 'Aides', href: '/transport-combine/aides' },
+      { label: 'D\u00e9finition', href: '/transport-combine/definition', desc: 'Le TC en 3 \u00e9tapes' },
+      { label: 'Les flux en France', href: '/transport-combine/flux', desc: 'Corridors et statistiques' },
+      { label: 'Durabilit\u00e9', href: '/transport-combine/durabilite', desc: 'Impact environnemental' },
+      { label: 'Aides', href: '/transport-combine/aides', desc: 'Dispositifs publics' },
     ],
   },
   { label: 'Carte', href: '/carte' },
@@ -36,10 +36,10 @@ const NAV: NavItem[] = [
     label: 'Acteurs',
     href: '/acteurs',
     children: [
-      { label: 'Op\u00e9rateurs TC', href: '/acteurs/operateurs' },
-      { label: 'Plateformes & Ports', href: '/acteurs/plateformes' },
-      { label: 'Acteurs ferroviaires', href: '/acteurs/ferroviaire' },
-      { label: 'Acteurs fluviaux', href: '/acteurs/fluvial' },
+      { label: 'Op\u00e9rateurs TC', href: '/acteurs/operateurs', desc: '20 op\u00e9rateurs' },
+      { label: 'Plateformes & Ports', href: '/acteurs/plateformes', desc: '10 terminaux' },
+      { label: 'Acteurs ferroviaires', href: '/acteurs/ferroviaire', desc: '\u00c9quipement & conseil' },
+      { label: 'Acteurs fluviaux', href: '/acteurs/fluvial', desc: 'Transport par voie d\u2019eau' },
     ],
   },
   { label: 'Plan de transport', href: '/plan-de-transport' },
@@ -57,11 +57,16 @@ function DropdownItem({ item, pathname }: { item: NavItem; pathname: string }) {
       <Link
         href={item.href}
         className={clsx(
-          'text-sm font-medium transition-colors px-3 py-2 rounded-md',
-          isActive ? 'text-blue' : 'text-text hover:text-blue'
+          'relative text-sm font-medium transition-colors px-3 py-2 rounded-md',
+          isActive
+            ? 'text-white'
+            : 'text-white/70 hover:text-white'
         )}
       >
         {item.label}
+        {isActive && (
+          <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full gntc-gradient-bg" />
+        )}
       </Link>
     );
   }
@@ -74,29 +79,43 @@ function DropdownItem({ item, pathname }: { item: NavItem; pathname: string }) {
     >
       <button
         className={clsx(
-          'text-sm font-medium transition-colors px-3 py-2 rounded-md flex items-center gap-1',
-          isActive ? 'text-blue' : 'text-text hover:text-blue'
+          'relative text-sm font-medium transition-colors px-3 py-2 rounded-md flex items-center gap-1',
+          isActive
+            ? 'text-white'
+            : 'text-white/70 hover:text-white'
         )}
       >
         {item.label}
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={clsx('transition-transform', open && 'rotate-180')}>
           <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
+        {isActive && (
+          <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full gntc-gradient-bg" />
+        )}
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50">
-          {item.children.map((child) => (
-            <Link
-              key={child.href}
-              href={child.href}
-              className={clsx(
-                'block px-4 py-2 text-sm transition-colors',
-                pathname === child.href ? 'text-blue bg-blue/5' : 'text-gray-700 hover:text-blue hover:bg-blue/5'
-              )}
-            >
-              {child.label}
-            </Link>
-          ))}
+        <div className="absolute top-full left-0 mt-1 w-64 rounded-xl overflow-hidden z-50" style={{ background: 'rgba(26, 29, 35, 0.97)', backdropFilter: 'blur(20px)', border: '1px solid rgba(88, 123, 189, 0.25)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)' }}>
+          <div className="py-1.5">
+            {item.children.map((child) => (
+              <Link
+                key={child.href}
+                href={child.href}
+                className={clsx(
+                  'block px-4 py-2.5 transition-colors',
+                  pathname === child.href
+                    ? 'bg-white/10'
+                    : 'hover:bg-white/5'
+                )}
+              >
+                <div className={clsx('text-sm font-medium', pathname === child.href ? 'text-white' : 'text-white/80')}>
+                  {child.label}
+                </div>
+                {child.desc && (
+                  <div className="text-[11px] text-white/40 mt-0.5">{child.desc}</div>
+                )}
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -108,15 +127,18 @@ export default function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+    <header className="sticky top-0 z-50" style={{ background: 'rgba(26, 29, 35, 0.97)', backdropFilter: 'blur(20px)' }}>
+      {/* Thin gradient accent bar */}
+      <div className="h-[2px] gntc-gradient-bg" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-            <img src="/logo-gntc.jpg" alt="GNTC" className="h-10" />
+            <img src="/logo-gntc.jpg" alt="GNTC" className="h-10 rounded" />
             <div className="hidden sm:block">
-              <div className="text-sm font-display font-bold text-text leading-tight">GNTC</div>
-              <div className="text-[10px] text-muted leading-tight">Transport Combin&eacute;</div>
+              <div className="text-sm font-display font-bold text-white leading-tight">GNTC</div>
+              <div className="text-[10px] text-white/50 leading-tight">Transport Combin&eacute;</div>
             </div>
           </Link>
 
@@ -130,7 +152,7 @@ export default function SiteHeader() {
           {/* Mobile burger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-text"
+            className="lg:hidden p-2 text-white/70 hover:text-white"
           >
             {mobileOpen ? (
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -147,7 +169,7 @@ export default function SiteHeader() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-gray-100 bg-white">
+        <div style={{ background: 'rgba(26, 29, 35, 0.98)', borderTop: '1px solid rgba(88, 123, 189, 0.2)' }}>
           <nav className="max-w-7xl mx-auto px-4 py-4 space-y-1">
             {NAV.map((item) => (
               <div key={item.href}>
@@ -155,8 +177,10 @@ export default function SiteHeader() {
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
                   className={clsx(
-                    'block px-3 py-2 text-sm font-medium rounded-md',
-                    pathname.startsWith(item.href) ? 'text-blue bg-blue/5' : 'text-text hover:text-blue'
+                    'block px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                    pathname.startsWith(item.href)
+                      ? 'text-white bg-white/10'
+                      : 'text-white/70 hover:text-white hover:bg-white/5'
                   )}
                 >
                   {item.label}
@@ -169,8 +193,10 @@ export default function SiteHeader() {
                         href={child.href}
                         onClick={() => setMobileOpen(false)}
                         className={clsx(
-                          'block px-3 py-1.5 text-xs rounded-md',
-                          pathname === child.href ? 'text-blue bg-blue/5' : 'text-muted hover:text-blue'
+                          'block px-3 py-1.5 text-xs rounded-md transition-colors',
+                          pathname === child.href
+                            ? 'text-white bg-white/10'
+                            : 'text-white/50 hover:text-white/80'
                         )}
                       >
                         {child.label}
