@@ -68,8 +68,35 @@ export default function MissionsPage() {
         ))}
       </div>
 
+      {/* Dossiers majeurs */}
+      <section className="mt-16 mb-16">
+        <h2 className="text-xl font-display font-bold text-text mb-2">Les dossiers majeurs</h2>
+        <p className="text-sm text-muted mb-6 max-w-2xl">
+          Le GNTC suit en permanence les dossiers strat&eacute;giques pour la fili&egrave;re du transport combin&eacute;.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[
+            'Aides \u00e0 la pince (aide \u00e0 l\u2019exploitation)',
+            'D\u00e9rogation 46 tonnes pour le transport combin\u00e9',
+            'Tarification des sillons ferroviaires',
+            'Canal Seine-Nord Europe',
+            'R\u00e9vision de la directive europ\u00e9enne transport combin\u00e9',
+            'Strat\u00e9gie Nationale Fret Ferroviaire (SNFF)',
+            'Qualit\u00e9 de service SNCF R\u00e9seau',
+            'Sch\u00e9ma directeur du transport combin\u00e9',
+            'Dispositif ReMo (Report Modal)',
+            'Certificats d\u2019\u00c9conomie d\u2019\u00c9nergie (CEE)',
+          ].map((d) => (
+            <div key={d} className="flex items-center gap-3 bg-white rounded-lg border border-gray-100 px-4 py-3">
+              <div className="w-2 h-2 rounded-full gntc-gradient-bg flex-shrink-0" />
+              <span className="text-sm text-text">{d}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Key figures */}
-      <section className="mt-16">
+      <section>
         <h2 className="text-xl font-display font-bold text-text mb-6">Le GNTC en chiffres</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[

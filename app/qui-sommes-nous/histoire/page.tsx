@@ -3,43 +3,43 @@ import PageLayout from '@/components/Site/PageLayout';
 const TIMELINE = [
   {
     year: '1945',
+    title: 'Cr\u00e9ation de la SNTM',
+    desc: 'La Soci\u00e9t\u00e9 Nationale des Transports de Marchandises (SNTM) est cr\u00e9\u00e9e pour organiser la compl\u00e9mentarit\u00e9 rail-route dans la France de l\u2019apr\u00e8s-guerre.',
+  },
+  {
+    year: '1959',
+    title: 'Technique Kangourou',
+    desc: 'D\u00e9veloppement de la technique \u00ab\u00a0Kangourou\u00a0\u00bb permettant de charger les semi-remorques sur des wagons sp\u00e9ciaux. Une r\u00e9volution pour le transport combin\u00e9.',
+  },
+  {
+    year: '1968',
+    title: 'Naissance de Novatrans',
+    desc: 'La SNTM devient la SNTC. Novatrans voit le jour comme premier op\u00e9rateur de transport combin\u00e9 en France, filiale de la SNCF.',
+  },
+  {
+    year: '1976',
     title: 'Cr\u00e9ation du GNTC',
-    desc: 'Fondation du Groupement National des Transports Combin\u00e9s dans le cadre de la reconstruction de l\u2019apr\u00e8s-guerre, pour organiser la compl\u00e9mentarit\u00e9 rail-route.',
+    desc: 'Le 23 juin 1976, le Groupement National des Transports Combin\u00e9s succ\u00e8de \u00e0 la SNTC. Le GNTC devient l\u2019organisation professionnelle de r\u00e9f\u00e9rence.',
   },
   {
-    year: '1960s',
-    title: 'D\u00e9veloppement du ferroutage',
-    desc: 'Premiers services r\u00e9guliers de transport combin\u00e9 rail-route en France. Mise en place des premi\u00e8res plateformes multimodales.',
+    year: '1994',
+    title: 'Premier train sous la Manche',
+    desc: 'Le 27 juin 1994, le premier train de transport combin\u00e9 emprunte le tunnel sous la Manche, ouvrant un corridor majeur vers le Royaume-Uni.',
   },
   {
-    year: '1970s',
-    title: 'Conteneurisation',
-    desc: 'Arriv\u00e9e massive du conteneur maritime. Le transport combin\u00e9 s\u2019adapte avec les conteneurs terrestres et les caisses mobiles.',
+    year: '2004',
+    title: 'L\u2019\u00e8re des caisses mobiles',
+    desc: 'Les caisses mobiles repr\u00e9sentent d\u00e9sormais 98% du trafic terrestre de transport combin\u00e9. Le secteur s\u2019est profond\u00e9ment transform\u00e9.',
   },
   {
-    year: '1984',
-    title: 'Cr\u00e9ation de Novatrans',
-    desc: 'Novatrans devient le premier op\u00e9rateur de transport combin\u00e9 en France, filiale de la SNCF d\u00e9di\u00e9e au combin\u00e9 rail-route.',
+    year: '2007',
+    title: 'Autoroute ferroviaire record',
+    desc: 'Mise en service de l\u2019autoroute ferroviaire Bettembourg\u2013Perpignan, la plus longue d\u2019Europe. Un jalon pour le transport combin\u00e9 international.',
   },
   {
-    year: '1991',
-    title: 'Directive europ\u00e9enne 91/440',
-    desc: 'Ouverture du march\u00e9 ferroviaire europ\u00e9en. Le transport combin\u00e9 est reconnu comme priorit\u00e9 europ\u00e9enne pour le report modal.',
-  },
-  {
-    year: '2003',
-    title: 'Lib\u00e9ralisation du fret',
-    desc: 'Ouverture du fret ferroviaire \u00e0 la concurrence en France. Arriv\u00e9e de nouveaux op\u00e9rateurs priv\u00e9s sur le march\u00e9 du combin\u00e9.',
-  },
-  {
-    year: '2009',
-    title: 'Grenelle de l\u2019Environnement',
-    desc: 'Le transport combin\u00e9 est identifi\u00e9 comme levier majeur de la transition \u00e9cologique du fret. Objectif de 25% de part modale non-routi\u00e8re.',
-  },
-  {
-    year: '2018',
-    title: 'Plan fret ferroviaire',
-    desc: 'Lancement du plan de relance du fret ferroviaire avec un objectif de doublement de la part modale d\u2019ici 2030.',
+    year: '2012',
+    title: 'Trains de 850 m\u00e8tres',
+    desc: 'Obtention de l\u2019autorisation de faire circuler des trains de 850 m\u00e8tres, augmentant significativement la capacit\u00e9 du transport combin\u00e9.',
   },
   {
     year: '2020',
@@ -47,19 +47,24 @@ const TIMELINE = [
     desc: 'Le transport combin\u00e9 d\u00e9montre sa r\u00e9silience pendant la crise sanitaire en maintenant les flux essentiels de marchandises.',
   },
   {
-    year: '2023',
-    title: 'Strat\u00e9gie Nationale Fret Ferroviaire',
-    desc: 'Le gouvernement adopte la SNFF avec un objectif ambitieux : doubler la part du fret ferroviaire d\u2019ici 2030 pour atteindre 18%.',
+    year: '2022',
+    title: 'Cr\u00e9ation de l\u2019Observatoire',
+    desc: 'Le GNTC, SNCF R\u00e9seau, VNF et l\u2019ADEME cr\u00e9ent l\u2019Observatoire du transport combin\u00e9 pour mieux conna\u00eetre les statistiques du secteur.',
   },
   {
     year: '2024',
-    title: 'Aide \u00e0 l\u2019exploitation renforc\u00e9e',
-    desc: 'Revalorisation de l\u2019aide \u00e0 l\u2019exploitation du transport combin\u00e9 \u00e0 47 M\u20ac/an pour accompagner le d\u00e9veloppement de la fili\u00e8re.',
+    title: '\u00c9lection de R\u00e9my Crochet',
+    desc: 'R\u00e9my Crochet (FROIDCOMBI) est \u00e9lu pr\u00e9sident du GNTC. L\u2019aide \u00e0 l\u2019exploitation est renforc\u00e9e \u00e0 47 M\u20ac/an.',
+  },
+  {
+    year: '2025',
+    title: '80 ans du GNTC',
+    desc: 'Le GNTC c\u00e9l\u00e8bre ses 80 ans d\u2019existence. Inauguration des terminaux de Dunkerque (25 M\u20ac) et S\u00e8te (20 M\u20ac). La fili\u00e8re est en plein essor.',
   },
   {
     year: '2026',
     title: 'Vers le num\u00e9rique',
-    desc: 'Modernisation de l\u2019image du GNTC, lancement de la cartographie interactive du r\u00e9seau et digitalisation des services aux adh\u00e9rents.',
+    desc: 'Lancement de la cartographie interactive du r\u00e9seau et digitalisation des services. Le GNTC entre dans l\u2019\u00e8re num\u00e9rique.',
   },
 ];
 
