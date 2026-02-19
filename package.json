@@ -11,7 +11,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@cartographie/shared": "*",
+    "@cartographie/shared": "file:./packages/shared",
     "@neondatabase/serverless": "^1.0.2",
     "@types/leaflet": "^1.9.8",
     "@vercel/analytics": "^1.6.1",
