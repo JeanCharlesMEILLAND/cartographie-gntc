@@ -4,32 +4,22 @@ import { useState } from 'react';
 import { useFilterStore } from '@/store/useFilterStore';
 import clsx from 'clsx';
 
-type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification' | 'showWaterways' | 'showPorts' | 'showLocks';
+type LayerKey = 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showWaterways' | 'showPorts';
 
 // Color matching the map rendering for each layer
 const LAYER_COLORS: Record<LayerKey, string> = {
   showRoutes: '#587bbd',
   showPlatforms: '#587bbd',
   showLabels: '#587bbd',
-  showRailway: '#64b5f6',
   showWaterways: '#2196F3',
   showPorts: '#0D47A1',
-  showLocks: '#FF6F00',
-  showVoieUnique: '#42A5F5',
-  showVoieDouble: '#FF9800',
-  showElectrification: '#EF5350',
 };
 
 const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showRoutes', label: 'Liaisons' },
   { key: 'showPlatforms', label: 'Plateformes' },
-  { key: 'showRailway', label: 'Réseau ferré' },
   { key: 'showWaterways', label: 'Voies navigables' },
   { key: 'showPorts', label: 'Ports de fret' },
-  { key: 'showLocks', label: 'Écluses' },
-  { key: 'showVoieUnique', label: 'Voie unique' },
-  { key: 'showVoieDouble', label: 'Double voie' },
-  { key: 'showElectrification', label: 'Électrification' },
 ];
 
 export default function LayerToggles() {

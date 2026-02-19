@@ -11,18 +11,12 @@ interface FilterState {
   showRoutes: boolean;
   showPlatforms: boolean;
   showLabels: boolean;
-  showRailway: boolean;
-  showVoieUnique: boolean;
-  showVoieDouble: boolean;
-  showElectrification: boolean;
   showWaterways: boolean;
   showPorts: boolean;
-  showLocks: boolean;
   showFranceBorder: boolean;
 
   // Map
   tileStyle: string;
-  railwayStyle: 'standard' | 'maxspeed' | 'signals' | 'electrification';
 
   // Operators with visible routes (after frequency filter)
   visibleOperators: Set<string>;
@@ -49,9 +43,8 @@ interface FilterState {
   selectAllOperators: () => void;
   clearOperators: () => void;
   setMinFrequency: (f: number) => void;
-  toggleLayer: (layer: 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showRailway' | 'showVoieUnique' | 'showVoieDouble' | 'showElectrification' | 'showWaterways' | 'showPorts' | 'showLocks' | 'showFranceBorder') => void;
+  toggleLayer: (layer: 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showWaterways' | 'showPorts' | 'showFranceBorder') => void;
   setTileStyle: (style: string) => void;
-  setRailwayStyle: (style: 'standard' | 'maxspeed' | 'signals' | 'electrification') => void;
   setSelectedPlatform: (name: string | null) => void;
   setSelectedPlatformOperators: (ops: Set<string> | null) => void;
   setPanelCollapsed: (collapsed: boolean) => void;
@@ -73,20 +66,14 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   showRoutes: true,
   showPlatforms: true,
   showLabels: true,
-  showRailway: true,
-  showVoieUnique: false,
-  showVoieDouble: false,
-  showElectrification: false,
   showWaterways: false,
   showPorts: false,
-  showLocks: false,
   showFranceBorder: true,
 
   visibleOperators: new Set<string>(),
   selectedPlatformOperators: null,
 
   tileStyle: 'osm-dark',
-  railwayStyle: 'standard',
 
   selectedPlatform: null,
   panelCollapsed: false,
@@ -122,8 +109,6 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   toggleLayer: (layer) => set((state) => ({ [layer]: !state[layer] })),
 
   setTileStyle: (style) => set({ tileStyle: style }),
-
-  setRailwayStyle: (style) => set({ railwayStyle: style }),
 
   setSelectedPlatform: (name) => set({ selectedPlatform: name }),
 

@@ -12,14 +12,10 @@ function MapClickHandler() {
   return null;
 }
 import FranceBorder from './FranceBorder';
-import RailwayOverlay from './RailwayOverlay';
-import TrackTypeLayer from './TrackTypeLayer';
-import ElectrificationLayer from './ElectrificationLayer';
 import RouteLayer from './RouteLayer';
 import TrainMarkers from './TrainMarkers';
 import WaterwayLayer from './WaterwayLayer';
 import PortLayer from './PortLayer';
-import LocksLayer from './LocksLayer';
 import PlatformMarkers from './PlatformMarkers';
 import SearchRouteOverlay from './SearchRouteOverlay';
 import 'leaflet/dist/leaflet.css';
@@ -67,13 +63,9 @@ export default function MapInner({ platforms, routes, railGeometries, services, 
       <ZoomControl position="bottomright" />
       <MapClickHandler />
       <FranceBorder />
-      <RailwayOverlay />
-      <TrackTypeLayer />
-      <ElectrificationLayer />
       <RouteLayer routes={routes} railGeometries={railGeometries} />
       <WaterwayLayer />
       <PortLayer />
-      <LocksLayer />
       {services && allPlatforms && (
         <TrainMarkers services={services} platforms={allPlatforms} railGeometries={railGeometries} />
       )}
