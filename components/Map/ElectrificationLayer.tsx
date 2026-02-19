@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { GeoJSON as GeoJSONLayer } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
 import type { FeatureCollection, Feature } from 'geojson';
-import { fetchSNCFLayers } from './ITELayer';
+import { fetchSNCFLayers } from '@/lib/fetchSNCFLayers';
 import type { PathOptions } from 'leaflet';
 
 const ELEC_COLORS: Record<string, string> = {

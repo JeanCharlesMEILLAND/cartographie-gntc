@@ -15,7 +15,6 @@ import FranceBorder from './FranceBorder';
 import RailwayOverlay from './RailwayOverlay';
 import TrackTypeLayer from './TrackTypeLayer';
 import ElectrificationLayer from './ElectrificationLayer';
-import ITELayer from './ITELayer';
 import RouteLayer from './RouteLayer';
 import TrainMarkers from './TrainMarkers';
 import WaterwayLayer from './WaterwayLayer';
@@ -72,7 +71,6 @@ export default function MapInner({ platforms, routes, railGeometries, services, 
       <TrackTypeLayer />
       <ElectrificationLayer />
       <RouteLayer routes={routes} railGeometries={railGeometries} />
-      <ITELayer />
       <WaterwayLayer />
       <PortLayer />
       <LocksLayer />

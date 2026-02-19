@@ -3,13 +3,10 @@ import type { FeatureCollection, Feature } from 'geojson';
 
 export const dynamic = 'force-dynamic';
 
-const ITE_URL = 'https://www.data.gouv.fr/api/1/datasets/r/a31e504f-ad5c-4b78-916e-f9ed30d789b7';
 const REGIME_URL = 'https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/regime-dexploitation-des-lignes/exports/geojson';
 const ELEC_URL = 'https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/liste-des-lignes-electrifiees/exports/geojson';
 
 interface SNCFData {
-  ite: FeatureCollection;
-  iteDispo: FeatureCollection;
   voieUnique: FeatureCollection;
   voieDouble: FeatureCollection;
   electrification: FeatureCollection;
@@ -48,33 +45,10 @@ export async function GET() {
     return NextResponse.json(cache);
   }
 
-  const [iteRaw, regime, elecRaw] = await Promise.all([
-    fetchJSON(ITE_URL),
+  const [regime, elecRaw] = await Promise.all([
     fetchJSON(REGIME_URL),
     fetchJSON(ELEC_URL),
   ]);
-
-  // Split ITE into two categories
-  let ite: FeatureCollection = { type: 'FeatureCollection', features: [] };
-  let iteDispo: FeatureCollection = { type: 'FeatureCollection', features: [] };
-  if (iteRaw) {
-    const active: Feature[] = [];
-    const dispo: Feature[] = [];
-    for (const f of iteRaw.features) {
-      const p = f.properties || {};
-      const conv = p['Convention_active'] === 'Oui';
-      const circ = p['Circulation_récente'] === 'Oui';
-      const etat = (p['Etat_ITE'] || '') as string;
-      const broken = etat.startsWith('Inutilisable');
-      if (conv && circ) {
-        active.push(f);
-      } else if (!broken && (conv || etat.startsWith('Bon') || etat.startsWith('Neuf') || etat === 'Utilisée')) {
-        dispo.push(f);
-      }
-    }
-    ite = { type: 'FeatureCollection', features: active };
-    iteDispo = { type: 'FeatureCollection', features: dispo };
-  }
 
   // Split regime into voie unique / voie double
   let voieUnique: FeatureCollection = { type: 'FeatureCollection', features: [] };
@@ -140,8 +114,6 @@ export async function GET() {
   }
 
   const result: SNCFData = {
-    ite,
-    iteDispo,
     voieUnique,
     voieDouble,
     electrification,
