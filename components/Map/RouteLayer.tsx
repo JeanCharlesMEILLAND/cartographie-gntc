@@ -5,7 +5,7 @@ import { Polyline } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
 import { useSearchStore } from '@/store/useSearchStore';
 import { AggregatedRoute } from '@/lib/types';
-import { getBezierPoints } from '@/lib/bezier';
+import { getBezierPoints } from '@cartographie/shared/utils';
 import { getOperatorColor } from '@/lib/colors';
 
 interface RouteLayerProps {

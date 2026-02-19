@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { railGeometrySchema, parseBody } from '@/lib/validations';
+import { railGeometrySchema, parseBody } from '@cartographie/shared/utils';
 import { readRailGeometries, writeRailGeometries } from '@/lib/db/transportData';
 
 const BROUTER_URL = 'https://brouter.de/brouter';

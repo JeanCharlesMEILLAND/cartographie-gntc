@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth';
+import { auth } from '@cartographie/shared/auth';
 import { redirect } from 'next/navigation';
 import UserManager from '@/components/Admin/UserManager';
 

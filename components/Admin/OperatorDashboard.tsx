@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { TransportData } from '@/lib/types';
 import { buildOperatorStats, groupServicesByRoute } from '@/lib/adminComputations';
 import { getOperatorColor } from '@/lib/colors';
-import KPICard from './shared/KPICard';
+import { KPICard } from '@cartographie/shared/ui';
 
 interface OperatorInfo {
   id: number;

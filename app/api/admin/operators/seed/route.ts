@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { operators } from '@/lib/db/schema';
+import { auth } from '@cartographie/shared/auth';
+import { db } from '@cartographie/shared/db';
+import { operators } from '@cartographie/shared/db/schema';
 import { eq } from 'drizzle-orm';
 import { OPERATOR_COLORS } from '@/lib/colors';
 import { readTransportData } from '@/lib/db/transportData';

@@ -7,8 +7,7 @@ import { TransportData, Service } from '@/lib/types';
 import { useAdminNav } from '@/lib/useAdminNav';
 import { exportServices } from '@/lib/exportCsv';
 import { parseCsvServices } from '@/lib/importCsv';
-import FilterSelect from './shared/FilterSelect';
-import { MaterialDot } from './shared/MaterialBadge';
+import { FilterSelect, MaterialDot } from '@cartographie/shared/ui';
 
 const ALL_COLS = [
   { key: 'operator', label: 'Opérateur', width: 'min-w-[120px]' },

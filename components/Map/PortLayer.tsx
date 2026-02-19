@@ -37,6 +37,7 @@ export default function PortLayer() {
         const nature = p['MnNaturePort'] || '';
         const gestion = p['MnModeGestionPort'] || '';
         const zone = p['NomZonePortuaire'] || '';
+        const cargo = p['cargo'] || '';
         const hasCommerce = (() => {
           for (let j = 1; j <= 6; j++) {
             if (p[`MnActivitePortuaire_${j}`] === 'Commerce') return true;
@@ -47,7 +48,7 @@ export default function PortLayer() {
 
         return (
           <CircleMarker
-            key={`port-${p['CdPort'] || i}`}
+            key={`port-${p['osmId'] || p['CdPort'] || i}`}
             center={[coords[1], coords[0]]}
             radius={6}
             pathOptions={{
@@ -72,25 +73,20 @@ export default function PortLayer() {
                   </div>
                 )}
 
-                {/* Nature badge */}
-                <div className="flex flex-wrap gap-1 mb-1">
-                  {nature && (
+                {/* Fret badge */}
+                {hasCommerce && (
+                  <div className="flex flex-wrap gap-1 mb-1">
                     <span
                       className="inline-flex items-center text-[9px] px-1.5 py-0.5 rounded font-medium text-white"
                       style={{ backgroundColor: fillColor }}
                     >
-                      {nature}
-                    </span>
-                  )}
-                  {hasCommerce && (
-                    <span className="inline-flex items-center text-[9px] px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: 'rgba(125,194,67,0.2)', color: '#7dc243', borderWidth: 1, borderColor: 'rgba(125,194,67,0.3)' }}>
                       Commerce / Fret
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* Management + Zone */}
-                {(gestion || zone) && (
+                {/* Management + Zone + Cargo */}
+                {(gestion || zone || cargo) && (
                   <div className="border-t pt-1" style={{ borderColor: 'rgba(128,128,128,0.2)' }}>
                     {gestion && gestion !== 'Inconnu' && (
                       <div className="text-[10px] opacity-60">
@@ -100,6 +96,11 @@ export default function PortLayer() {
                     {zone && zone !== name && (
                       <div className="text-[10px] opacity-60">
                         <span className="font-medium">Zone</span> : {zone}
+                      </div>
+                    )}
+                    {cargo && (
+                      <div className="text-[10px] opacity-60">
+                        <span className="font-medium">Cargo</span> : {cargo}
                       </div>
                     )}
                   </div>

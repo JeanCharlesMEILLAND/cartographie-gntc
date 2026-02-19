@@ -1,5 +1,5 @@
-import { db } from '@/lib/db';
-import { transportData, railGeometries } from '@/lib/db/schema';
+import { db } from '@cartographie/shared/db';
+import { transportData, railGeometries } from '@cartographie/shared/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import { TransportData } from '@/lib/types';
 

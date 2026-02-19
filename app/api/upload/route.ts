@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { auth } from '@cartographie/shared/auth';
 import { parseTransportExcel } from '@/lib/parseExcel';
 import { TransportData } from '@/lib/types';
 import { writeTransportData } from '@/lib/db/transportData';

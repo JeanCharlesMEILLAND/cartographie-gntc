@@ -1,8 +1,8 @@
-import { auth } from '@/lib/auth';
+import { auth } from '@cartographie/shared/auth';
 import { redirect } from 'next/navigation';
 import { SessionProvider } from 'next-auth/react';
 import AdminShell from '@/components/Admin/AdminShell';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@cartographie/shared/ui';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { auditLog } from '@/lib/db/schema';
+import { auth } from '@cartographie/shared/auth';
+import { db } from '@cartographie/shared/db';
+import { auditLog } from '@cartographie/shared/db/schema';
 import { desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {

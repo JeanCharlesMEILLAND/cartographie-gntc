@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip, Marker, useMap, useMapEvents } from 'react-leaflet';
 import { Platform, AggregatedRoute, Service } from '@/lib/types';
-import { getBezierPoints } from '@/lib/bezier';
+import { getBezierPoints } from '@cartographie/shared/utils';
 import { getOperatorColor } from '@/lib/colors';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';

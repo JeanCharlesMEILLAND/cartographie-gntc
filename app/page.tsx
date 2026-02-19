@@ -15,7 +15,7 @@ import { useSearchStore } from '@/store/useSearchStore';
 import { dayTimeToMinutes, getTrainProgress } from '@/lib/trainClock';
 import { exportSynthese } from '@/lib/exportCsv';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import LoadingScreen from '@/components/LoadingScreen';
+import { LoadingScreen } from '@cartographie/shared/ui';
 import ChatWidget from '@/components/Chat/ChatWidget';
 
 export default function Home() {

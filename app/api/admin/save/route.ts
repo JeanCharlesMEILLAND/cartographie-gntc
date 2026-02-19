@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { auditLog } from '@/lib/db/schema';
-import { transportDataSchema, parseBody } from '@/lib/validations';
+import { auth } from '@cartographie/shared/auth';
+import { db } from '@cartographie/shared/db';
+import { auditLog } from '@cartographie/shared/db/schema';
+import { transportDataSchema, parseBody } from '@cartographie/shared/utils';
 import { readTransportData, writeTransportData } from '@/lib/db/transportData';
 
 interface ServiceRecord {

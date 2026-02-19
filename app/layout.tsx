@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Outfit, JetBrains_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@cartographie/shared/ui';
 import './globals.css';
 
 const outfit = Outfit({

@@ -3,7 +3,7 @@
 import { Fragment } from 'react';
 import { Polyline, CircleMarker, Tooltip } from 'react-leaflet';
 import { useSearchStore } from '@/store/useSearchStore';
-import { getBezierPoints } from '@/lib/bezier';
+import { getBezierPoints } from '@cartographie/shared/utils';
 import { getOperatorColor } from '@/lib/colors';
 import { haversineKm } from '@/lib/routeFinder';
 

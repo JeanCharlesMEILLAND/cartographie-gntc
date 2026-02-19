@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { operators, users } from '@/lib/db/schema';
+import { auth } from '@cartographie/shared/auth';
+import { db } from '@cartographie/shared/db';
+import { operators, users } from '@cartographie/shared/db/schema';
 import { eq } from 'drizzle-orm';
-import { createOperatorSchema, updateOperatorSchema, parseBody } from '@/lib/validations';
+import { createOperatorSchema, updateOperatorSchema, parseBody } from '@cartographie/shared/utils';
 
 export async function GET() {
   const session = await auth();

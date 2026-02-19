@@ -9,7 +9,7 @@ import { useAdminNav } from '@/lib/useAdminNav';
 import { analyzeDataQuality } from '@/lib/dataQuality';
 import { exportPlatforms, exportRoutes, exportServices, exportSynthese } from '@/lib/exportCsv';
 import Link from 'next/link';
-import KPICard from './shared/KPICard';
+import { KPICard } from '@cartographie/shared/ui';
 
 /* ─── SVG Icons (20x20 for KPIs) ─── */
 const IconMapPin20 = () => (

@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { Platform, AggregatedRoute, Service } from '@/lib/types';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@cartographie/shared/ui';
 
 const MapInner = dynamic(() => import('./MapInner'), {
   ssr: false,

@@ -6,7 +6,7 @@ import { buildPlatformOperatorBreakdown, DAY_ORDER } from '@/lib/adminComputatio
 import { getOperatorColor } from '@/lib/colors';
 import { useAdminStore } from '@/store/useAdminStore';
 import { useAdminNav } from '@/lib/useAdminNav';
-import MaterialBadge from './shared/MaterialBadge';
+import { MaterialBadge } from '@cartographie/shared/ui';
 
 interface Props {
   data: TransportData;

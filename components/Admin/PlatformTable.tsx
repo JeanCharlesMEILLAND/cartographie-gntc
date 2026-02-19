@@ -7,9 +7,7 @@ import { getOperatorColor } from '@/lib/colors';
 import { useAdminStore } from '@/store/useAdminStore';
 import { useAdminNav } from '@/lib/useAdminNav';
 import { exportPlatforms } from '@/lib/exportCsv';
-import FilterSelect from './shared/FilterSelect';
-import EditableCell from './shared/EditableCell';
-import MaterialBadge from './shared/MaterialBadge';
+import { FilterSelect, EditableCell, MaterialBadge } from '@cartographie/shared/ui';
 
 const COLS = [
   { key: 'site', label: 'Site', width: 'min-w-[160px]' },

@@ -5,7 +5,7 @@ import { CircleMarker, Tooltip } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
 import { Service, Platform } from '@/lib/types';
 import { dayTimeToMinutes, getTrainProgress, interpolateAlongPath } from '@/lib/trainClock';
-import { getBezierPoints } from '@/lib/bezier';
+import { getBezierPoints } from '@cartographie/shared/utils';
 import { getOperatorColor } from '@/lib/colors';
 
 interface TrainMarkersProps {
