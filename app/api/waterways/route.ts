@@ -1,18 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { FeatureCollection } from 'geojson';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { db } from '@cartographie/shared/db';
+import { ports } from '@cartographie/shared/db/schema';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-// Sandre WFS requires "application/json; subtype=geojson" as output format
+// Sandre WFS for waterways (voies navigables) — ports now come from DB
 const GEOJSON_FORMAT = encodeURIComponent('application/json; subtype=geojson');
-
 const WATERWAYS_URL =
   `https://services.sandre.eaufrance.fr/geo/dpf?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&typename=SegDPF&SRSNAME=EPSG:4326&OUTPUTFORMAT=${GEOJSON_FORMAT}`;
-
-const PORTS_URL =
-  `https://services.sandre.eaufrance.fr/geo/pts?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&typename=PortMaritime&SRSNAME=EPSG:4326&OUTPUTFORMAT=${GEOJSON_FORMAT}`;
 
 interface WaterwayData {
   waterways: FeatureCollection;
@@ -47,75 +44,36 @@ function filterNavigable(fc: FeatureCollection): FeatureCollection {
   };
 }
 
-// Load curated inland/fluvial ports from static GeoJSON (sourced from OSM)
-let inlandPortsCache: FeatureCollection | null = null;
-
-async function loadInlandPorts(): Promise<FeatureCollection> {
-  if (inlandPortsCache) return inlandPortsCache;
+// Load ports from database and convert to GeoJSON
+async function loadPortsFromDB(): Promise<FeatureCollection> {
   try {
-    const filePath = join(process.cwd(), 'public', 'data', 'inland-ports.geojson');
-    const raw = await readFile(filePath, 'utf-8');
-    const fc: FeatureCollection = JSON.parse(raw);
-    // Map properties to match Sandre port format for PortLayer compatibility
-    fc.features = fc.features.map((f) => ({
-      ...f,
-      properties: {
-        NomPort: f.properties?.name || 'Port fluvial',
-        LbCommune: '',
-        MnNaturePort: 'Fluvial',
-        MnModeGestionPort: f.properties?.operator || '',
-        NomZonePortuaire: '',
-        MnActivitePortuaire_1: 'Commerce',
-        source: 'osm',
-        osmId: f.properties?.osmId || 0,
-        cargo: f.properties?.cargo || '',
-      },
-    }));
-    inlandPortsCache = fc;
-    return fc;
+    const rows = await db.select().from(ports).where(eq(ports.visible, 1));
+
+    return {
+      type: 'FeatureCollection',
+      features: rows.map((row) => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [parseFloat(row.longitude), parseFloat(row.latitude)],
+        },
+        properties: {
+          NomPort: row.name,
+          LbCommune: row.commune || '',
+          MnNaturePort: row.nature || '',
+          MnModeGestionPort: row.gestion || '',
+          NomZonePortuaire: row.zone || '',
+          MnActivitePortuaire_1: row.hasCommerce ? 'Commerce' : '',
+          source: row.source,
+          osmId: row.sourceId || '',
+          cargo: row.cargo || '',
+          CdPort: row.source === 'sandre' ? row.sourceId : '',
+        },
+      })),
+    };
   } catch {
     return EMPTY_FC;
   }
-}
-
-// Freight-focused port filter:
-// - Maritime ports: must have "Commerce" activity
-// - Fluvial/Fluvio-maritime ports: keep unless ONLY plaisance/pêche
-//   (Sandre doesn't tag fluvial ports with "Commerce" even when they do freight)
-function filterFretPorts(fc: FeatureCollection): FeatureCollection {
-  return {
-    type: 'FeatureCollection',
-    features: fc.features.filter((f) => {
-      const p = f.properties || {};
-      const nature = p['MnNaturePort'] || '';
-
-      // Collect all activities
-      const activities: string[] = [];
-      for (let i = 1; i <= 6; i++) {
-        const act = p[`MnActivitePortuaire_${i}`] || '';
-        if (act) activities.push(act);
-      }
-
-      const hasCommerce = activities.includes('Commerce');
-
-      // Maritime: only if Commerce (fret)
-      if (nature === 'Maritime') return hasCommerce;
-
-      // Fluvial / Fluvio-maritime: keep unless exclusively plaisance/pêche
-      if (nature === 'Fluvial' || nature === 'Fluvio-maritime') {
-        if (hasCommerce) return true;
-        // No activities listed → likely freight infrastructure, keep it
-        if (activities.length === 0) return true;
-        // Exclude if ALL activities are plaisance/pêche only
-        const fretExcluded = new Set(['Plaisance', 'Peche', 'Pêche']);
-        const onlyLeisure = activities.every((a) => fretExcluded.has(a));
-        return !onlyLeisure;
-      }
-
-      // Unknown nature: only if Commerce
-      return hasCommerce;
-    }),
-  };
 }
 
 export async function GET() {
@@ -124,22 +82,14 @@ export async function GET() {
     return NextResponse.json(cache);
   }
 
-  const [rawWaterways, rawPorts, inlandPorts] = await Promise.all([
+  const [rawWaterways, portsFC] = await Promise.all([
     fetchGeoJSON(WATERWAYS_URL),
-    fetchGeoJSON(PORTS_URL),
-    loadInlandPorts(),
+    loadPortsFromDB(),
   ]);
-
-  // Combine Sandre maritime ports (filtered) + static inland ports
-  const maritimePorts = rawPorts ? filterFretPorts(rawPorts) : EMPTY_FC;
-  const combinedPorts: FeatureCollection = {
-    type: 'FeatureCollection',
-    features: [...maritimePorts.features, ...inlandPorts.features],
-  };
 
   const data: WaterwayData = {
     waterways: rawWaterways ? filterNavigable(rawWaterways) : EMPTY_FC,
-    ports: combinedPorts,
+    ports: portsFC,
   };
 
   cache = data;

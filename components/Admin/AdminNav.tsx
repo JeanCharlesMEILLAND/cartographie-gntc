@@ -80,6 +80,14 @@ function IconClock() {
     </svg>
   );
 }
+function IconAnchor() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="7" cy="3.5" r="1.5" />
+      <path d="M7 5V12M7 12C4.5 12 2.5 10 2.5 7.5H4.5M7 12C9.5 12 11.5 10 11.5 7.5H9.5" />
+    </svg>
+  );
+}
 
 export default function AdminNav() {
   const pathname = usePathname();
@@ -94,6 +102,7 @@ export default function AdminNav() {
     { href: '/admin/plateformes', label: `Plateformes${data ? ` (${data.platforms.length})` : ''}`, icon: IconMapPin },
     { href: '/admin/operateurs', label: `Opérateurs${data ? ` (${data.operators.length})` : ''}`, icon: IconGroup },
     { href: '/admin/flux', label: `Flux${data ? ` (${data.services.length})` : ''}`, icon: IconTable },
+    { href: '/admin/ports', label: 'Ports', icon: IconAnchor },
     { href: '/admin/utilisateurs', label: 'Utilisateurs', icon: IconUserPlus },
     { href: '/admin/historique', label: 'Historique', icon: IconClock },
   ];

@@ -49,3 +49,22 @@ export const railGeometries = pgTable('rail_geometries', {
   data: jsonb('data').notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+export const ports = pgTable('ports', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 500 }).notNull(),
+  latitude: text('latitude').notNull(),
+  longitude: text('longitude').notNull(),
+  nature: varchar('nature', { length: 50 }),        // 'Fluvial' | 'Maritime' | 'Fluvio-maritime'
+  source: varchar('source', { length: 20 }).notNull(), // 'sandre' | 'osm' | 'manual'
+  sourceId: varchar('source_id', { length: 100 }),
+  commune: varchar('commune', { length: 255 }),
+  operator: varchar('operator', { length: 255 }),
+  gestion: varchar('gestion', { length: 255 }),
+  zone: varchar('zone', { length: 255 }),
+  cargo: varchar('cargo', { length: 255 }),
+  hasCommerce: integer('has_commerce').default(0),
+  visible: integer('visible').default(1),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
