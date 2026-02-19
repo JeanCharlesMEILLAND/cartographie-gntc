@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import SiteHeader from '@/components/Site/SiteHeader';
 import SiteFooter from '@/components/Site/SiteFooter';
+import { getLatestArticles, CATEGORY_LABELS, CATEGORY_COLORS } from '@/lib/actualites';
 
 const STATS = [
   { value: '1 000 000', label: 'camions retir\u00e9s des routes par an' },
@@ -160,6 +161,39 @@ export default function HomePage() {
                 <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
+          </div>
+        </section>
+
+        {/* Latest news */}
+        <section className="py-16 sm:py-24 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-display font-bold text-text mb-2">Derni&egrave;res actualit&eacute;s</h2>
+                <p className="text-sm text-muted">Suivez l&apos;actualit&eacute; du transport combin&eacute; en France.</p>
+              </div>
+              <Link href="/actualites" className="hidden sm:inline-flex items-center gap-1 text-sm text-blue font-medium hover:underline">
+                Toutes les actus
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7H11M11 7L7.5 3.5M11 7L7.5 10.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </Link>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {getLatestArticles(3).map((a) => (
+                <Link key={a.slug} href={`/actualites/${a.slug}`} className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-lg transition-shadow group">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full text-white" style={{ background: CATEGORY_COLORS[a.category] }}>
+                      {CATEGORY_LABELS[a.category]}
+                    </span>
+                    <span className="text-xs text-muted">{new Date(a.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  </div>
+                  <h3 className="font-display font-bold text-text group-hover:text-blue transition-colors mb-2 line-clamp-2">{a.title}</h3>
+                  <p className="text-xs text-muted leading-relaxed line-clamp-3">{a.excerpt}</p>
+                </Link>
+              ))}
+            </div>
+            <div className="sm:hidden mt-6 text-center">
+              <Link href="/actualites" className="text-sm text-blue font-medium hover:underline">Toutes les actualit&eacute;s &rarr;</Link>
+            </div>
           </div>
         </section>
 

@@ -1,0 +1,481 @@
+/* ------------------------------------------------------------------ */
+/*  Annuaire des acteurs du transport combiné – données centralisées  */
+/* ------------------------------------------------------------------ */
+
+export type ActeurCategory = 'operateur' | 'plateforme' | 'ferroviaire' | 'fluvial';
+
+export interface Acteur {
+  slug: string;
+  name: string;
+  category: ActeurCategory;
+  description: string;
+  contact?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  logo?: string;       // path under /logos/
+  color?: string;       // brand color for accent
+  specialites?: string[];
+  location?: string;    // ville (département)
+}
+
+/* ---------- helpers ------------------------------------------------ */
+
+export const CATEGORY_META: Record<ActeurCategory, { label: string; labelPlural: string; icon: string; href: string; description: string }> = {
+  operateur: {
+    label: 'Opérateur TC',
+    labelPlural: 'Opérateurs de transport combiné',
+    icon: '🚂',
+    href: '/acteurs/operateurs',
+    description: 'Les entreprises qui organisent et commercialisent les services de transport combiné rail-route et fleuve-route.',
+  },
+  plateforme: {
+    label: 'Plateforme',
+    labelPlural: 'Plateformes multimodales & Ports',
+    icon: '🏗️',
+    href: '/acteurs/plateformes',
+    description: 'Les terminaux et ports où s\'effectuent les transbordements entre modes de transport.',
+  },
+  ferroviaire: {
+    label: 'Acteur ferroviaire',
+    labelPlural: 'Acteurs ferroviaires',
+    icon: '🛤️',
+    href: '/acteurs/ferroviaire',
+    description: 'Les entreprises spécialisées dans l\'équipement, le conseil et les services ferroviaires pour le transport combiné.',
+  },
+  fluvial: {
+    label: 'Acteur fluvial',
+    labelPlural: 'Acteurs fluviaux',
+    icon: '🚢',
+    href: '/acteurs/fluvial',
+    description: 'Les opérateurs et gestionnaires du transport combiné par voie d\'eau intérieure.',
+  },
+};
+
+export function getActeursByCategory(cat: ActeurCategory): Acteur[] {
+  return ACTEURS.filter((a) => a.category === cat);
+}
+
+export function searchActeurs(query: string): Acteur[] {
+  const q = query.toLowerCase().trim();
+  if (!q) return ACTEURS;
+  return ACTEURS.filter(
+    (a) =>
+      a.name.toLowerCase().includes(q) ||
+      a.description.toLowerCase().includes(q) ||
+      a.location?.toLowerCase().includes(q) ||
+      a.specialites?.some((s) => s.toLowerCase().includes(q)),
+  );
+}
+
+/* ---------- data --------------------------------------------------- */
+
+export const ACTEURS: Acteur[] = [
+  /* ====== OPÉRATEURS DE TRANSPORT COMBINÉ ====== */
+  {
+    slug: 'ambrogio-intermodal',
+    name: 'Ambrogio Intermodal',
+    category: 'operateur',
+    description: 'Opérateur italien de transport combiné rail-route, présent en France depuis Mouguerre. Spécialiste des liaisons France-Italie et France-Espagne.',
+    contact: 'Alberto AMBROGIO',
+    address: '14 avenue d\'Alegera, BP 10036, 64990 Mouguerre',
+    phone: '+33 5 59 42 63 00',
+    email: 'commercial.mg@ambrogiointermodal.com',
+    website: 'www.ambrogiointermodal.com',
+    logo: '/logos/ambrogio.png',
+    color: '#e879f9',
+    specialites: ['Rail-route', 'International', 'Italie-France'],
+    location: 'Mouguerre (64)',
+  },
+  {
+    slug: 'be-modal',
+    name: 'Be Modal Intermodal Transport',
+    category: 'operateur',
+    description: 'Opérateur de transport combiné basé à Rennes, spécialisé dans les solutions intermodales pour le Grand Ouest.',
+    contact: 'Christophe HUARD',
+    logo: '/logos/bemodal.png',
+    color: '#2dd4bf',
+    specialites: ['Rail-route', 'Grand Ouest'],
+    location: 'Rennes (35)',
+    website: 'be-modal-solutions.fr',
+  },
+  {
+    slug: 'brittany-ferries',
+    name: 'Brittany Ferries',
+    category: 'operateur',
+    description: 'Compagnie maritime proposant un service de transport combiné rail-mer entre Mouguerre et Cherbourg, en connexion avec le Royaume-Uni.',
+    website: 'www.brittany-ferries.fr',
+    logo: '/logos/brittanyferries.png',
+    color: '#facc15',
+    specialites: ['Rail-mer', 'Royaume-Uni', 'Mouguerre-Cherbourg'],
+    location: 'Roscoff (29)',
+  },
+  {
+    slug: 'cargobeamer',
+    name: 'Cargo Beamer',
+    category: 'operateur',
+    description: 'Opérateur innovant utilisant une technologie brevetée de chargement horizontal des semi-remorques sur wagons, sans grue.',
+    email: 'sales@cargobeamer.com',
+    website: 'www.cargobeamer.com',
+    logo: '/logos/cargobeamer.png',
+    color: '#38bdf8',
+    contact: 'Christian KAMPF (DG France)',
+    specialites: ['Rail-route', 'Chargement horizontal', 'Innovation'],
+    location: 'Leipzig (Allemagne)',
+  },
+  {
+    slug: 'cinerites',
+    name: 'Cinérites',
+    category: 'operateur',
+    description: 'Opérateur de transport combiné avec 4 plateformes : Voutré, Le Mans, Trappes et Bonneuil-sur-Marne. Spécialiste des flux granulats et matériaux.',
+    email: 'contact@cinerites.fr',
+    phone: '+33 2 43 75 57 63',
+    website: 'www.cinerites.fr',
+    logo: '/logos/cinerites.png',
+    color: '#f87171',
+    specialites: ['Rail-route', 'Granulats', 'Matériaux'],
+    location: 'Voutré (53)',
+  },
+  {
+    slug: 'combronde',
+    name: 'Groupe Combronde (Prestalog)',
+    category: 'operateur',
+    description: 'Groupe auvergnat de transport et logistique, opérateur de transport combiné via sa filiale Prestalog. Exploite les terminaux de Loire-sur-Rhône, Clermont-Ferrand, Vierzon et Vergèze.',
+    contact: 'Jérôme BAUDY',
+    address: 'Groupe Combronde, Gerzat (63)',
+    phone: '+33 4 73 23 22 92',
+    email: 'j.baudy@groupecombronde.com',
+    website: 'www.groupecombronde.com',
+    logo: '/logos/combronde.png',
+    color: '#f472b6',
+    specialites: ['Rail-route', 'Fluvial', 'Terminaux', 'Auvergne'],
+    location: 'Gerzat (63)',
+  },
+  {
+    slug: 'db-cargo-france',
+    name: 'DB Cargo France',
+    category: 'operateur',
+    description: 'Filiale française de DB Cargo (Deutsche Bahn), entreprise ferroviaire de fret et opérateur de transport combiné sur les axes franco-allemands.',
+    contact: 'Louis-Félix TOURON',
+    website: 'www.dbcargo.com/fr',
+    logo: '/logos/dbcargo.png',
+    color: '#f43f5e',
+    specialites: ['Rail-route', 'International', 'France-Allemagne'],
+    location: 'Paris (75)',
+  },
+  {
+    slug: 'delta-rail',
+    name: 'Delta Rail',
+    category: 'operateur',
+    description: 'Opérateur de transport combiné basé à Aix-en-Provence, spécialisé dans les liaisons méditerranéennes.',
+    contact: 'Kenji JASON',
+    email: 'contact@deltarail.fr',
+    phone: '+33 4 42 70 71 80',
+    website: 'www.deltarail.fr',
+    logo: '/logos/deltarail.png',
+    color: '#818cf8',
+    specialites: ['Rail-route', 'Méditerranée'],
+    location: 'Aix-en-Provence (13)',
+  },
+  {
+    slug: 'froidcombi',
+    name: 'Froid Combi',
+    category: 'operateur',
+    description: 'Opérateur de transport combiné frigorifique, spécialiste du transport de denrées périssables. Son dirigeant Rémy Crochet est président du GNTC depuis 2024.',
+    contact: 'Rémy CROCHET',
+    color: '#fb923c',
+    specialites: ['Rail-route', 'Frigorifique', 'Agroalimentaire'],
+    location: 'Châteaurenard (13)',
+  },
+  {
+    slug: 'greenmodal',
+    name: 'Greenmodal',
+    category: 'operateur',
+    description: 'Filiale du groupe Novatrans, spécialisée dans le transport combiné pour les chargeurs et commissionnaires. Offre clé en main de report modal.',
+    contact: 'Vincent BELLANGE (Dir. commercial)',
+    address: '42 Rue de Ruffi, 13003 Marseille',
+    phone: '+33 4 75 00 47 00',
+    email: 'contact@novatrans-greenmodal.eu',
+    website: 'novatrans-greenmodal.eu',
+    logo: '/logos/greenmodal.png',
+    color: '#7dc243',
+    specialites: ['Rail-route', 'Clé en main', 'Report modal'],
+    location: 'Marseille (13)',
+  },
+  {
+    slug: 'hupac',
+    name: 'HUPAC',
+    category: 'operateur',
+    description: 'Opérateur suisse majeur du transport combiné en Europe. Exploite un vaste réseau de navettes intermodales traversant les Alpes.',
+    contact: 'André FLESCH',
+    phone: '+41 58 855 81 10',
+    email: 'line1@hupac.com',
+    website: 'www.hupac.com',
+    color: '#fbbf24',
+    specialites: ['Rail-route', 'Transalpin', 'Réseau européen'],
+    location: 'Chiasso (Suisse)',
+  },
+  {
+    slug: 'logi-ports-shuttle',
+    name: 'Logi Ports Shuttle (Sogestran)',
+    category: 'operateur',
+    description: 'Service de navettes ferroviaires de conteneurs maritimes au départ du Havre, opéré par le groupe Sogestran.',
+    contact: 'Pierre COSSART',
+    specialites: ['Rail-route', 'Conteneurs maritimes', 'Le Havre'],
+    location: 'Le Havre (76)',
+  },
+  {
+    slug: 'mercitalia-intermodal',
+    name: 'Mercitalia Intermodal',
+    category: 'operateur',
+    description: 'Filiale du groupe Mercitalia (FS Italiane), opérateur de transport combiné sur les corridors France-Italie.',
+    specialites: ['Rail-route', 'International', 'France-Italie'],
+    location: 'Milano (Italie)',
+  },
+  {
+    slug: 'metrocargo',
+    name: 'Metrocargo Italia',
+    category: 'operateur',
+    description: 'Opérateur italien de transport combiné basé à Gênes, spécialisé dans les liaisons portuaires et les corridors alpins.',
+    phone: '+39 010 6520502',
+    website: 'www.mercitalialogistics.com',
+    color: '#6ee7b7',
+    specialites: ['Rail-route', 'Portuaire', 'Gênes'],
+    location: 'Genova (Italie)',
+  },
+  {
+    slug: 'naviland-cargo',
+    name: 'Naviland Cargo',
+    category: 'operateur',
+    description: 'Premier opérateur français de transport combiné rail-route. Filiale de SNCF, Naviland Cargo exploite le plus grand réseau de navettes intermodales en France.',
+    address: 'Levallois-Perret (siège)',
+    phone: '+33 1 41 05 33 01',
+    website: 'www.naviland-cargo.com',
+    logo: '/logos/naviland.png',
+    color: '#587bbd',
+    specialites: ['Rail-route', 'Réseau national', 'Conteneurs maritimes'],
+    location: 'Levallois-Perret (92)',
+  },
+  {
+    slug: 'novatrans',
+    name: 'Novatrans',
+    category: 'operateur',
+    description: 'Opérateur historique du transport combiné en France, fondé en 1968. Exploite un réseau national et européen de navettes intermodales rail-route.',
+    address: '10 rue Vandrezanne, CS 91397, 75634 Paris Cedex 13',
+    phone: '+33 1 85 34 49 11',
+    email: 'contact.commercial@novatrans.eu',
+    website: 'www.novatrans.eu',
+    logo: '/logos/novatrans.png',
+    color: '#f59e42',
+    specialites: ['Rail-route', 'Réseau national', 'Europe'],
+    location: 'Paris (75)',
+  },
+  {
+    slug: 't3m',
+    name: 'T3M',
+    category: 'operateur',
+    description: 'Opérateur de transport combiné basé à Montpellier, spécialisé dans les liaisons méditerranéennes et les flux France-Espagne.',
+    contact: 'Núria VALMAÑA PI',
+    address: '11 Rue Maryse Bastié, ZI de la Lauze, 34430 Saint Jean de Védas',
+    phone: '+33 4 67 27 18 51',
+    email: 'sales@t3m.fr',
+    website: 'www.t3m.fr',
+    logo: '/logos/t3m.png',
+    color: '#34d399',
+    specialites: ['Rail-route', 'Méditerranée', 'France-Espagne'],
+    location: 'Saint-Jean-de-Védas (34)',
+  },
+  {
+    slug: 'tp-nova',
+    name: 'TP Nova',
+    category: 'operateur',
+    description: 'Opérateur de transport combiné.',
+    contact: 'Maylis DE NUCÉ',
+    specialites: ['Rail-route'],
+  },
+  {
+    slug: 'transports-vigneron',
+    name: 'Transports Vigneron',
+    category: 'operateur',
+    description: 'Entreprise de transport lorraine combinant route et rail. Spécialiste du transport combiné dans le Grand Est.',
+    contact: 'Christophe PFUND',
+    email: 'commercial@transports-vigneron.fr',
+    phone: '+33 6 12 50 25 02',
+    website: 'www.transports-vigneron.fr',
+    logo: '/logos/vigneron.png',
+    color: '#4ade80',
+    specialites: ['Rail-route', 'Grand Est', 'Lorraine'],
+    location: 'Ludres (54)',
+  },
+  {
+    slug: 'viia',
+    name: 'VIIA / Lorry-Rail',
+    category: 'operateur',
+    description: 'Opérateur d\'autoroute ferroviaire (filiale SNCF). Exploite la ligne Bettembourg–Perpignan (la plus longue d\'Europe) et d\'autres services d\'autoroute ferroviaire.',
+    email: 'info@viia.com',
+    phone: '+33 4 68 81 56 74',
+    website: 'www.viia.com',
+    logo: '/logos/viia.png',
+    color: '#a78bfa',
+    specialites: ['Autoroute ferroviaire', 'Semi-remorques', 'Bettembourg-Perpignan'],
+    location: 'Levallois-Perret (92)',
+  },
+
+  /* ====== PLATEFORMES MULTIMODALES & PORTS ====== */
+  {
+    slug: 'btm',
+    name: 'BTM (Multimodal Terminal Operator)',
+    category: 'plateforme',
+    description: 'Opérateur de terminaux multimodaux. Gère les terminaux de Bonneuil-sur-Marne, Valenton, Fenouillet et Miramas.',
+    specialites: ['Terminaux', 'Île-de-France', 'Méditerranée'],
+    location: 'Bonneuil-sur-Marne (94)',
+  },
+  {
+    slug: 'combronde-terminaux',
+    name: 'Combronde Terminaux',
+    category: 'plateforme',
+    description: 'Réseau de terminaux multimodaux du groupe Combronde : Loire-sur-Rhône, Clermont-Ferrand, Vierzon et Vergèze.',
+    website: 'www.groupecombronde.com',
+    specialites: ['Terminaux', 'Centre-France', 'Rhône-Alpes'],
+    location: 'Loire-sur-Rhône (69)',
+  },
+  {
+    slug: 'delta-3',
+    name: 'Delta 3',
+    category: 'plateforme',
+    description: 'Plateforme multimodale de Dourges (Hauts-de-France), l\'une des plus grandes d\'Europe. Connecte rail, route et voie d\'eau.',
+    specialites: ['Trimodal', 'Hauts-de-France', 'Rail-Route-Fluvial'],
+    location: 'Dourges (62)',
+  },
+  {
+    slug: 'lhte',
+    name: 'Le Havre Terminal Exploitation (LHTE)',
+    category: 'plateforme',
+    description: 'Terminal d\'exploitation au Havre, plateforme majeure pour les conteneurs maritimes en lien avec le premier port français.',
+    specialites: ['Maritime', 'Conteneurs', 'Port du Havre'],
+    location: 'Le Havre (76)',
+  },
+  {
+    slug: 'port-dunkerque',
+    name: 'Port de Dunkerque',
+    category: 'plateforme',
+    description: 'Grand port maritime du Nord, avec un nouveau terminal multimodal de 25 M€ inauguré en 2025. Connecté aux réseaux ferroviaire et fluvial.',
+    specialites: ['Port maritime', 'Terminal multimodal', 'Nord'],
+    location: 'Dunkerque (59)',
+  },
+  {
+    slug: 'ports-de-lille',
+    name: 'Ports de Lille',
+    category: 'plateforme',
+    description: 'Ports fluviaux de la métropole lilloise, offrant des services de transport combiné fleuve-route et des connexions rail.',
+    specialites: ['Fluvial', 'Rail', 'Hauts-de-France'],
+    location: 'Lille (59)',
+  },
+  {
+    slug: 'port-marseille-fos',
+    name: 'Grand Port Maritime de Marseille Fos',
+    category: 'plateforme',
+    description: 'Premier port français, avec des terminaux multimodaux connectant le maritime au ferroviaire et au fluvial (axe rhodanien).',
+    specialites: ['Port maritime', 'Méditerranée', 'Axe rhodanien'],
+    location: 'Marseille (13)',
+  },
+  {
+    slug: 'ports-de-strasbourg',
+    name: 'Ports de Strasbourg',
+    category: 'plateforme',
+    description: 'Port rhénan de Strasbourg, plateforme trimodale connectant la France au réseau fluvial européen (Rhin).',
+    specialites: ['Trimodal', 'Rhin', 'Franco-allemand'],
+    location: 'Strasbourg (67)',
+  },
+  {
+    slug: 'pscct',
+    name: 'PSCCT (Saint-Charles Conteneur Terminal)',
+    category: 'plateforme',
+    description: 'Terminal à conteneurs de Perpignan Saint-Charles, nœud stratégique pour les échanges France-Espagne et l\'autoroute ferroviaire.',
+    specialites: ['Conteneurs', 'France-Espagne', 'Autoroute ferroviaire'],
+    location: 'Perpignan (66)',
+  },
+  {
+    slug: 'port-barcelone',
+    name: 'Port de Barcelone',
+    category: 'plateforme',
+    description: 'Grand port méditerranéen espagnol, partenaire du GNTC pour le développement des liaisons ferroviaires transpyrénéennes.',
+    specialites: ['Port maritime', 'Espagne', 'Transpyrénéen'],
+    location: 'Barcelone (Espagne)',
+  },
+
+  /* ====== ACTEURS FERROVIAIRES ====== */
+  {
+    slug: 'combipass',
+    name: 'Combipass',
+    category: 'ferroviaire',
+    description: 'Société spécialisée dans l\'équipement et le conseil pour le transport combiné ferroviaire. Expertise en matériel intermodal.',
+    contact: 'Gilles DELVIGNE',
+    specialites: ['Équipement', 'Conseil', 'Matériel intermodal'],
+    location: 'Avignon (84)',
+  },
+  {
+    slug: 'ermewa',
+    name: 'ERMEWA',
+    category: 'ferroviaire',
+    description: 'Leader européen de la location de wagons de fret. Flotte de plus de 47 000 wagons dont des wagons-poche pour le transport combiné.',
+    contact: 'Édouard LIMOUZY',
+    specialites: ['Location wagons', 'Wagons-poche', '47 000+ wagons'],
+    location: 'Paris (75)',
+  },
+  {
+    slug: 'modalis',
+    name: 'Modalis',
+    category: 'ferroviaire',
+    description: 'Fournisseur de solutions intermodales pour le transport combiné. Expertise en organisation et optimisation des flux ferroviaires.',
+    contact: 'Yvonne JANSSEN',
+    specialites: ['Solutions intermodales', 'Optimisation', 'Organisation'],
+  },
+  {
+    slug: '2c-combi-conseil',
+    name: '2C Combi Conseil',
+    category: 'ferroviaire',
+    description: 'Cabinet de conseil spécialisé dans le report modal et le transport combiné. Accompagnement des entreprises dans leur transition vers le rail.',
+    contact: 'Christian CARBONELL',
+    specialites: ['Conseil', 'Report modal', 'Accompagnement'],
+  },
+
+  /* ====== ACTEURS FLUVIAUX ====== */
+  {
+    slug: 'combronde-fluvial',
+    name: 'Combronde (Fluvial)',
+    category: 'fluvial',
+    description: 'Activité fluviale du groupe Combronde. Transport de conteneurs et vrac par voies d\'eau intérieures, notamment sur l\'axe Rhône-Saône.',
+    website: 'www.groupecombronde.com',
+    specialites: ['Conteneurs', 'Vrac', 'Axe Rhône-Saône'],
+    location: 'Gerzat (63)',
+  },
+  {
+    slug: 'fluviofeeder',
+    name: 'Fluviofeeder Armement',
+    category: 'fluvial',
+    description: 'Opérateur de transport fluvial de conteneurs, filiale du groupe Marfret. Navettes fluviales au départ des grands ports maritimes.',
+    email: 'achaventre@marfret.fr',
+    specialites: ['Conteneurs fluviaux', 'Feeder', 'Ports maritimes'],
+  },
+  {
+    slug: 'sogestran-logistics',
+    name: 'Sogestran Logistics',
+    category: 'fluvial',
+    description: 'Logisticien fluvial du groupe Sogestran, actif depuis 1948. Opérations sur la Seine et les axes fluviaux du nord de la France.',
+    contact: 'Pierre COSSART',
+    specialites: ['Logistique fluviale', 'Seine', 'Depuis 1948'],
+    location: 'Le Havre (76)',
+  },
+  {
+    slug: 'vnf',
+    name: 'VNF (Voies Navigables de France)',
+    category: 'fluvial',
+    description: 'Établissement public gestionnaire du réseau fluvial français (6 700 km). Partenaire institutionnel du GNTC pour le développement du transport combiné fleuve-route.',
+    contact: 'Stéphanie PLANCQ',
+    email: 'stephanie.plancq@vnf.fr',
+    specialites: ['Gestionnaire réseau', '6 700 km', 'Institutionnel'],
+    location: 'Béthune (62)',
+  },
+];
