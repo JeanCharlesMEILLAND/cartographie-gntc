@@ -110,6 +110,50 @@ function PlatformPicker({
   );
 }
 
+function PlatformToggle({
+  city,
+  routes,
+  selectedPlatforms,
+  onPlatformsChange,
+}: {
+  city: CitySuggestion;
+  routes: AggregatedRoute[];
+  selectedPlatforms: Platform[];
+  onPlatformsChange: (p: Platform[]) => void;
+}) {
+  const [showPlatforms, setShowPlatforms] = useState(false);
+
+  return showPlatforms ? (
+    <div className="mt-1.5">
+      <button
+        onClick={() => setShowPlatforms(false)}
+        className="text-[10px] text-muted hover:text-text transition-colors mb-0.5 flex items-center gap-1"
+      >
+        <svg width="8" height="8" viewBox="0 0 8 8" fill="none" className="rotate-90">
+          <path d="M2 3L4 5L6 3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Masquer les plateformes
+      </button>
+      <PlatformPicker
+        city={city}
+        routes={routes}
+        selectedPlatforms={selectedPlatforms}
+        onPlatformsChange={onPlatformsChange}
+      />
+    </div>
+  ) : (
+    <button
+      onClick={() => setShowPlatforms(true)}
+      className="mt-1.5 w-full text-left text-[10px] text-muted hover:text-blue transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md border border-border/50 hover:border-blue/30"
+    >
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="flex-shrink-0">
+        <path d="M3 5L5 7L7 5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      Voir les {city.platforms.length} plateformes disponibles autour
+    </button>
+  );
+}
+
 function CityInput({
   value,
   onChange,
@@ -336,9 +380,9 @@ function CityInput({
         </div>
       )}
 
-      {/* Platform picker — shown when city is selected and has multiple platforms */}
+      {/* Platform picker — hidden by default, toggle via button */}
       {selectedCity && selectedCity.platforms.length > 1 && (
-        <PlatformPicker
+        <PlatformToggle
           city={selectedCity}
           routes={routes}
           selectedPlatforms={selectedPlatforms}
