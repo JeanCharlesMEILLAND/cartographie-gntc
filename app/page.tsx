@@ -1,370 +1,204 @@
-'use client';
+import Link from 'next/link';
+import SiteHeader from '@/components/Site/SiteHeader';
+import SiteFooter from '@/components/Site/SiteFooter';
 
-import { useEffect, useState, useMemo } from 'react';
-import { TransportData, Platform, AggregatedRoute } from '@/lib/types';
-import { useFilterStore } from '@/store/useFilterStore';
-import MapContainer from '@/components/Map/MapContainer';
-import FilterPanel from '@/components/Filters/FilterPanel';
-import KPIBar from '@/components/Dashboard/KPIBar';
-import CO2Badge from '@/components/Dashboard/CO2Badge';
-import InfoCard from '@/components/InfoCard';
-import Legend from '@/components/Legend';
-import SearchPanel from '@/components/Search/SearchPanel';
-import TimeControl from '@/components/Clock/TimeControl';
-import { useSearchStore } from '@/store/useSearchStore';
-import { dayTimeToMinutes, getTrainProgress } from '@/lib/trainClock';
-import { exportSynthese } from '@/lib/exportCsv';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { LoadingScreen } from '@cartographie/shared/ui';
-import ChatWidget from '@/components/Chat/ChatWidget';
+const STATS = [
+  { value: '1 000 000', label: 'camions retir\u00e9s des routes par an' },
+  { value: '1 000 000', label: 'tonnes de CO\u2082 \u00e9conomis\u00e9es par an' },
+  { value: '-85%', label: "d'\u00e9missions de CO\u2082 vs tout-routier" },
+  { value: '21', label: 'op\u00e9rateurs de transport combin\u00e9' },
+];
 
-export default function Home() {
-  const [data, setData] = useState<TransportData | null>(null);
-  const [railGeometries, setRailGeometries] = useState<Record<string, [number, number][]>>({});
-  const [loading, setLoading] = useState(true);
-  const [loadProgress, setLoadProgress] = useState(0);
-  const [loadStep, setLoadStep] = useState('Initialisation...');
-  const { searchOpen, setSearchOpen } = useSearchStore();
+const STEPS = [
+  {
+    number: '01',
+    title: 'Pr\u00e9-acheminement',
+    desc: 'Le transporteur routier achemine les marchandises depuis le lieu de chargement vers la plateforme multimodale la plus proche.',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="text-blue">
+        <rect x="4" y="14" width="22" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
+        <path d="M26 18H32L36 22V28H26" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="31" r="3" stroke="currentColor" strokeWidth="2" />
+        <circle cx="32" cy="31" r="3" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    ),
+  },
+  {
+    number: '02',
+    title: 'Transport principal',
+    desc: 'Les marchandises voyagent par rail ou voie fluviale sur la longue distance, dans des UTI (conteneurs, caisses mobiles, semi-remorques).',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="text-blue">
+        <rect x="6" y="8" width="28" height="22" rx="4" stroke="currentColor" strokeWidth="2" />
+        <line x1="6" y1="18" x2="34" y2="18" stroke="currentColor" strokeWidth="2" />
+        <circle cx="14" cy="34" r="2.5" stroke="currentColor" strokeWidth="2" />
+        <circle cx="26" cy="34" r="2.5" stroke="currentColor" strokeWidth="2" />
+        <line x1="14" y1="30" x2="14" y2="31.5" stroke="currentColor" strokeWidth="2" />
+        <line x1="26" y1="30" x2="26" y2="31.5" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    ),
+  },
+  {
+    number: '03',
+    title: 'Post-acheminement',
+    desc: 'Un dernier trajet routier court livre les marchandises \u00e0 destination finale. Le service est porte-\u00e0-porte, comme le tout-routier.',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="text-blue">
+        <path d="M20 6L8 14V30L20 38L32 30V14L20 6Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        <circle cx="20" cy="22" r="4" stroke="currentColor" strokeWidth="2" />
+        <path d="M20 18V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+];
 
-  useKeyboardShortcuts();
+const PARTNERS = [
+  'VNF', 'SNCF R\u00e9seau', 'ADEME', 'UIRR', 'HELLIO',
+];
 
-  const {
-    country,
-    activeOperators,
-    minFrequency,
-    selectedPlatform,
-    setAllOperators,
-    setVisibleOperators,
-    setSelectedPlatformOperators,
-    showClock,
-    toggleClock,
-    clockDay,
-    clockTime,
-  } = useFilterStore();
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadAll() {
-      try {
-        // Step 1: Fetch transport data
-        setLoadStep('Chargement des données...');
-        setLoadProgress(10);
-        const res = await fetch('/api/data');
-        if (cancelled) return;
-        setLoadProgress(30);
-        setLoadStep('Traitement des plateformes...');
-
-        const json: TransportData = await res.json();
-        if (cancelled) return;
-        setData(json);
-        if (json.operators.length > 0) {
-          setAllOperators(json.operators);
-        }
-        setLoadProgress(50);
-
-        // Step 2: Fetch rail geometries
-        setLoadStep('Chargement du réseau ferré...');
-        setLoadProgress(55);
-        try {
-          const geoRes = await fetch('/rail-geometries.json');
-          if (cancelled) return;
-          setLoadProgress(75);
-          setLoadStep('Construction de la carte...');
-          if (geoRes.ok) {
-            const geo = await geoRes.json();
-            if (cancelled) return;
-            setRailGeometries(geo);
-          }
-        } catch {
-          // Rail geometries are optional
-        }
-        setLoadProgress(90);
-
-        // Step 3: Finalize
-        setLoadStep('Prêt !');
-        setLoadProgress(100);
-        await new Promise((r) => setTimeout(r, 400));
-        if (cancelled) return;
-        setLoading(false);
-      } catch (err) {
-        console.error('Failed to fetch data:', err);
-        if (!cancelled) {
-          setLoadStep('Erreur de chargement');
-          setLoading(false);
-        }
-      }
-    }
-
-    loadAll();
-    return () => { cancelled = true; };
-  }, [setAllOperators]);
-
-  // Platform lookup map — O(1) instead of O(n) per .find()
-  const platformMap = useMemo(() => {
-    const m = new Map<string, Platform>();
-    if (data) for (const p of data.platforms) m.set(p.site, p);
-    return m;
-  }, [data]);
-
-  // Filter platforms by country
-  const filteredPlatforms = useMemo<Platform[]>(() => {
-    if (!data) return [];
-    return data.platforms.filter((p) => {
-      if (country === 'france') return p.pays?.toLowerCase() === 'france';
-      if (country === 'international') return p.pays?.toLowerCase() !== 'france';
-      return true;
-    });
-  }, [data, country]);
-
-  // Compute which operators have routes passing the frequency filter
-  useEffect(() => {
-    if (!data) return;
-    const ops = new Set<string>();
-    data.routes.forEach((r) => {
-      if (r.freq >= minFrequency) {
-        r.operators.forEach((op) => ops.add(op));
-      }
-    });
-    setVisibleOperators(ops);
-  }, [data, minFrequency, setVisibleOperators]);
-
-  // Compute operators serving the selected platform
-  useEffect(() => {
-    if (!selectedPlatform || !data) {
-      setSelectedPlatformOperators(null);
-      return;
-    }
-    const ops = new Set<string>();
-    data.routes.forEach((r) => {
-      if (r.from === selectedPlatform || r.to === selectedPlatform) {
-        r.operators.forEach((op) => ops.add(op));
-      }
-    });
-    setSelectedPlatformOperators(ops);
-  }, [data, selectedPlatform, setSelectedPlatformOperators]);
-
-  // Filter routes by operators, frequency, and country
-  const filteredRoutes = useMemo<AggregatedRoute[]>(() => {
-    if (!data) return [];
-    return data.routes.filter((r) => {
-      // Frequency filter
-      if (r.freq < minFrequency) return false;
-
-      // Operator filter: at least one operator must be active
-      // If no operators selected ("Aucun"), hide all routes
-      const hasActiveOp = r.operators.some((op) => activeOperators.has(op));
-      if (!hasActiveOp) return false;
-
-      // Country filter — O(1) lookup via platformMap
-      if (country === 'france') {
-        const fromP = platformMap.get(r.from);
-        const toP = platformMap.get(r.to);
-        if (!fromP || !toP) return false;
-        if (fromP.pays?.toLowerCase() !== 'france' || toP.pays?.toLowerCase() !== 'france')
-          return false;
-      } else if (country === 'international') {
-        const fromP = platformMap.get(r.from);
-        const toP = platformMap.get(r.to);
-        if (!fromP && !toP) return false;
-        const fromFR = fromP?.pays?.toLowerCase() === 'france';
-        const toFR = toP?.pays?.toLowerCase() === 'france';
-        if (fromFR && toFR) return false;
-      }
-
-      return true;
-    });
-  }, [data, activeOperators, minFrequency, country]);
-
-  // Only show platforms connected to at least one visible route
-  const visiblePlatforms = useMemo<Platform[]>(() => {
-    const connectedSites = new Set<string>();
-    filteredRoutes.forEach((r) => {
-      connectedSites.add(r.from);
-      connectedSites.add(r.to);
-    });
-    return filteredPlatforms.filter((p) => connectedSites.has(p.site));
-  }, [filteredPlatforms, filteredRoutes]);
-
-  // KPIs — context-aware: show platform stats when one is selected
-  const selectedRoutes = useMemo(() => {
-    if (!selectedPlatform) return null;
-    return filteredRoutes.filter(
-      (r) => r.from === selectedPlatform || r.to === selectedPlatform
-    );
-  }, [filteredRoutes, selectedPlatform]);
-
-  const kpiRoutes = selectedRoutes || filteredRoutes;
-
-  const totalTrains = useMemo(
-    () => kpiRoutes.reduce((sum, r) => sum + r.freq, 0),
-    [kpiRoutes]
-  );
-
-  const activeOps = useMemo(() => {
-    const ops = new Set<string>();
-    kpiRoutes.forEach((r) => r.operators.forEach((op) => ops.add(op)));
-    return ops;
-  }, [kpiRoutes]);
-
-  const kpiPlatformCount = selectedPlatform
-    ? new Set(kpiRoutes.flatMap((r) => [r.from, r.to])).size
-    : visiblePlatforms.length;
-
-  // Train count for the clock
-  const clockTrainCount = useMemo(() => {
-    if (!showClock || !data) return 0;
-    const dayIndex: Record<string, number> = { Lu: 0, Ma: 1, Me: 2, Je: 3, Ve: 4, Sa: 5, Di: 6 };
-    const currentMinutes = (dayIndex[clockDay] ?? 0) * 24 * 60 + clockTime;
-    let count = 0;
-    for (const svc of data.services) {
-      const depMin = dayTimeToMinutes(svc.dayDep, svc.timeDep);
-      const arrMin = dayTimeToMinutes(svc.dayArr, svc.timeArr);
-      if (getTrainProgress(depMin, arrMin, currentMinutes) !== null) count++;
-    }
-    return count;
-  }, [showClock, data, clockDay, clockTime]);
-
-  if (loading) {
-    return <LoadingScreen progress={loadProgress} step={loadStep} />;
-  }
-
+export default function HomePage() {
   return (
-    <div className="h-screen w-screen overflow-hidden relative">
-      {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-[1000] h-[50px] glass-panel flex items-center justify-between px-2 sm:px-4">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          {/* Logo GNTC */}
-          <img src="/logo-gntc.jpg" alt="GNTC" className="h-8 sm:h-9 flex-shrink-0" />
-          <div className="min-w-0">
-            <h1 className="text-xs sm:text-sm font-display font-bold leading-tight truncate gntc-gradient">
-              Transport Combiné
-            </h1>
-            <p className="text-[10px] text-muted leading-tight hidden sm:block">OTC / GNTC</p>
+    <>
+      <SiteHeader />
+
+      <main>
+        {/* Hero */}
+        <section className="relative bg-[#1a1d23] overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue/20 via-transparent to-cyan/10" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 text-xs font-medium text-blue bg-blue/10 border border-blue/20 rounded-full px-4 py-1.5 mb-6">
+                <span className="w-2 h-2 rounded-full bg-blue animate-pulse" />
+                Depuis 1945
+              </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white leading-tight mb-6">
+                Le transport combin&eacute;, fer de lance de la{' '}
+                <span className="gntc-gradient">transition &eacute;cologique</span>
+              </h1>
+              <p className="text-base sm:text-lg text-gray-300 leading-relaxed mb-8 max-w-2xl">
+                Le GNTC f&eacute;d&egrave;re et repr&eacute;sente l&apos;ensemble de la fili&egrave;re du transport combin&eacute; en France.
+                Une solution logistique sobre en &eacute;nergie qui r&eacute;duit de 85% les &eacute;missions de CO&sup2; par rapport au tout-routier.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/carte"
+                  className="inline-flex items-center gap-2 gntc-gradient-bg text-white font-semibold text-sm px-6 py-3 rounded-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="1.5" />
+                    <circle cx="9" cy="9" r="2.5" fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="1.2" />
+                  </svg>
+                  Explorer la carte
+                </Link>
+                <Link
+                  href="/carte"
+                  className="inline-flex items-center gap-2 bg-white/10 text-white font-semibold text-sm px-6 py-3 rounded-lg border border-white/20 hover:bg-white/20 transition-all"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Trouver un transport
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* KPIs */}
-        <KPIBar
-          platformCount={kpiPlatformCount}
-          routeCount={kpiRoutes.length}
-          trainsPerWeek={totalTrains}
-          operatorCount={activeOps.size}
-          selectedPlatform={selectedPlatform}
-        />
+        {/* Stats */}
+        <section className="relative -mt-8 z-10">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {STATS.map((stat) => (
+                <div key={stat.label} className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 sm:p-6 text-center">
+                  <div className="text-2xl sm:text-3xl font-display font-bold gntc-gradient mb-1">{stat.value}</div>
+                  <div className="text-xs sm:text-sm text-muted">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          {/* Search button — primary CTA */}
-          <button
-            onClick={() => setSearchOpen(!searchOpen)}
-            className={`flex items-center gap-1.5 text-xs font-semibold transition-all px-3 sm:px-4 py-2 rounded-lg flex-shrink-0 shadow-sm ${
-              searchOpen
-                ? 'gntc-gradient-bg text-white shadow-md'
-                : 'gntc-gradient-bg text-white hover:shadow-md hover:scale-[1.02]'
-            }`}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="2" cy="8" r="1.5" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity="0.3" />
-            </svg>
-            <span className="text-[10px] sm:text-xs">Trouver un transport</span>
-          </button>
+        {/* How it works */}
+        <section className="py-16 sm:py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl sm:text-3xl font-display font-bold text-text mb-3">Comment &ccedil;a marche ?</h2>
+              <p className="text-muted text-sm sm:text-base max-w-xl mx-auto">
+                Le transport combin&eacute; allie la souplesse du routier &agrave; l&apos;efficacit&eacute; du ferroviaire et du fluvial.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
+              {STEPS.map((step) => (
+                <div key={step.number} className="relative bg-white rounded-xl border border-gray-100 p-6 sm:p-8 hover:shadow-lg transition-shadow">
+                  <div className="text-[10px] font-mono font-bold text-blue/40 uppercase tracking-widest mb-4">
+                    &Eacute;tape {step.number}
+                  </div>
+                  <div className="mb-4">{step.icon}</div>
+                  <h3 className="text-lg font-display font-bold text-text mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted leading-relaxed">{step.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-          {/* Live traffic button */}
-          <button
-            onClick={toggleClock}
-            className={`flex items-center gap-1.5 text-xs transition-colors px-2 sm:px-3 py-1.5 rounded-md border flex-shrink-0 ${
-              showClock
-                ? 'text-cyan border-cyan/30 bg-cyan/10'
-                : 'text-blue hover:text-cyan border-border hover:border-blue/30'
-            }`}
-            title="Simulation horaire"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
-              <circle cx="7" cy="7" r="5.5" />
-              <path d="M7 4v3.5l2.5 1.5" />
-            </svg>
-            <span className="text-[9px] sm:text-xs"><span className="sm:hidden">Horaires</span><span className="hidden sm:inline">Simulation horaire</span></span>
-          </button>
-
-          {/* Export button */}
-          {data && (
-            <button
-              onClick={() => exportSynthese(data)}
-              className="flex items-center gap-1.5 text-xs text-muted hover:text-cyan transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-cyan/30 flex-shrink-0"
-              title="Exporter les données (CSV)"
+        {/* CTA Carte */}
+        <section className="py-12 sm:py-16 bg-gradient-to-r from-[#587bbd]/10 via-[#7dc243]/5 to-[#587bbd]/10">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-2xl sm:text-3xl font-display font-bold text-text mb-3">
+              Explorez le r&eacute;seau de transport combin&eacute;
+            </h2>
+            <p className="text-muted text-sm sm:text-base max-w-xl mx-auto mb-8">
+              Visualisez les liaisons, les plateformes multimodales, les op&eacute;rateurs et trouvez le meilleur itin&eacute;raire pour vos marchandises.
+            </p>
+            <Link
+              href="/carte"
+              className="inline-flex items-center gap-2 gntc-gradient-bg text-white font-semibold px-8 py-3.5 rounded-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+              Ouvrir la carte interactive
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span className="hidden sm:inline">Export</span>
-            </button>
-          )}
+            </Link>
+          </div>
+        </section>
 
-          {/* Admin button */}
-          <a
-            href="/admin"
-            className="flex items-center gap-1.5 text-xs text-muted hover:text-blue transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-blue/30 flex-shrink-0"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" strokeWidth="1.2" />
-              <path d="M2.5 12.5C2.5 10 4.5 8 7 8C9.5 8 11.5 10 11.5 12.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-            </svg>
-            <span className="hidden sm:inline">Admin</span>
-          </a>
-        </div>
-      </header>
+        {/* Partners */}
+        <section className="py-12 sm:py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8">
+              <h2 className="text-xs font-semibold text-muted uppercase tracking-wider">Nos partenaires</h2>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
+              {PARTNERS.map((name) => (
+                <div key={name} className="text-lg font-display font-semibold text-gray-300">{name}</div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      {/* Map (fullscreen behind everything) */}
-      <MapContainer
-        platforms={visiblePlatforms}
-        routes={filteredRoutes}
-        railGeometries={railGeometries}
-        services={data?.services}
-        allPlatforms={data?.platforms}
-      />
+        {/* Newsletter CTA */}
+        <section className="py-12 sm:py-16 bg-[#1a1d23]">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-2">COMBILETTRE</h2>
+            <p className="text-sm text-gray-400 mb-6">
+              Recevez chaque mois les actualit&eacute;s du transport combin&eacute; directement dans votre bo&icirc;te mail.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Votre adresse email"
+                className="flex-1 text-sm px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-gray-500 focus:outline-none focus:border-blue/50"
+              />
+              <button className="gntc-gradient-bg text-white font-semibold text-sm px-6 py-3 rounded-lg hover:shadow-lg transition-all flex-shrink-0">
+                S&apos;inscrire
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
 
-      {/* Filter Panel */}
-      <FilterPanel />
-
-      {/* Right-side badges */}
-      <div className="absolute top-[54px] sm:top-[60px] right-2 sm:right-4 z-[999] flex flex-col gap-1.5 sm:gap-2">
-        <CO2Badge routes={filteredRoutes} />
-      </div>
-
-      {/* Legend */}
-      <Legend routes={filteredRoutes} />
-
-      {/* Search Panel */}
-      <SearchPanel platforms={data?.platforms || []} services={data?.services || []} routes={filteredRoutes} />
-
-      {/* Info Card */}
-      <InfoCard platforms={data?.platforms || []} routes={filteredRoutes} services={data?.services || []} />
-
-      {/* Train Clock */}
-      <TimeControl trainCount={clockTrainCount} />
-
-      {/* IA k LEFER Chat Widget */}
-      <ChatWidget
-        platforms={data?.platforms}
-        services={data?.services}
-        routes={filteredRoutes}
-      />
-
-      {/* Unmatched platforms warning - only show if significant */}
-      {data && data.unmatchedPlatforms.length > 3 && (
-        <div className="absolute top-[60px] left-1/2 -translate-x-1/2 z-[1000] glass-panel rounded-md px-3 py-1.5">
-          <span className="text-xs text-orange">
-            Plateformes non géocodées ({data.unmatchedPlatforms.length}) :{' '}
-            <span className="text-muted">
-              {data.unmatchedPlatforms.slice(0, 5).join(', ')}
-              {data.unmatchedPlatforms.length > 5 && '...'}
-            </span>
-          </span>
-        </div>
-      )}
-
-    </div>
+      <SiteFooter />
+    </>
   );
 }
