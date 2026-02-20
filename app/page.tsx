@@ -3,56 +3,6 @@ import SiteHeader from '@/components/Site/SiteHeader';
 import SiteFooter from '@/components/Site/SiteFooter';
 import { getLatestArticles, CATEGORY_LABELS, CATEGORY_COLORS } from '@/lib/actualites';
 
-const STATS = [
-  { value: '1 000 000', label: 'camions retirés des routes par an' },
-  { value: '1 000 000', label: 'tonnes de CO₂ économisées par an' },
-  { value: '-85%', label: "d'émissions de CO₂ vs tout-routier" },
-  { value: '21', label: 'opérateurs de transport combiné' },
-];
-
-const STEPS = [
-  {
-    number: '01',
-    title: 'Pré-acheminement',
-    desc: 'Le transporteur routier achemine les marchandises depuis le lieu de chargement vers la plateforme multimodale la plus proche.',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="text-blue">
-        <rect x="4" y="14" width="22" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
-        <path d="M26 18H32L36 22V28H26" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="12" cy="31" r="3" stroke="currentColor" strokeWidth="2" />
-        <circle cx="32" cy="31" r="3" stroke="currentColor" strokeWidth="2" />
-      </svg>
-    ),
-  },
-  {
-    number: '02',
-    title: 'Transport principal',
-    desc: 'Les marchandises voyagent par rail ou voie fluviale sur la longue distance, dans des UTI (conteneurs, caisses mobiles, semi-remorques).',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="text-blue">
-        <rect x="6" y="8" width="28" height="22" rx="4" stroke="currentColor" strokeWidth="2" />
-        <line x1="6" y1="18" x2="34" y2="18" stroke="currentColor" strokeWidth="2" />
-        <circle cx="14" cy="34" r="2.5" stroke="currentColor" strokeWidth="2" />
-        <circle cx="26" cy="34" r="2.5" stroke="currentColor" strokeWidth="2" />
-        <line x1="14" y1="30" x2="14" y2="31.5" stroke="currentColor" strokeWidth="2" />
-        <line x1="26" y1="30" x2="26" y2="31.5" stroke="currentColor" strokeWidth="2" />
-      </svg>
-    ),
-  },
-  {
-    number: '03',
-    title: 'Post-acheminement',
-    desc: 'Un dernier trajet routier court livre les marchandises à destination finale. Le service est porte-à-porte, comme le tout-routier.',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="text-blue">
-        <path d="M20 6L8 14V30L20 38L32 30V14L20 6Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-        <circle cx="20" cy="22" r="4" stroke="currentColor" strokeWidth="2" />
-        <path d="M20 18V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-];
-
 const PARTNERS = [
   { name: 'VNF', logo: '/logos/partenaires/vnf.png' },
   { name: 'SNCF Réseau', logo: '/logos/partenaires/sncf-reseau.png' },
@@ -110,40 +60,125 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="relative -mt-8 z-10">
+        {/* Impact – visual section */}
+        <section className="relative -mt-8 z-10 pb-0">
           <div className="w-full px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {STATS.map((stat) => (
-                <div key={stat.label} className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 sm:p-6 text-center">
-                  <div className="text-2xl sm:text-3xl font-display font-bold gntc-gradient mb-1">{stat.value}</div>
-                  <div className="text-xs sm:text-sm text-muted">{stat.label}</div>
+            <div className="bg-[#0f2818] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="grid lg:grid-cols-2">
+                {/* Left – infographic */}
+                <div className="relative flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-white/5">
+                  <img
+                    src="/images/infographies/environnement-2.jpg"
+                    alt="1 train de transport combin&eacute; = 45 poids lourds"
+                    className="w-full max-w-md rounded-lg"
+                  />
                 </div>
-              ))}
+                {/* Right – stats */}
+                <div className="p-8 sm:p-10 lg:p-12 flex flex-col justify-center">
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-[#84cc16] mb-6">Impact environnemental</h2>
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-[#84cc16]/15 flex items-center justify-center flex-shrink-0">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-[#84cc16]">
+                          <path d="M4 17L10 11L14 15L22 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M16 7H22V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-2xl sm:text-3xl font-display font-bold text-white">-85%</div>
+                        <div className="text-sm text-gray-400">d&apos;&eacute;missions de CO&#8322; par rapport au tout-routier</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-[#84cc16]/15 flex items-center justify-center flex-shrink-0">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-[#84cc16]">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                          <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-2xl sm:text-3xl font-display font-bold text-white">1 million</div>
+                        <div className="text-sm text-gray-400">de camions retir&eacute;s des routes chaque ann&eacute;e</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-[#84cc16]/15 flex items-center justify-center flex-shrink-0">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-[#84cc16]">
+                          <path d="M12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21C16.97 21 21 16.97 21 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          <path d="M12 8V12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-2xl sm:text-3xl font-display font-bold text-white">-59%</div>
+                        <div className="text-sm text-gray-400">de consommation d&apos;&eacute;nergie vs transport routier</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-8 pt-6 border-t border-white/10">
+                    <Link href="/transport-combine/durabilite" className="inline-flex items-center gap-2 text-sm font-medium text-[#84cc16] hover:text-white transition-colors">
+                      D&eacute;couvrir les chiffres cl&eacute;s
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7H11M11 7L7.5 3.5M11 7L7.5 10.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* How it works */}
+        {/* How it works – visual */}
         <section className="py-16 sm:py-24">
           <div className="w-full px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl sm:text-3xl font-display font-bold text-text mb-3">Comment &ccedil;a marche ?</h2>
+            <div className="text-center mb-10">
+              <h2 className="text-2xl sm:text-3xl font-display font-bold text-text mb-3">Comment &ccedil;a marche&nbsp;?</h2>
               <p className="text-muted text-sm sm:text-base max-w-xl mx-auto">
                 Le transport combin&eacute; allie la souplesse du routier &agrave; l&apos;efficacit&eacute; du ferroviaire et du fluvial.
               </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
-              {STEPS.map((step) => (
-                <div key={step.number} className="relative bg-white rounded-xl border border-gray-100 p-6 sm:p-8 hover:shadow-lg transition-shadow">
-                  <div className="text-[10px] font-mono font-bold text-blue/40 uppercase tracking-widest mb-4">
-                    &Eacute;tape {step.number}
+
+            {/* Large process illustration */}
+            <div className="relative max-w-4xl mx-auto mb-12">
+              <img
+                src="/images/infographies/visuel-tc.jpg"
+                alt="Sch&eacute;ma du transport combin&eacute; : camion, grue, train, grue, camion"
+                className="w-full rounded-2xl border border-gray-100 shadow-lg"
+              />
+            </div>
+
+            {/* 3 steps as horizontal timeline */}
+            <div className="relative max-w-4xl mx-auto">
+              {/* Connecting line */}
+              <div className="hidden md:block absolute top-6 left-[16.67%] right-[16.67%] h-[2px] bg-gradient-to-r from-[#1a4d2e] via-[#84cc16] to-[#1a4d2e]" />
+
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="text-center">
+                  <div className="relative inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#1a4d2e] text-white font-display font-bold text-sm mb-4 shadow-lg ring-4 ring-white">
+                    01
                   </div>
-                  <div className="mb-4">{step.icon}</div>
-                  <h3 className="text-lg font-display font-bold text-text mb-2">{step.title}</h3>
-                  <p className="text-sm text-muted leading-relaxed">{step.desc}</p>
+                  <h3 className="font-display font-bold text-text mb-2">Pr&eacute;-acheminement</h3>
+                  <p className="text-sm text-muted leading-relaxed">
+                    Le transporteur routier achemine les UTI depuis le lieu de chargement vers le terminal multimodal le plus proche.
+                  </p>
                 </div>
-              ))}
+                <div className="text-center">
+                  <div className="relative inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#84cc16] text-white font-display font-bold text-sm mb-4 shadow-lg ring-4 ring-white">
+                    02
+                  </div>
+                  <h3 className="font-display font-bold text-text mb-2">Transport principal</h3>
+                  <p className="text-sm text-muted leading-relaxed">
+                    Les marchandises voyagent par rail ou voie fluviale sur la longue distance &mdash; 1 train remplace 45 camions.
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="relative inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#1a4d2e] text-white font-display font-bold text-sm mb-4 shadow-lg ring-4 ring-white">
+                    03
+                  </div>
+                  <h3 className="font-display font-bold text-text mb-2">Post-acheminement</h3>
+                  <p className="text-sm text-muted leading-relaxed">
+                    Un dernier trajet routier court livre &agrave; destination. Le service est porte-&agrave;-porte, comme le tout-routier.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
