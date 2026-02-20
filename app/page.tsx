@@ -36,12 +36,12 @@ export default function HomePage() {
           <img
             src="/images/banners/gntc-org.jpg"
             alt=""
-            className="absolute inset-0 w-full h-full object-cover opacity-15"
+            className="absolute inset-0 w-full h-full object-cover opacity-60"
             loading="eager"
           />
-          {/* L-to-R gradient for depth */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0f2818] via-[#0f2818]/85 to-[#0f2818]/50" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f2818]/80 to-transparent" />
+          {/* L-to-R gradient – opaque left for text readability, transparent right to show photo */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f2818]/90 via-[#0f2818]/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f2818]/70 via-transparent to-[#0f2818]/30" />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
             <div className="max-w-3xl hero-animate">
