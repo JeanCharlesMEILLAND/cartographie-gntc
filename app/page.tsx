@@ -34,7 +34,7 @@ export default function HomePage() {
         {/* ════════════════ HERO ════════════════ */}
         <section className="relative bg-[#0f2818] overflow-hidden">
           <img
-            src="/images/banners/combilettre-transport-combine.jpg"
+            src="/images/banners/gntc-org.jpg"
             alt=""
             className="absolute inset-0 w-full h-full object-cover opacity-15"
             loading="eager"
