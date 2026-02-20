@@ -44,12 +44,12 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f2818]/70 via-transparent to-[#0f2818]/30" />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
-            <div className="max-w-3xl hero-animate">
+            <div className="max-w-4xl hero-animate">
               <div className="inline-flex items-center gap-2 text-xs font-medium text-[#84cc16] bg-[#84cc16]/10 border border-[#84cc16]/25 rounded-full px-4 py-1.5 mb-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#84cc16] animate-pulse" />
                 Depuis 1945
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.5rem] font-display font-bold text-white leading-[1.12] mb-6">
+              <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] xl:text-[3.25rem] font-display font-bold text-white leading-[1.15] mb-6">
                 Le transport combin&eacute;, fer de lance de la{' '}
                 <span className="gntc-gradient">transition &eacute;cologique</span>
               </h1>
