@@ -33,7 +33,7 @@ const FOOTER_NAV = [
 export default function SiteFooter() {
   return (
     <footer className="bg-[#0f2818] text-gray-300">
-      <div className="h-[2px] gntc-gradient-bg" />
+      <div className="h-[2px] shimmer-line" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-14">
           {/* Brand */}
@@ -66,7 +66,7 @@ export default function SiteFooter() {
               <ul className="space-y-2.5">
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-gray-400 hover:text-white transition-colors">
+                    <Link href={link.href} className="text-sm text-gray-400 hover:text-white transition-colors duration-200 footer-link">
                       {link.label}
                     </Link>
                   </li>
