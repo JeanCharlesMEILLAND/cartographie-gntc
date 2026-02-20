@@ -212,7 +212,7 @@ export default function CartePage() {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden relative">
+    <div className="h-screen w-screen overflow-hidden relative carte-scope">
       {/* Carte header */}
       <header className="absolute top-0 left-0 right-0 z-[1000] h-[50px] glass-panel flex items-center justify-between px-2 sm:px-4">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">

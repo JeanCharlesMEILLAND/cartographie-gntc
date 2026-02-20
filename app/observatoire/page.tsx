@@ -4,73 +4,59 @@ import PageLayout from '@/components/Site/PageLayout';
 import { ACTEURS } from '@/lib/acteurs';
 
 const KPI = [
-  { value: '~40', label: 'plateformes actives', icon: '\uD83C\uDFED' },
-  { value: '~500', label: 'trains / semaine', icon: '\uD83D\uDE82' },
-  { value: '~150', label: 'liaisons r\u00e9guli\u00e8res', icon: '\uD83D\uDDFA\uFE0F' },
-  { value: String(ACTEURS.filter((a) => a.category === 'operateur').length), label: 'op\u00e9rateurs', icon: '\uD83C\uDFE2' },
-  { value: '1 000 000', label: 'camions retir\u00e9s / an', icon: '\uD83D\uDE9B' },
-  { value: '-85%', label: 'CO\u2082 vs routier', icon: '\uD83C\uDF3F' },
+  { value: '~40', label: 'plateformes actives', icon: '🏭' },
+  { value: '~500', label: 'trains / semaine', icon: '🚂' },
+  { value: '~150', label: 'liaisons régulières', icon: '🗺️' },
+  { value: String(ACTEURS.filter((a) => a.category === 'operateur').length), label: 'opérateurs', icon: '🏢' },
+  { value: '1 000 000', label: 'camions retirés / an', icon: '🚛' },
+  { value: '-85%', label: 'CO₂ vs routier', icon: '🌿' },
 ];
 
-const TOP_CORRIDORS = [
-  { name: 'Paris \u2013 Lyon \u2013 Marseille', share: 22 },
-  { name: 'Paris \u2013 Toulouse', share: 12 },
-  { name: 'Paris \u2013 Bordeaux', share: 10 },
-  { name: 'Lille \u2013 Lyon', share: 9 },
-  { name: 'Bettembourg \u2013 Perpignan (AF)', share: 8 },
-  { name: 'Le Havre \u2013 Paris / r\u00e9gions', share: 8 },
-  { name: 'Paris \u2013 Rennes / Nantes', share: 6 },
-  { name: 'Strasbourg \u2013 Lyon', share: 5 },
-  { name: 'Dunkerque \u2013 r\u00e9gions', share: 4 },
-  { name: 'Autres corridors', share: 16 },
-];
-
-const OPERATOR_SHARE = [
-  { name: 'Novatrans', share: 25, color: '#f59e42' },
-  { name: 'Naviland Cargo', share: 20, color: '#587bbd' },
-  { name: 'VIIA', share: 12, color: '#a78bfa' },
-  { name: 'T3M', share: 8, color: '#34d399' },
-  { name: 'Greenmodal', share: 7, color: '#7dc243' },
-  { name: 'HUPAC', share: 6, color: '#fbbf24' },
-  { name: 'Combronde', share: 5, color: '#f472b6' },
-  { name: 'Autres', share: 17, color: '#94a3b8' },
+const MAIN_CORRIDORS = [
+  'Paris – Lyon – Marseille (axe rhodanien)',
+  'Lille – Lyon / Marseille',
+  'Bettembourg – Perpignan (autoroute ferroviaire)',
+  'Le Havre – Paris / régions',
+  'Paris – Bordeaux / Toulouse',
+  'Paris – Rennes / Nantes',
+  'Strasbourg – Lyon',
+  'Dunkerque – régions',
+  'France – Italie (Modane)',
+  'France – Espagne (Le Boulou)',
 ];
 
 const REPORTS = [
-  { year: '2024', title: 'Rapport annuel 2024', desc: 'Bilan complet de la fili\u00e8re du transport combin\u00e9 en France.' },
-  { year: '2023', title: 'Rapport annuel 2023', desc: 'Chiffres cl\u00e9s, \u00e9volution des trafics et perspectives.' },
-  { year: '2022', title: 'Rapport annuel 2022', desc: 'Cr\u00e9ation de l\u2019Observatoire du transport combin\u00e9.' },
+  { year: '2024', title: 'Rapport annuel 2024', desc: 'Bilan complet de la filière du transport combiné en France.', cover: '/images/infographies/observatoire-2024-cover.jpg' },
+  { year: '2023', title: 'Rapport annuel 2023', desc: 'Chiffres clés, évolution des trafics et perspectives.', cover: '/images/infographies/observatoire-2023-cover.jpg' },
+  { year: '2022', title: 'Rapport annuel 2022', desc: 'Création de l\'Observatoire du transport combiné.' },
 ];
-
-function BarChart({ data, maxValue }: { data: { name: string; share: number; color?: string }[]; maxValue?: number }) {
-  const max = maxValue || Math.max(...data.map((d) => d.share));
-  return (
-    <div className="space-y-3">
-      {data.map((d) => (
-        <div key={d.name} className="flex items-center gap-3">
-          <div className="w-40 text-xs text-text truncate flex-shrink-0">{d.name}</div>
-          <div className="flex-1 bg-gray-50 rounded-full h-6 overflow-hidden">
-            <div
-              className="h-full rounded-full flex items-center justify-end pr-2 transition-all"
-              style={{ width: `${Math.max((d.share / max) * 100, 8)}%`, background: d.color || '#3b82f6' }}
-            >
-              <span className="text-[10px] font-bold text-white">{d.share}%</span>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export default function ObservatoirePage() {
   return (
     <PageLayout
-      title="Observatoire du transport combin&eacute;"
-      subtitle="Donn&eacute;es cl&eacute;s, statistiques et rapports sur la fili&egrave;re du transport combin&eacute; en France."
+      title="Observatoire du transport combiné"
+      subtitle="Données clés, statistiques et rapports sur la filière du transport combiné en France."
       hero
       breadcrumbs={[{ label: 'Observatoire' }]}
     >
+      {/* Présentation de l'Observatoire */}
+      <section className="mb-12 bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+        <p className="text-sm text-muted leading-relaxed">
+          En 2022, les principales parties prenantes du transport combin&eacute; fran&ccedil;ais se sont
+          rapproch&eacute;es dans l&rsquo;id&eacute;e de constituer un Observatoire du transport combin&eacute;,
+          structure en r&eacute;seau ayant pour objectif de mieux conna&icirc;tre les statistiques et
+          donn&eacute;es strat&eacute;giques de cette activit&eacute;.
+        </p>
+        <p className="text-sm text-muted leading-relaxed">
+          Ces parties prenantes sont le GNTC, les deux gestionnaires de r&eacute;seaux (SNCF R&eacute;seau
+          pour le ferroviaire et VNF pour le fluvial), et l&rsquo;ADEME.
+        </p>
+        <p className="text-sm text-muted leading-relaxed">
+          Le SDES et la DGITM suivent les travaux en qualit&eacute; d&rsquo;observateurs.
+          L&rsquo;Autorit&eacute; de r&eacute;gulation des transports (ART) a contribu&eacute; au rapport.
+        </p>
+      </section>
+
       {/* KPIs */}
       <section className="mb-16">
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -84,45 +70,59 @@ export default function ObservatoirePage() {
         </div>
       </section>
 
-      {/* Charts */}
+      {/* Two columns: operators + corridors */}
       <div className="grid lg:grid-cols-2 gap-8 mb-16">
-        {/* Operator market share */}
+        {/* Operators list */}
         <section className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-lg font-display font-bold text-text mb-1">R&eacute;partition par op&eacute;rateur</h2>
-          <p className="text-xs text-muted mb-6">Part estim&eacute;e du trafic de transport combin&eacute; terrestre en France.</p>
-          <BarChart data={OPERATOR_SHARE} maxValue={30} />
+          <h2 className="text-lg font-display font-bold text-text mb-1">Opérateurs actifs</h2>
+          <p className="text-xs text-muted mb-4">Les {ACTEURS.filter((a) => a.category === 'operateur').length} opérateurs de transport combiné adhérents du GNTC.</p>
+          <div className="grid grid-cols-2 gap-2">
+            {ACTEURS.filter((a) => a.category === 'operateur').map((a) => (
+              <div key={a.slug} className="text-sm text-text flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full gntc-gradient-bg flex-shrink-0" />
+                {a.name}
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Top corridors */}
         <section className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-lg font-display font-bold text-text mb-1">Top 10 corridors</h2>
-          <p className="text-xs text-muted mb-6">Principaux axes de transport combin&eacute; par volume de trafic.</p>
-          <BarChart data={TOP_CORRIDORS} maxValue={25} />
+          <h2 className="text-lg font-display font-bold text-text mb-1">Principaux corridors</h2>
+          <p className="text-xs text-muted mb-4">Les grands axes du transport combiné en France et en Europe.</p>
+          <div className="space-y-2">
+            {MAIN_CORRIDORS.map((c) => (
+              <div key={c} className="flex items-center gap-3 text-sm text-text">
+                <div className="w-1.5 h-1.5 rounded-full gntc-gradient-bg flex-shrink-0" />
+                {c}
+              </div>
+            ))}
+          </div>
         </section>
       </div>
 
       {/* Evolution highlights */}
       <section className="mb-16">
-        <h2 className="text-xl font-display font-bold text-text mb-6">&Eacute;volution r&eacute;cente</h2>
+        <h2 className="text-xl font-display font-bold text-text mb-6">Évolution récente</h2>
         <div className="grid sm:grid-cols-3 gap-6">
           {[
             {
-              title: 'Croissance du trafic',
-              value: '+15%',
-              desc: 'Hausse du trafic de transport combin\u00e9 entre 2022 et 2024, port\u00e9e par la SNFF et les aides renforc\u00e9es.',
-              color: 'text-green-600',
+              title: 'Objectif SNFF 2030',
+              value: 'x2',
+              desc: 'La Stratégie Nationale Fret Ferroviaire vise un doublement de la part modale du fret ferroviaire d\'ici 2030.',
+              color: 'text-purple-600',
             },
             {
               title: 'Nouveaux terminaux',
-              value: '3',
-              desc: 'Ouverture des terminaux de Dunkerque (25 M\u20ac), S\u00e8te (20 M\u20ac) et extension de Delta 3 en 2024-2025.',
+              value: '2',
+              desc: 'Mise en service des terminaux de Dunkerque et Sète, renforçant le maillage national du transport combiné.',
               color: 'text-blue',
             },
             {
-              title: 'Objectif SNFF 2030',
-              value: 'x2',
-              desc: 'La Strat\u00e9gie Nationale Fret Ferroviaire vise un doublement de la part modale du fret ferroviaire d\u2019ici 2030.',
-              color: 'text-purple-600',
+              title: 'Aide à l\'exploitation',
+              value: '47 M€',
+              desc: 'Budget annuel de l\'aide à l\'exploitation du transport combiné, essentielle pour la compétitivité du mode.',
+              color: 'text-green-600',
             },
           ].map((item) => (
             <div key={item.title} className="bg-white rounded-xl border border-gray-100 p-6">
@@ -139,11 +139,16 @@ export default function ObservatoirePage() {
         <h2 className="text-xl font-display font-bold text-text mb-6">Rapports annuels</h2>
         <div className="grid sm:grid-cols-3 gap-4">
           {REPORTS.map((r) => (
-            <div key={r.year} className="bg-white rounded-xl border border-gray-100 p-6">
-              <div className="text-xs font-mono font-bold text-blue mb-2">{r.year}</div>
-              <h3 className="font-display font-bold text-text mb-2">{r.title}</h3>
-              <p className="text-xs text-muted leading-relaxed mb-4">{r.desc}</p>
-              <span className="text-xs text-muted italic">PDF bient&ocirc;t disponible</span>
+            <div key={r.year} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+              {r.cover && (
+                <img src={r.cover} alt={r.title} className="w-full h-40 object-cover" />
+              )}
+              <div className="p-6">
+                <div className="text-xs font-mono font-bold text-blue mb-2">{r.year}</div>
+                <h3 className="font-display font-bold text-text mb-2">{r.title}</h3>
+                <p className="text-xs text-muted leading-relaxed mb-4">{r.desc}</p>
+                <span className="text-xs text-muted italic">PDF bientôt disponible</span>
+              </div>
             </div>
           ))}
         </div>
@@ -151,17 +156,14 @@ export default function ObservatoirePage() {
 
       {/* Sources */}
       <section className="bg-gray-50 rounded-xl p-6">
-        <h3 className="text-sm font-display font-bold text-text mb-2">Sources &amp; m&eacute;thodologie</h3>
+        <h3 className="text-sm font-display font-bold text-text mb-2">Sources</h3>
         <ul className="text-xs text-muted space-y-1 list-disc list-inside">
-          <li>GNTC &mdash; Enqu&ecirc;tes aupr&egrave;s des op&eacute;rateurs adh&eacute;rents (2024)</li>
-          <li>SNCF R&eacute;seau &mdash; Statistiques de circulation fret (2024)</li>
-          <li>VNF &mdash; Trafic fluvial de conteneurs (2024)</li>
-          <li>DGITM &mdash; Enqu&ecirc;te TRM, Comptes des transports de la Nation</li>
-          <li>UIRR &mdash; Combined Transport in Europe, annual report 2024</li>
+          <li>GNTC — Enquêtes auprès des opérateurs adhérents</li>
+          <li>SNCF Réseau — Statistiques de circulation fret</li>
+          <li>VNF — Trafic fluvial de conteneurs</li>
+          <li>DGITM — Enquête TRM, Comptes des transports de la Nation</li>
+          <li>UIRR — Combined Transport in Europe, annual report</li>
         </ul>
-        <p className="text-xs text-muted mt-3 italic">
-          Les parts de march&eacute; sont des estimations bas&eacute;es sur les donn&eacute;es publiques et les d&eacute;clarations des op&eacute;rateurs.
-        </p>
       </section>
     </PageLayout>
   );

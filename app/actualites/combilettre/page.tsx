@@ -7,7 +7,7 @@ export default function CombilettrePage() {
       title="COMBILETTRE"
       subtitle="La newsletter du GNTC, publi&eacute;e tous les deux mois. Retrouvez ici toutes les archives."
       breadcrumbs={[
-        { label: 'Actualit\u00e9s', href: '/actualites' },
+        { label: 'Actualités', href: '/actualites' },
         { label: 'COMBILETTRE' },
       ]}
     >

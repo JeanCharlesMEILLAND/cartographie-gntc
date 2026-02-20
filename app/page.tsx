@@ -4,16 +4,16 @@ import SiteFooter from '@/components/Site/SiteFooter';
 import { getLatestArticles, CATEGORY_LABELS, CATEGORY_COLORS } from '@/lib/actualites';
 
 const STATS = [
-  { value: '1 000 000', label: 'camions retir\u00e9s des routes par an' },
-  { value: '1 000 000', label: 'tonnes de CO\u2082 \u00e9conomis\u00e9es par an' },
-  { value: '-85%', label: "d'\u00e9missions de CO\u2082 vs tout-routier" },
-  { value: '21', label: 'op\u00e9rateurs de transport combin\u00e9' },
+  { value: '1 000 000', label: 'camions retirés des routes par an' },
+  { value: '1 000 000', label: 'tonnes de CO₂ économisées par an' },
+  { value: '-85%', label: "d'émissions de CO₂ vs tout-routier" },
+  { value: '21', label: 'opérateurs de transport combiné' },
 ];
 
 const STEPS = [
   {
     number: '01',
-    title: 'Pr\u00e9-acheminement',
+    title: 'Pré-acheminement',
     desc: 'Le transporteur routier achemine les marchandises depuis le lieu de chargement vers la plateforme multimodale la plus proche.',
     icon: (
       <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="text-blue">
@@ -42,7 +42,7 @@ const STEPS = [
   {
     number: '03',
     title: 'Post-acheminement',
-    desc: 'Un dernier trajet routier court livre les marchandises \u00e0 destination finale. Le service est porte-\u00e0-porte, comme le tout-routier.',
+    desc: 'Un dernier trajet routier court livre les marchandises à destination finale. Le service est porte-à-porte, comme le tout-routier.',
     icon: (
       <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="text-blue">
         <path d="M20 6L8 14V30L20 38L32 30V14L20 6Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
@@ -54,7 +54,11 @@ const STEPS = [
 ];
 
 const PARTNERS = [
-  'VNF', 'SNCF R\u00e9seau', 'ADEME', 'UIRR', 'HELLIO',
+  { name: 'VNF', logo: '/logos/partenaires/vnf.png' },
+  { name: 'SNCF Réseau', logo: '/logos/partenaires/sncf-reseau.png' },
+  { name: 'ADEME', logo: '/logos/partenaires/ademe.png' },
+  { name: 'UIRR', logo: '/logos/partenaires/uirr.jpg' },
+  { name: 'HELLIO', logo: '/logos/partenaires/hellio.jpg' },
 ];
 
 export default function HomePage() {
@@ -64,9 +68,10 @@ export default function HomePage() {
 
       <main>
         {/* Hero */}
-        <section className="relative bg-[#1a1d23] overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue/20 via-transparent to-cyan/10" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
+        <section className="relative bg-[#0f2818] overflow-hidden">
+          <img src="/images/banners/combilettre-transport-combine.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0f2818]/80 via-[#0f2818]/60 to-[#0f2818]/80" />
+          <div className="relative w-full px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 text-xs font-medium text-blue bg-blue/10 border border-blue/20 rounded-full px-4 py-1.5 mb-6">
                 <span className="w-2 h-2 rounded-full bg-blue animate-pulse" />
@@ -107,7 +112,7 @@ export default function HomePage() {
 
         {/* Stats */}
         <section className="relative -mt-8 z-10">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {STATS.map((stat) => (
                 <div key={stat.label} className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 sm:p-6 text-center">
@@ -121,7 +126,7 @@ export default function HomePage() {
 
         {/* How it works */}
         <section className="py-16 sm:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-2xl sm:text-3xl font-display font-bold text-text mb-3">Comment &ccedil;a marche ?</h2>
               <p className="text-muted text-sm sm:text-base max-w-xl mx-auto">
@@ -144,8 +149,8 @@ export default function HomePage() {
         </section>
 
         {/* CTA Carte */}
-        <section className="py-12 sm:py-16 bg-gradient-to-r from-[#587bbd]/10 via-[#7dc243]/5 to-[#587bbd]/10">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <section className="py-12 sm:py-16 bg-gradient-to-r from-[#1a4d2e]/10 via-[#84cc16]/5 to-[#1a4d2e]/10">
+          <div className="w-full px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-2xl sm:text-3xl font-display font-bold text-text mb-3">
               Explorez le r&eacute;seau de transport combin&eacute;
             </h2>
@@ -166,7 +171,7 @@ export default function HomePage() {
 
         {/* Latest news */}
         <section className="py-16 sm:py-24 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-8">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-display font-bold text-text mb-2">Derni&egrave;res actualit&eacute;s</h2>
@@ -179,15 +184,22 @@ export default function HomePage() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {getLatestArticles(3).map((a) => (
-                <Link key={a.slug} href={`/actualites/${a.slug}`} className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-lg transition-shadow group">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full text-white" style={{ background: CATEGORY_COLORS[a.category] }}>
-                      {CATEGORY_LABELS[a.category]}
-                    </span>
-                    <span className="text-xs text-muted">{new Date(a.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                <Link key={a.slug} href={`/actualites/${a.slug}`} className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow group">
+                  {a.image && (
+                    <div className="aspect-[16/9] overflow-hidden">
+                      <img src={a.image} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full text-white" style={{ background: CATEGORY_COLORS[a.category] }}>
+                        {CATEGORY_LABELS[a.category]}
+                      </span>
+                      <span className="text-xs text-muted">{new Date(a.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                    </div>
+                    <h3 className="font-display font-bold text-text group-hover:text-blue transition-colors mb-2 line-clamp-2">{a.title}</h3>
+                    <p className="text-xs text-muted leading-relaxed line-clamp-3">{a.excerpt}</p>
                   </div>
-                  <h3 className="font-display font-bold text-text group-hover:text-blue transition-colors mb-2 line-clamp-2">{a.title}</h3>
-                  <p className="text-xs text-muted leading-relaxed line-clamp-3">{a.excerpt}</p>
                 </Link>
               ))}
             </div>
@@ -199,21 +211,71 @@ export default function HomePage() {
 
         {/* Partners */}
         <section className="py-12 sm:py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
               <h2 className="text-xs font-semibold text-muted uppercase tracking-wider">Nos partenaires</h2>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
-              {PARTNERS.map((name) => (
-                <div key={name} className="text-lg font-display font-semibold text-gray-300">{name}</div>
+            <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
+              {PARTNERS.map((p) => (
+                <img key={p.name} src={p.logo} alt={p.name} title={p.name} className="h-10 sm:h-12 object-contain grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300" />
               ))}
             </div>
           </div>
         </section>
 
+        {/* Video section */}
+        <section className="py-16 sm:py-24">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl sm:text-3xl font-display font-bold text-text mb-3">En vid&eacute;o</h2>
+              <p className="text-muted text-sm sm:text-base max-w-xl mx-auto">
+                Retrouvez les conf&eacute;rences de la Journ&eacute;e du Transport Combin&eacute;.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              <div>
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-100 shadow-lg">
+                  <iframe
+                    src="https://www.youtube.com/embed/mY1DAoMd76Y"
+                    title="Journ&eacute;e du Transport Combin&eacute; 2025"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+                <h3 className="font-display font-bold text-text mt-4 text-center">Journ&eacute;e du TC 2025</h3>
+              </div>
+              <div>
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-100 shadow-lg">
+                  <iframe
+                    src="https://www.youtube.com/embed/VgEJpVqpw0A"
+                    title="Journ&eacute;e du Transport Combin&eacute; 2024"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+                <h3 className="font-display font-bold text-text mt-4 text-center">Journ&eacute;e du TC 2024</h3>
+              </div>
+              <div>
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-100 shadow-lg">
+                  <iframe
+                    src="https://www.youtube.com/embed/wjoksD263PE"
+                    title="Journ&eacute;e du Transport Combin&eacute; 2023"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+                <h3 className="font-display font-bold text-text mt-4 text-center">Journ&eacute;e du TC 2023</h3>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Newsletter CTA */}
-        <section className="py-12 sm:py-16 bg-[#1a1d23]">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <section className="py-12 sm:py-16 bg-[#0f2818]">
+          <div className="w-full px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-2">COMBILETTRE</h2>
             <p className="text-sm text-gray-400 mb-6">
               Recevez chaque mois les actualit&eacute;s du transport combin&eacute; directement dans votre bo&icirc;te mail.

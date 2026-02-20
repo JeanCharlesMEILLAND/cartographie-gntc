@@ -18,7 +18,7 @@ const NAV: NavItem[] = [
     children: [
       { label: 'Notre organisation', href: '/qui-sommes-nous/organisation', desc: 'Gouvernance et commissions' },
       { label: 'Nos missions', href: '/qui-sommes-nous/missions', desc: 'Actions et dossiers majeurs' },
-      { label: 'Notre histoire', href: '/qui-sommes-nous/histoire', desc: 'De 1945 \u00e0 aujourd\u2019hui' },
+      { label: 'Notre histoire', href: '/qui-sommes-nous/histoire', desc: 'De 1945 \u00e0 aujourd\'hui' },
     ],
   },
   {
@@ -36,12 +36,14 @@ const NAV: NavItem[] = [
     label: 'Acteurs',
     href: '/acteurs',
     children: [
+      { label: 'Transporteurs', href: '/acteurs/transporteurs', desc: '18 entreprises de transport' },
       { label: 'Op\u00e9rateurs TC', href: '/acteurs/operateurs', desc: '20 op\u00e9rateurs' },
       { label: 'Plateformes & Ports', href: '/acteurs/plateformes', desc: '10 terminaux' },
       { label: 'Acteurs ferroviaires', href: '/acteurs/ferroviaire', desc: '\u00c9quipement & conseil' },
-      { label: 'Acteurs fluviaux', href: '/acteurs/fluvial', desc: 'Transport par voie d\u2019eau' },
+      { label: 'Acteurs fluviaux', href: '/acteurs/fluvial', desc: 'Transport par voie d\'eau' },
     ],
   },
+  { label: 'Les CEE', href: '/les-cee' },
   { label: 'Plan de transport', href: '/plan-de-transport' },
   { label: 'Observatoire', href: '/observatoire' },
   { label: 'Actualit\u00e9s', href: '/actualites' },
@@ -59,8 +61,8 @@ function DropdownItem({ item, pathname }: { item: NavItem; pathname: string }) {
         className={clsx(
           'relative text-sm font-medium transition-colors px-3 py-2 rounded-md',
           isActive
-            ? 'text-white'
-            : 'text-white/70 hover:text-white'
+            ? 'text-blue'
+            : 'text-gray-600 hover:text-gray-900'
         )}
       >
         {item.label}
@@ -81,8 +83,8 @@ function DropdownItem({ item, pathname }: { item: NavItem; pathname: string }) {
         className={clsx(
           'relative text-sm font-medium transition-colors px-3 py-2 rounded-md flex items-center gap-1',
           isActive
-            ? 'text-white'
-            : 'text-white/70 hover:text-white'
+            ? 'text-blue'
+            : 'text-gray-600 hover:text-gray-900'
         )}
       >
         {item.label}
@@ -94,7 +96,7 @@ function DropdownItem({ item, pathname }: { item: NavItem; pathname: string }) {
         )}
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-64 rounded-xl overflow-hidden z-50" style={{ background: 'rgba(26, 29, 35, 0.97)', backdropFilter: 'blur(20px)', border: '1px solid rgba(88, 123, 189, 0.25)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)' }}>
+        <div className="absolute top-full left-0 mt-1 w-64 rounded-xl overflow-hidden z-50 bg-white border border-gray-200 shadow-xl">
           <div className="py-1.5">
             {item.children.map((child) => (
               <Link
@@ -103,15 +105,15 @@ function DropdownItem({ item, pathname }: { item: NavItem; pathname: string }) {
                 className={clsx(
                   'block px-4 py-2.5 transition-colors',
                   pathname === child.href
-                    ? 'bg-white/10'
-                    : 'hover:bg-white/5'
+                    ? 'bg-blue/5'
+                    : 'hover:bg-gray-50'
                 )}
               >
-                <div className={clsx('text-sm font-medium', pathname === child.href ? 'text-white' : 'text-white/80')}>
+                <div className={clsx('text-sm font-medium', pathname === child.href ? 'text-blue' : 'text-gray-700')}>
                   {child.label}
                 </div>
                 {child.desc && (
-                  <div className="text-[11px] text-white/40 mt-0.5">{child.desc}</div>
+                  <div className="text-[11px] text-gray-400 mt-0.5">{child.desc}</div>
                 )}
               </Link>
             ))}
@@ -127,18 +129,18 @@ export default function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50" style={{ background: 'rgba(26, 29, 35, 0.97)', backdropFilter: 'blur(20px)' }}>
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200">
       {/* Thin gradient accent bar */}
       <div className="h-[2px] gntc-gradient-bg" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0">
             <img src="/logo-gntc.jpg" alt="GNTC" className="h-10 rounded" />
             <div className="hidden sm:block">
-              <div className="text-sm font-display font-bold text-white leading-tight">GNTC</div>
-              <div className="text-[10px] text-white/50 leading-tight">Transport Combin&eacute;</div>
+              <div className="text-sm font-display font-bold text-gray-900 leading-tight">GNTC</div>
+              <div className="text-[10px] text-gray-400 leading-tight">Transport Combin&eacute;</div>
             </div>
           </Link>
 
@@ -152,7 +154,7 @@ export default function SiteHeader() {
           {/* Mobile burger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-white/70 hover:text-white"
+            className="lg:hidden p-2 text-gray-500 hover:text-gray-900"
           >
             {mobileOpen ? (
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -169,8 +171,8 @@ export default function SiteHeader() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div style={{ background: 'rgba(26, 29, 35, 0.98)', borderTop: '1px solid rgba(88, 123, 189, 0.2)' }}>
-          <nav className="max-w-7xl mx-auto px-4 py-4 space-y-1">
+        <div className="bg-white border-t border-gray-100">
+          <nav className="px-4 py-4 space-y-1">
             {NAV.map((item) => (
               <div key={item.href}>
                 <Link
@@ -179,8 +181,8 @@ export default function SiteHeader() {
                   className={clsx(
                     'block px-3 py-2 text-sm font-medium rounded-md transition-colors',
                     pathname.startsWith(item.href)
-                      ? 'text-white bg-white/10'
-                      : 'text-white/70 hover:text-white hover:bg-white/5'
+                      ? 'text-blue bg-blue/5'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   )}
                 >
                   {item.label}
@@ -195,8 +197,8 @@ export default function SiteHeader() {
                         className={clsx(
                           'block px-3 py-1.5 text-xs rounded-md transition-colors',
                           pathname === child.href
-                            ? 'text-white bg-white/10'
-                            : 'text-white/50 hover:text-white/80'
+                            ? 'text-blue bg-blue/5'
+                            : 'text-gray-400 hover:text-gray-700'
                         )}
                       >
                         {child.label}

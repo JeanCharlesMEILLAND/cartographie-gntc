@@ -4,42 +4,42 @@ import { useState } from 'react';
 import PageLayout from '@/components/Site/PageLayout';
 
 const ENV_STATS = [
-  { value: '1 000 000', label: 'camions retir\u00e9s des routes chaque ann\u00e9e', detail: 'gr\u00e2ce au report modal vers le rail et le fluvial' },
-  { value: '-85%', label: 'd\u2019\u00e9missions de CO\u2082', detail: 'par rapport \u00e0 un transport tout-routier \u00e9quivalent' },
-  { value: '1 000 000', label: 'tonnes de CO\u2082 \u00e9conomis\u00e9es/an', detail: 'soit l\u2019\u00e9quivalent de 500 000 voitures retir\u00e9es' },
-  { value: '-50%', label: 'de consommation \u00e9nerg\u00e9tique', detail: 'le rail consomme 6x moins d\u2019\u00e9nergie par tonne-km' },
+  { value: '1 000 000', label: 'camions retirés des routes chaque année', detail: 'grâce au report modal vers le rail et le fluvial' },
+  { value: '-85%', label: 'd\'émissions de CO₂', detail: 'par rapport à un transport tout-routier équivalent' },
+  { value: '1 000 000', label: 'tonnes de CO₂ économisées/an', detail: 'soit l\'équivalent de 500 000 voitures retirées' },
+  { value: '6x', label: 'moins d\'énergie consommée', detail: 'le rail consomme 6 fois moins d\'énergie par tonne-km que la route' },
 ];
 
 const BENEFITS = [
   {
-    title: 'R\u00e9duction des \u00e9missions',
-    desc: 'Le transport ferroviaire \u00e9met 14g de CO\u2082 par tonne-km contre 96g pour le routier. Le fluvial \u00e9met 30g par tonne-km.',
-    icon: '\uD83C\uDF0D',
+    title: 'Réduction des émissions',
+    desc: 'Le transport ferroviaire émet 14g de CO₂ par tonne-km contre 96g pour le routier. Le fluvial émet 30g par tonne-km.',
+    icon: '🌍',
   },
   {
-    title: 'D\u00e9congestion routi\u00e8re',
-    desc: 'Un seul train de combin\u00e9 remplace 30 \u00e0 40 poids-lourds sur les autoroutes. Moins de bouchons, moins d\u2019usure des routes.',
-    icon: '\uD83D\uDE9B',
+    title: 'Décongestion routière',
+    desc: 'Un seul train de combiné remplace 30 à 40 poids-lourds sur les autoroutes. Moins de bouchons, moins d\'usure des routes.',
+    icon: '🚛',
   },
   {
-    title: 'S\u00e9curit\u00e9 routi\u00e8re',
-    desc: 'Moins de camions = moins d\u2019accidents. Le ferroviaire est 10 fois plus s\u00fbr que le routier par tonne-km.',
-    icon: '\uD83D\uDEE1\uFE0F',
+    title: 'Sécurité routière',
+    desc: 'Moins de camions = moins d\'accidents. Le ferroviaire est nettement plus sûr que le routier par tonne-km transportée.',
+    icon: '🛡️',
   },
   {
-    title: 'Qualit\u00e9 de l\u2019air',
-    desc: 'R\u00e9duction des particules fines, des NOx et du bruit le long des corridors routiers les plus satur\u00e9s.',
-    icon: '\uD83D\uDCA8',
+    title: 'Qualité de l\'air',
+    desc: 'Réduction des particules fines, des NOx et du bruit le long des corridors routiers les plus saturés.',
+    icon: '💨',
   },
   {
-    title: '\u00c9lectrique par nature',
-    desc: 'Plus de 50% du r\u00e9seau ferr\u00e9 fran\u00e7ais est \u00e9lectrifi\u00e9. La d\u00e9carbonation est d\u00e9j\u00e0 avanc\u00e9e sur le rail.',
-    icon: '\u26A1',
+    title: 'Électrique par nature',
+    desc: 'Plus de 50% du réseau ferré français est électrifié. La décarbonation est déjà avancée sur le rail.',
+    icon: '⚡',
   },
   {
-    title: 'Efficacit\u00e9 \u00e9nerg\u00e9tique',
+    title: 'Efficacité énergétique',
     desc: 'Le rail transporte 1 tonne sur 500 km avec 1 litre de carburant. Le routier : 100 km pour 1 litre.',
-    icon: '\u2699\uFE0F',
+    icon: '⚙️',
   },
 ];
 
@@ -131,8 +131,8 @@ export default function DurabilitePage() {
       subtitle="Le transport combin&eacute; est le fer de lance de la transition &eacute;cologique du fret. D&eacute;couvrez ses b&eacute;n&eacute;fices environnementaux."
       hero
       breadcrumbs={[
-        { label: 'Transport combin\u00e9', href: '/transport-combine' },
-        { label: 'Durabilit\u00e9' },
+        { label: 'Transport combiné', href: '/transport-combine' },
+        { label: 'Durabilité' },
       ]}
     >
       {/* Key stats */}

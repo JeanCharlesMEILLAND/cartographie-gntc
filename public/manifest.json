@@ -4,8 +4,8 @@
   "description": "Cartographie interactive des flux de transport combiné rail-route",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f1729",
-  "theme_color": "#587bbd",
+  "background_color": "#0f2818",
+  "theme_color": "#1a4d2e",
   "icons": [
     {
       "src": "/favicon-192x192.png",

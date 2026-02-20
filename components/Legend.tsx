@@ -49,19 +49,19 @@ export default function Legend({ routes = [] }: LegendProps) {
               <div className="text-[9px] font-semibold text-muted uppercase tracking-wider mb-1">Intensité</div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-5 h-[4px] rounded-full bg-blue flex-shrink-0" />
+                  <div className="w-5 h-[4px] rounded-full flex-shrink-0" style={{ backgroundColor: '#587bbd' }} />
                   <span className="text-muted">&gt;30 trains/sem</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-5 h-[3px] rounded-full bg-blue flex-shrink-0 opacity-85" />
+                  <div className="w-5 h-[3px] rounded-full flex-shrink-0 opacity-85" style={{ backgroundColor: '#587bbd' }} />
                   <span className="text-muted">16–30 trains/sem</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-5 h-[2.5px] rounded-full bg-blue flex-shrink-0 opacity-65" />
+                  <div className="w-5 h-[2.5px] rounded-full flex-shrink-0 opacity-65" style={{ backgroundColor: '#587bbd' }} />
                   <span className="text-muted">9–15 trains/sem</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-5 h-[1.5px] rounded-full bg-blue flex-shrink-0 opacity-40" />
+                  <div className="w-5 h-[1.5px] rounded-full flex-shrink-0 opacity-40" style={{ backgroundColor: '#587bbd' }} />
                   <span className="text-muted">1–8 trains/sem</span>
                 </div>
               </div>
@@ -72,15 +72,15 @@ export default function Legend({ routes = [] }: LegendProps) {
               <div className="text-[9px] font-semibold text-muted uppercase tracking-wider mb-1">Plateformes</div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2.5 h-2.5 rounded-full bg-cyan flex-shrink-0 border border-cyan" />
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#7dc243', border: '1px solid #7dc243' }} />
                   <span className="text-muted">France</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2.5 h-2.5 rounded-full bg-purple flex-shrink-0 border border-purple" />
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#8b6db5', border: '1px solid #8b6db5' }} />
                   <span className="text-muted">International</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-3 h-3 rounded-full bg-cyan flex-shrink-0 border border-cyan marker-hub" />
+                  <div className="w-3 h-3 rounded-full flex-shrink-0 marker-hub" style={{ backgroundColor: '#7dc243', border: '1px solid #7dc243' }} />
                   <span className="text-muted">Hub majeur</span>
                 </div>
               </div>
@@ -111,9 +111,9 @@ export default function Legend({ routes = [] }: LegendProps) {
             <div className="border-t border-border pt-2">
               <div className="text-[9px] font-semibold text-muted uppercase tracking-wider mb-1">Raccourcis</div>
               <div className="space-y-0.5 text-[10px] text-muted">
-                <div><kbd className="px-1 py-0.5 bg-blue/10 rounded text-[9px] font-mono">F</kbd> Filtres</div>
-                <div><kbd className="px-1 py-0.5 bg-blue/10 rounded text-[9px] font-mono">S</kbd> Recherche</div>
-                <div><kbd className="px-1 py-0.5 bg-blue/10 rounded text-[9px] font-mono">Esc</kbd> Fermer</div>
+                <div><kbd className="px-1 py-0.5 rounded text-[9px] font-mono" style={{ backgroundColor: 'rgba(88,123,189,0.1)' }}>F</kbd> Filtres</div>
+                <div><kbd className="px-1 py-0.5 rounded text-[9px] font-mono" style={{ backgroundColor: 'rgba(88,123,189,0.1)' }}>S</kbd> Recherche</div>
+                <div><kbd className="px-1 py-0.5 rounded text-[9px] font-mono" style={{ backgroundColor: 'rgba(88,123,189,0.1)' }}>Esc</kbd> Fermer</div>
               </div>
             </div>
           </div>

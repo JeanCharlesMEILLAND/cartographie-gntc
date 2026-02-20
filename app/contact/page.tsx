@@ -15,7 +15,7 @@ const CONTACT_INFO = [
     ),
   },
   {
-    label: 'T\u00e9l\u00e9phone',
+    label: 'Téléphone',
     value: '+33 6.81.84.26.21',
     href: 'tel:+33681842621',
     icon: (
@@ -38,9 +38,7 @@ const CONTACT_INFO = [
 ];
 
 const SOCIALS = [
-  { name: 'Twitter / X', href: 'https://twitter.com/GNTC_TC', icon: 'X' },
-  { name: 'LinkedIn', href: 'https://www.linkedin.com/company/gntc/', icon: 'in' },
-  { name: 'YouTube', href: 'https://www.youtube.com/@gntc_tc', icon: '\u25B6' },
+  { name: 'LinkedIn', href: 'https://www.linkedin.com/company/gntcofficiel/', icon: 'in' },
 ];
 
 export default function ContactPage() {
@@ -98,15 +96,15 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Delegue general */}
+          {/* Secretariat */}
           <div className="mt-8 bg-white rounded-xl border border-gray-100 p-6">
-            <div className="text-xs font-semibold text-text uppercase tracking-wider mb-3">D&eacute;l&eacute;gu&eacute;e G&eacute;n&eacute;rale</div>
+            <div className="text-xs font-semibold text-text uppercase tracking-wider mb-3">Secr&eacute;tariat du GNTC</div>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-blue/10 flex items-center justify-center flex-shrink-0">
-                <span className="text-base font-display font-bold text-blue">IO</span>
+                <span className="text-base font-display font-bold text-blue">G</span>
               </div>
               <div>
-                <div className="font-display font-bold text-text">Isabelle OCKET</div>
+                <div className="font-display font-bold text-text">Secr&eacute;tariat</div>
                 <div className="text-xs text-muted">secretariat@gntc.fr &middot; +33 6.81.84.26.21</div>
               </div>
             </div>
@@ -131,6 +129,7 @@ export default function ContactPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Row 1: Nom | Email */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-text mb-1">Nom</label>
@@ -142,6 +141,18 @@ export default function ContactPage() {
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-text mb-1">Email</label>
+                  <input
+                    type="email"
+                    required
+                    className="w-full text-sm px-3 py-2.5 rounded-lg border border-gray-200 focus:border-blue focus:outline-none focus:ring-1 focus:ring-blue/20"
+                    placeholder="votre@email.com"
+                  />
+                </div>
+              </div>
+              {/* Row 2: Entreprise | Nom du dirigeant */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
                   <label className="block text-sm font-medium text-text mb-1">Entreprise</label>
                   <input
                     type="text"
@@ -149,16 +160,30 @@ export default function ContactPage() {
                     placeholder="Votre entreprise"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-text mb-1">Nom du dirigeant</label>
+                  <input
+                    type="text"
+                    className="w-full text-sm px-3 py-2.5 rounded-lg border border-gray-200 focus:border-blue focus:outline-none focus:ring-1 focus:ring-blue/20"
+                    placeholder="Nom du dirigeant"
+                  />
+                </div>
               </div>
+              {/* Row 3: Chiffre d'affaires (full width) */}
               <div>
-                <label className="block text-sm font-medium text-text mb-1">Email</label>
-                <input
-                  type="email"
-                  required
-                  className="w-full text-sm px-3 py-2.5 rounded-lg border border-gray-200 focus:border-blue focus:outline-none focus:ring-1 focus:ring-blue/20"
-                  placeholder="votre@email.com"
-                />
+                <label className="block text-sm font-medium text-text mb-1">Chiffre d&apos;affaires</label>
+                <select className="w-full text-sm px-3 py-2.5 rounded-lg border border-gray-200 focus:border-blue focus:outline-none focus:ring-1 focus:ring-blue/20">
+                  <option value="">S&eacute;lectionnez...</option>
+                  <option>Entre 0 et 1M &euro;</option>
+                  <option>Entre 1 et 3M &euro;</option>
+                  <option>Entre 3 et 5M &euro;</option>
+                  <option>Entre 5 et 10M &euro;</option>
+                  <option>Entre 10 et 20M &euro;</option>
+                  <option>Entre 20 et 50M &euro;</option>
+                  <option>Plus de 50M &euro;</option>
+                </select>
               </div>
+              {/* Row 4: Objet (full width) */}
               <div>
                 <label className="block text-sm font-medium text-text mb-1">Objet</label>
                 <select className="w-full text-sm px-3 py-2.5 rounded-lg border border-gray-200 focus:border-blue focus:outline-none focus:ring-1 focus:ring-blue/20">

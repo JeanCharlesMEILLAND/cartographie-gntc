@@ -592,7 +592,7 @@ export default function ChatWidget({ platforms, services }: ChatWidgetProps) {
                     <button
                       onClick={handleOpenPlanner}
                       className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg text-white transition-all hover:shadow-md hover:scale-[1.02]"
-                      style={{ background: 'var(--gntc-gradient, linear-gradient(to bottom right, #587bbd, #7dc243))' }}
+                      style={{ background: 'var(--gntc-gradient, linear-gradient(to bottom right, #1a4d2e, #84cc16))' }}
                     >
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                         <path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

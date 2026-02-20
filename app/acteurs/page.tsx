@@ -52,13 +52,13 @@ export default function ActeursPage() {
                     {a.logo ? (
                       <img src={a.logo} alt={a.name} className="w-10 h-10 object-contain rounded flex-shrink-0" />
                     ) : (
-                      <div className="w-10 h-10 rounded flex-shrink-0 flex items-center justify-center text-lg" style={{ background: (a.color || '#3b82f6') + '15' }}>
+                      <div className="w-10 h-10 rounded flex-shrink-0 flex items-center justify-center text-lg" style={{ background: (a.color || '#1a4d2e') + '15' }}>
                         {CATEGORY_META[a.category].icon}
                       </div>
                     )}
                     <div className="min-w-0">
                       <h3 className="font-display font-bold text-text text-sm truncate">{a.name}</h3>
-                      <div className="text-xs text-muted">{CATEGORY_META[a.category].label}{a.location ? ` \u00b7 ${a.location}` : ''}</div>
+                      <div className="text-xs text-muted">{CATEGORY_META[a.category].label}{a.location ? ` · ${a.location}` : ''}</div>
                     </div>
                   </div>
                   <p className="text-xs text-muted leading-relaxed line-clamp-2">{a.description}</p>
@@ -104,10 +104,10 @@ export default function ActeursPage() {
             <h2 className="text-xl font-display font-bold text-text mb-6">Le r&eacute;seau GNTC en chiffres</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { value: String(ACTEURS.length), label: 'acteurs r\u00e9f\u00e9renc\u00e9s' },
-                { value: String(ACTEURS.filter((a) => a.category === 'operateur').length), label: 'op\u00e9rateurs TC' },
+                { value: String(ACTEURS.length), label: 'acteurs référencés' },
+                { value: String(ACTEURS.filter((a) => a.category === 'operateur').length), label: 'opérateurs TC' },
                 { value: String(ACTEURS.filter((a) => a.category === 'plateforme').length), label: 'plateformes & ports' },
-                { value: '4', label: 'cat\u00e9gories d\u2019acteurs' },
+                { value: '4', label: 'catégories d\'acteurs' },
               ].map((s) => (
                 <div key={s.label} className="bg-white rounded-xl border border-gray-100 p-5 text-center">
                   <div className="text-2xl font-display font-bold gntc-gradient">{s.value}</div>

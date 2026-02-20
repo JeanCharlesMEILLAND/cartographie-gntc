@@ -4,7 +4,7 @@ import PageLayout from '@/components/Site/PageLayout';
 const SECTIONS = [
   {
     title: 'Notre organisation',
-    desc: 'Gouvernance, conseil d\u2019administration, commissions sp\u00e9cialis\u00e9es et partenariats institutionnels.',
+    desc: 'Gouvernance, conseil d\'administration, commissions spécialisées et partenariats institutionnels.',
     href: '/qui-sommes-nous/organisation',
     icon: (
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="text-blue">
@@ -15,7 +15,7 @@ const SECTIONS = [
   },
   {
     title: 'Nos missions',
-    desc: 'Repr\u00e9sentation, promotion et d\u00e9fense de la fili\u00e8re du transport combin\u00e9 aupr\u00e8s des pouvoirs publics.',
+    desc: 'Représentation, promotion et défense de la filière du transport combiné auprès des pouvoirs publics.',
     href: '/qui-sommes-nous/missions',
     icon: (
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="text-blue">
@@ -27,7 +27,7 @@ const SECTIONS = [
   },
   {
     title: 'Notre histoire',
-    desc: 'De 1945 \u00e0 aujourd\u2019hui, plus de 80 ans au service du transport combin\u00e9 en France.',
+    desc: 'De 1945 à aujourd\'hui, plus de 80 ans au service du transport combiné en France.',
     href: '/qui-sommes-nous/histoire',
     icon: (
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="text-blue">

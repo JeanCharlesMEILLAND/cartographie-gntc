@@ -12,7 +12,7 @@ export default function OperateursPage() {
       subtitle={meta.description}
       breadcrumbs={[
         { label: 'Acteurs', href: '/acteurs' },
-        { label: 'Op\u00e9rateurs' },
+        { label: 'Opérateurs' },
       ]}
     >
       {/* Overview */}

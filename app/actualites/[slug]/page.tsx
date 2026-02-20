@@ -16,7 +16,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     <PageLayout
       title={article.title}
       breadcrumbs={[
-        { label: 'Actualit\u00e9s', href: '/actualites' },
+        { label: 'Actualités', href: '/actualites' },
         { label: CATEGORY_LABELS[article.category] },
       ]}
     >
@@ -41,6 +41,21 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           prose-a:text-blue prose-a:no-underline hover:prose-a:underline"
         dangerouslySetInnerHTML={{ __html: article.content }}
       />
+
+      {/* Video embed */}
+      {article.videoId && (
+        <div className="mb-12">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-100">
+            <iframe
+              src={`https://www.youtube.com/embed/${article.videoId}`}
+              title={article.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 w-full h-full"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Back link */}
       <div className="border-t border-gray-100 pt-6">

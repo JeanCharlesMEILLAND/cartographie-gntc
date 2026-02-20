@@ -4,37 +4,37 @@ import PageLayout from '@/components/Site/PageLayout';
 const CORRIDORS = [
   {
     name: 'Axe Nord-Sud',
-    routes: ['Lille \u2013 Lyon', 'Dourges \u2013 Marseille', 'Lille \u2013 Perpignan', 'Paris \u2013 Marseille'],
-    desc: 'L\u2019axe principal du transport combin\u00e9 en France, reliant les grands p\u00f4les \u00e9conomiques du Nord au bassin m\u00e9diterran\u00e9en.',
-    volume: '~60% du trafic combin\u00e9',
+    routes: ['Lille – Lyon', 'Dourges – Marseille', 'Lille – Perpignan', 'Paris – Marseille'],
+    desc: 'L\'axe principal du transport combiné en France, reliant les grands pôles économiques du Nord au bassin méditerranéen.',
+    volume: 'Axe majeur',
   },
   {
     name: 'Axes transversaux',
-    routes: ['Bordeaux \u2013 Lyon', 'Nantes \u2013 Lyon', 'Toulouse \u2013 Paris'],
-    desc: 'Liaisons est-ouest et reliant les m\u00e9tropoles r\u00e9gionales. En d\u00e9veloppement pour r\u00e9duire la d\u00e9pendance \u00e0 l\u2019axe rhodanien.',
-    volume: '~20% du trafic combin\u00e9',
+    routes: ['Bordeaux – Lyon', 'Nantes – Lyon', 'Toulouse – Paris'],
+    desc: 'Liaisons est-ouest reliant les métropoles régionales. En développement pour réduire la dépendance à l\'axe rhodanien.',
+    volume: 'En croissance',
   },
   {
     name: 'Corridors internationaux',
-    routes: ['France \u2013 Italie (Modane)', 'France \u2013 Espagne (Le Boulou)', 'France \u2013 Benelux', 'France \u2013 Allemagne'],
-    desc: 'Le transport combin\u00e9 est par nature europ\u00e9en. Les corridors internationaux relient la France aux grands r\u00e9seaux europ\u00e9ens.',
-    volume: '~15% du trafic combin\u00e9',
+    routes: ['France – Italie (Modane)', 'France – Espagne (Le Boulou)', 'France – Benelux', 'France – Allemagne'],
+    desc: 'Le transport combiné est par nature européen. Les corridors internationaux relient la France aux grands réseaux européens.',
+    volume: 'Trafic international',
   },
   {
     name: 'Axe fluvial',
-    routes: ['Seine : Le Havre \u2013 Paris', 'Rh\u00f4ne : Lyon \u2013 Marseille', 'Nord : Dunkerque \u2013 Valenciennes'],
-    desc: 'Le transport combin\u00e9 fleuve-route se d\u00e9veloppe sur les axes fluviaux \u00e0 grand gabarit, notamment la Seine et le Rh\u00f4ne.',
-    volume: '~5% du trafic combin\u00e9',
+    routes: ['Seine : Le Havre – Paris', 'Rhône : Lyon – Marseille', 'Nord : Dunkerque – Valenciennes'],
+    desc: 'Le transport combiné fleuve-route se développe sur les axes fluviaux à grand gabarit, notamment la Seine et le Rhône.',
+    volume: 'En développement',
   },
 ];
 
 export default function FluxPage() {
   return (
     <PageLayout
-      title="Les flux de transport combin\u00e9 en France"
+      title="Les flux de transport combiné en France"
       subtitle="Le r&eacute;seau de transport combin&eacute; fran&ccedil;ais s&rsquo;organise autour de grands corridors structurants."
       breadcrumbs={[
-        { label: 'Transport combin\u00e9', href: '/transport-combine' },
+        { label: 'Transport combiné', href: '/transport-combine' },
         { label: 'Flux' },
       ]}
     >
@@ -68,8 +68,8 @@ export default function FluxPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { value: '~40', label: 'plateformes multimodales' },
-            { value: '21', label: 'op\u00e9rateurs actifs' },
-            { value: '~150', label: 'liaisons r\u00e9guli\u00e8res' },
+            { value: '21', label: 'opérateurs actifs' },
+            { value: '~150', label: 'liaisons régulières' },
             { value: '~500', label: 'trains/semaine' },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-xl border border-gray-100 p-5 text-center">

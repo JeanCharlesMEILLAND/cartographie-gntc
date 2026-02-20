@@ -4,38 +4,38 @@ import PageLayout from '@/components/Site/PageLayout';
 const STEPS = [
   {
     number: '01',
-    title: 'Pr\u00e9-acheminement routier',
-    desc: 'Le transporteur routier achemine les marchandises depuis le lieu de chargement (usine, entrep\u00f4t) vers la plateforme multimodale la plus proche. Ce trajet routier est g\u00e9n\u00e9ralement court (moins de 150 km).',
-    detail: 'Le chargement s\u2019effectue dans une Unit\u00e9 de Transport Intermodale (UTI) : conteneur, caisse mobile ou semi-remorque adapt\u00e9e.',
+    title: 'Pré-acheminement routier',
+    desc: 'Le transporteur routier achemine les marchandises depuis le lieu de chargement (usine, entrepôt) vers la plateforme multimodale la plus proche. Ce trajet routier est généralement court (moins de 150 km).',
+    detail: 'Le chargement s\'effectue dans une Unité de Transport Intermodale (UTI) : conteneur, caisse mobile ou semi-remorque adaptée.',
   },
   {
     number: '02',
     title: 'Transport principal ferroviaire ou fluvial',
-    desc: 'Les UTI sont transbord\u00e9es sur un train ou une barge fluviale pour la longue distance. C\u2019est le c\u0153ur du transport combin\u00e9 : la partie la plus \u00e9cologique et la plus efficiente.',
-    detail: 'Un train de transport combin\u00e9 transporte en moyenne 30 \u00e0 40 UTI, soit l\u2019\u00e9quivalent de 30 \u00e0 40 poids-lourds retir\u00e9s de la route.',
+    desc: 'Les UTI sont transbordées sur un train ou une barge fluviale pour la longue distance. C\'est le cœur du transport combiné : la partie la plus écologique et la plus efficiente.',
+    detail: 'Un train de transport combiné transporte en moyenne 30 à 40 UTI, soit l\'équivalent de 30 à 40 poids-lourds retirés de la route.',
   },
   {
     number: '03',
     title: 'Post-acheminement routier',
-    desc: 'Un dernier trajet routier court livre les marchandises \u00e0 destination finale. Le service est porte-\u00e0-porte, identique au tout-routier pour le client.',
-    detail: 'Le destinataire re\u00e7oit sa marchandise comme avec un transport routier classique, sans diff\u00e9rence de service.',
+    desc: 'Un dernier trajet routier court livre les marchandises à destination finale. Le service est porte-à-porte, identique au tout-routier pour le client.',
+    detail: 'Le destinataire reçoit sa marchandise comme avec un transport routier classique, sans différence de service.',
   },
 ];
 
 const UTIS = [
   {
     name: 'Conteneur',
-    desc: 'Bo\u00eete m\u00e9tallique normalis\u00e9e (20\u2019, 40\u2019, 45\u2019) utilis\u00e9e pour le transport maritime et terrestre. Manutention par le haut (grue, portique).',
-    sizes: '20\u2019, 40\u2019, 45\u2019',
+    desc: 'Boîte métallique normalisée (20\', 40\', 45\') utilisée pour le transport maritime et terrestre. Manutention par le haut (grue, portique).',
+    sizes: "20', 40', 45'",
   },
   {
     name: 'Caisse mobile',
-    desc: 'Unit\u00e9 de chargement sp\u00e9cifique au transport combin\u00e9 terrestre. Plus l\u00e9g\u00e8re qu\u2019un conteneur, avec des pieds r\u00e9tractables pour le stockage.',
+    desc: 'Unité de chargement spécifique au transport combiné terrestre. Plus légère qu\'un conteneur, avec des pieds rétractables pour le stockage.',
     sizes: '7.15m, 7.45m, 13.60m',
   },
   {
     name: 'Semi-remorque',
-    desc: 'La semi-remorque enti\u00e8re est charg\u00e9e sur le wagon. Technique dite de \u00ab\u00a0route roulante\u00a0\u00bb ou \u00ab\u00a0autoroute ferroviaire\u00a0\u00bb.',
+    desc: 'La semi-remorque entière est chargée sur le wagon. Technique dite de «route roulante» ou «autoroute ferroviaire».',
     sizes: 'Standard 13.60m',
   },
 ];
@@ -43,14 +43,19 @@ const UTIS = [
 export default function DefinitionPage() {
   return (
     <PageLayout
-      title="D\u00e9finition et organisation"
+      title="Définition et organisation"
       subtitle="Le transport combin&eacute; est un mode de transport intermodal utilisant principalement le rail ou la voie fluviale pour la longue distance, compl&eacute;t&eacute; par la route pour les parcours terminaux."
       breadcrumbs={[
-        { label: 'Transport combin\u00e9', href: '/transport-combine' },
-        { label: 'D\u00e9finition' },
+        { label: 'Transport combiné', href: '/transport-combine' },
+        { label: 'Définition' },
       ]}
     >
-      {/* 3 \u00e9tapes */}
+      {/* Infographic */}
+      <section className="mb-12">
+        <img src="/images/infographies/3-etapes.jpg" alt="Les 3 étapes du transport combiné" className="w-full rounded-xl border border-gray-100" />
+      </section>
+
+      {/* 3 étapes */}
       <section className="mb-16">
         <h2 className="text-xl font-display font-bold text-text mb-8">Les 3 &eacute;tapes du transport combin&eacute;</h2>
         <div className="space-y-6">
@@ -72,6 +77,24 @@ export default function DefinitionPage() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Rôle du transporteur */}
+      <section className="mb-16">
+        <h2 className="text-xl font-display font-bold text-text mb-4">Le r&ocirc;le du transporteur</h2>
+        <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+          <p className="text-sm text-muted leading-relaxed">
+            En transport combin&eacute;, toutes les composantes qui concourent &agrave; la fabrication du produit
+            sont d&rsquo;&eacute;gale importance, mais c&rsquo;est le transporteur routier qui d&eacute;tient le fret.
+            Il est ainsi l&rsquo;ensemblier ma&icirc;tre d&rsquo;ouvrage qui imagine, con&ccedil;oit et vend un
+            service domicile-domicile.
+          </p>
+          <p className="text-sm text-muted leading-relaxed">
+            D&rsquo;un point de vue soci&eacute;tal, il peut &ecirc;tre une r&eacute;ponse efficace &agrave; la
+            p&eacute;nurie de chauffeurs routiers importante en France, tout en permettant une relocalisation
+            des emplois.
+          </p>
         </div>
       </section>
 

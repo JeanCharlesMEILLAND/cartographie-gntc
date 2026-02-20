@@ -15,8 +15,8 @@ export default function PlanDeTransportPage() {
       <section className="mb-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { value: String(OPERATORS.length), label: 'op\u00e9rateurs' },
-            { value: '~150', label: 'liaisons r\u00e9guli\u00e8res' },
+            { value: String(OPERATORS.length), label: 'opérateurs' },
+            { value: '~150', label: 'liaisons régulières' },
             { value: '~500', label: 'trains / semaine' },
             { value: '~40', label: 'plateformes desservies' },
           ].map((s) => (
@@ -43,7 +43,7 @@ export default function PlanDeTransportPage() {
                 ) : (
                   <div
                     className="w-12 h-12 rounded flex-shrink-0 flex items-center justify-center font-display font-bold text-sm"
-                    style={{ background: (op.color || '#3b82f6') + '15', color: op.color || '#3b82f6' }}
+                    style={{ background: (op.color || '#1a4d2e') + '15', color: op.color || '#1a4d2e' }}
                   >
                     {op.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
                   </div>
@@ -112,9 +112,9 @@ export default function PlanDeTransportPage() {
         <h2 className="text-xl font-display font-bold text-text mb-6">Documents t&eacute;l&eacute;chargeables</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { title: 'Plan de transport 2025', format: 'Excel', icon: '\uD83D\uDCC4' },
-            { title: 'Guide du combin\u00e9 rail-route', format: 'PDF', icon: '\uD83D\uDCD8' },
-            { title: 'Annuaire des op\u00e9rateurs', format: 'PDF', icon: '\uD83D\uDCC2' },
+            { title: 'Plan de transport 2025', format: 'Excel', icon: '📄' },
+            { title: 'Guide du combiné rail-route', format: 'PDF', icon: '📘' },
+            { title: 'Annuaire des opérateurs', format: 'PDF', icon: '📂' },
           ].map((doc) => (
             <div key={doc.title} className="bg-white rounded-xl border border-gray-100 p-5 flex items-center gap-4">
               <div className="text-2xl">{doc.icon}</div>

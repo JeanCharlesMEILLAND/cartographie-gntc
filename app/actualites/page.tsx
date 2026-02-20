@@ -20,7 +20,7 @@ export default function ActualitesPage() {
     <PageLayout
       title="Actualit&eacute;s"
       subtitle="Suivez l&rsquo;actualit&eacute; du transport combin&eacute; en France : communiqu&eacute;s, &eacute;v&eacute;nements et vie de la fili&egrave;re."
-      breadcrumbs={[{ label: 'Actualit\u00e9s' }]}
+      breadcrumbs={[{ label: 'Actualités' }]}
     >
       {/* Category filters */}
       <div className="flex flex-wrap gap-2 mb-8">
@@ -35,7 +35,7 @@ export default function ActualitesPage() {
                   ? 'text-white'
                   : 'bg-gray-100 text-muted hover:bg-gray-200'
               }`}
-              style={isActive ? { background: cat ? CATEGORY_COLORS[cat] : '#3b82f6' } : undefined}
+              style={isActive ? { background: cat ? CATEGORY_COLORS[cat] : '#1a4d2e' } : undefined}
             >
               {cat ? CATEGORY_LABELS[cat] : 'Toutes'}
             </button>
@@ -44,32 +44,38 @@ export default function ActualitesPage() {
       </div>
 
       {/* Articles */}
-      <div className="space-y-6 mb-12">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {articles.map((a) => (
           <Link
             key={a.slug}
             href={`/actualites/${a.slug}`}
-            className="block bg-white rounded-xl border border-gray-100 p-6 hover:shadow-md transition-shadow group"
+            className="block bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group"
           >
-            <div className="flex items-start gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <span
-                    className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full text-white"
-                    style={{ background: CATEGORY_COLORS[a.category] }}
-                  >
-                    {CATEGORY_LABELS[a.category]}
-                  </span>
-                  <span className="text-xs text-muted">
-                    {new Date(a.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </span>
-                </div>
-                <h2 className="font-display font-bold text-text group-hover:text-blue transition-colors mb-2">{a.title}</h2>
-                <p className="text-sm text-muted leading-relaxed line-clamp-2">{a.excerpt}</p>
+            {a.image && (
+              <div className="aspect-[16/9] overflow-hidden">
+                <img src={a.image} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>
-              <svg className="w-5 h-5 text-muted group-hover:text-blue group-hover:translate-x-1 transition-all flex-shrink-0 mt-2" viewBox="0 0 20 20" fill="none">
-                <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+            )}
+            <div className="p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <span
+                  className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full text-white"
+                  style={{ background: CATEGORY_COLORS[a.category] }}
+                >
+                  {CATEGORY_LABELS[a.category]}
+                </span>
+                <span className="text-xs text-muted">
+                  {new Date(a.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+              </div>
+              <h2 className="font-display font-bold text-text group-hover:text-blue transition-colors mb-2 line-clamp-2">{a.title}</h2>
+              <p className="text-sm text-muted leading-relaxed line-clamp-3">{a.excerpt}</p>
+              {a.videoId && (
+                <div className="mt-2 text-xs text-blue font-medium flex items-center gap-1">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3.5L10.5 7L5 10.5V3.5Z" fill="currentColor" /></svg>
+                  Vid&eacute;o disponible
+                </div>
+              )}
             </div>
           </Link>
         ))}
@@ -78,7 +84,7 @@ export default function ActualitesPage() {
       {/* COMBILETTRE CTA */}
       <section className="bg-gradient-to-r from-blue/5 to-cyan/5 rounded-2xl p-8">
         <div className="flex items-start gap-4">
-          <div className="text-3xl">{'\uD83D\uDCF0'}</div>
+          <div className="text-3xl">{'📰'}</div>
           <div>
             <h2 className="text-lg font-display font-bold text-text mb-2">COMBILETTRE</h2>
             <p className="text-sm text-muted mb-4">

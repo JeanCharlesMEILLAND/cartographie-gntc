@@ -2,7 +2,7 @@
 /*  Annuaire des acteurs du transport combiné – données centralisées  */
 /* ------------------------------------------------------------------ */
 
-export type ActeurCategory = 'operateur' | 'plateforme' | 'ferroviaire' | 'fluvial';
+export type ActeurCategory = 'transporteur' | 'operateur' | 'plateforme' | 'ferroviaire' | 'fluvial';
 
 export interface Acteur {
   slug: string;
@@ -23,6 +23,13 @@ export interface Acteur {
 /* ---------- helpers ------------------------------------------------ */
 
 export const CATEGORY_META: Record<ActeurCategory, { label: string; labelPlural: string; icon: string; href: string; description: string }> = {
+  transporteur: {
+    label: 'Transporteur',
+    labelPlural: 'Les transporteurs',
+    icon: '🚛',
+    href: '/acteurs/transporteurs',
+    description: 'Les entreprises de transport routier qui utilisent le transport combiné rail-route et fleuve-route pour acheminer les marchandises de leurs clients.',
+  },
   operateur: {
     label: 'Opérateur TC',
     labelPlural: 'Opérateurs de transport combiné',
@@ -72,6 +79,158 @@ export function searchActeurs(query: string): Acteur[] {
 /* ---------- data --------------------------------------------------- */
 
 export const ACTEURS: Acteur[] = [
+  /* ====== LES TRANSPORTEURS ====== */
+  {
+    slug: 'groupe-alaine',
+    name: 'Groupe Alaine',
+    category: 'transporteur',
+    description: 'Transport et logistique depuis 1960, spécialisé dans le transport combiné rail-route.',
+    logo: '/logos/transporteurs/alaine.jpg',
+    specialites: ['Transport combiné', 'Logistique', 'Grand Sud-Ouest'],
+    location: 'Cestas (33)',
+  },
+  {
+    slug: 'groupe-blanchet',
+    name: 'Groupe Blanchet',
+    category: 'transporteur',
+    description: 'Groupe de transport et logistique, utilisateur historique du transport combiné rail-route.',
+    logo: '/logos/transporteurs/blanchet.jpg',
+    specialites: ['Transport combiné', 'Logistique', 'Rhône-Alpes'],
+    location: 'Valence (26)',
+  },
+  {
+    slug: 'bleu-modal',
+    name: 'Bleu Modal',
+    category: 'transporteur',
+    description: 'Commissionnaire de transport spécialisé dans le report modal et les solutions intermodales.',
+    logo: '/logos/transporteurs/bleu-modal.png',
+    specialites: ['Report modal', 'Intermodal', 'Commission de transport'],
+  },
+  {
+    slug: 'groupe-brun',
+    name: 'Groupe Brun',
+    category: 'transporteur',
+    description: 'Entreprise familiale de transport et logistique, utilisatrice du transport combiné.',
+    logo: '/logos/transporteurs/brun.jpg',
+    specialites: ['Transport', 'Logistique', 'Familial'],
+  },
+  {
+    slug: 'combronde-transport',
+    name: 'Groupe Combronde (Transport)',
+    category: 'transporteur',
+    description: 'Groupe auvergnat de transport et logistique, acteur majeur du transport combiné en France.',
+    logo: '/logos/transporteurs/combronde.jpg',
+    website: 'www.groupecombronde.com',
+    specialites: ['Transport combiné', 'Logistique', 'Auvergne'],
+    location: 'Gerzat (63)',
+  },
+  {
+    slug: 'cordier',
+    name: 'Hyper Volume / Transports Cordier',
+    category: 'transporteur',
+    description: 'Entreprise de transport spécialisée dans les volumes importants et le transport combiné.',
+    logo: '/logos/transporteurs/cordier.jpg',
+    specialites: ['Volumes', 'Transport combiné'],
+  },
+  {
+    slug: 'dls',
+    name: 'DLS (Diligence Location et Services)',
+    category: 'transporteur',
+    description: 'Société de location et services pour le transport combiné.',
+    logo: '/logos/transporteurs/dls.png',
+    specialites: ['Location', 'Services', 'Transport combiné'],
+  },
+  {
+    slug: 'labouriaux',
+    name: 'Labouriaux France Benne',
+    category: 'transporteur',
+    description: 'Entreprise de transport spécialisée dans les bennes et le transport combiné.',
+    logo: '/logos/transporteurs/labouriaux.jpg',
+    specialites: ['Bennes', 'Transport combiné'],
+  },
+  {
+    slug: 'lassalle',
+    name: 'Transports Lassalle',
+    category: 'transporteur',
+    description: 'Entreprise de transport routier utilisant le transport combiné rail-route.',
+    logo: '/logos/transporteurs/lassalle.gif',
+    specialites: ['Transport routier', 'Rail-route'],
+  },
+  {
+    slug: 'lomak',
+    name: 'Lomak',
+    category: 'transporteur',
+    description: 'Entreprise de transport et logistique, spécialisée dans les solutions intermodales.',
+    logo: '/logos/transporteurs/lomak.png',
+    specialites: ['Intermodal', 'Logistique'],
+  },
+  {
+    slug: 'mge',
+    name: 'MGE (Groupe MGE)',
+    category: 'transporteur',
+    description: 'Groupe de transport et logistique engagé dans le report modal et le transport combiné.',
+    logo: '/logos/transporteurs/mge.png',
+    specialites: ['Transport', 'Logistique', 'Report modal'],
+  },
+  {
+    slug: 'promodal',
+    name: 'Promodal',
+    category: 'transporteur',
+    description: 'Commissionnaire spécialisé dans la promotion du report modal vers le transport combiné rail-route.',
+    logo: '/logos/transporteurs/promodal.png',
+    specialites: ['Report modal', 'Commission', 'Rail-route'],
+  },
+  {
+    slug: 'groupe-samat',
+    name: 'Groupe Samat',
+    category: 'transporteur',
+    description: 'Groupe de transport et logistique du sud de la France, utilisateur du transport combiné.',
+    logo: '/logos/transporteurs/samat.jpg',
+    specialites: ['Transport', 'Logistique', 'Méditerranée'],
+    location: 'Marseille (13)',
+  },
+  {
+    slug: 'smtrt',
+    name: 'SMTRT',
+    category: 'transporteur',
+    description: 'Société de transports routiers, utilisatrice du transport combiné.',
+    logo: '/logos/transporteurs/smtrt.jpg',
+    specialites: ['Transport routier', 'Transport combiné'],
+  },
+  {
+    slug: 'tab-rail-road',
+    name: 'TAB Rail Road',
+    category: 'transporteur',
+    description: 'Entreprise spécialisée dans l\'interface rail-route et les solutions de transport combiné.',
+    logo: '/logos/transporteurs/tab-rail-road.jpg',
+    specialites: ['Rail-route', 'Interface modale'],
+  },
+  {
+    slug: 'transfer-lahaye',
+    name: 'Trans-Fer / Groupe Lahaye Global Logistics',
+    category: 'transporteur',
+    description: 'Filiale du groupe Lahaye, spécialisée dans le transport combiné fer-route.',
+    logo: '/logos/transporteurs/transfer.jpg',
+    specialites: ['Fer-route', 'Logistique', 'Groupe Lahaye'],
+  },
+  {
+    slug: 'veynat',
+    name: 'Transports Veynat',
+    category: 'transporteur',
+    description: 'Entreprise de transport routier, pionnière du transport combiné en France.',
+    logo: '/logos/transporteurs/veynat.jpg',
+    specialites: ['Transport combiné', 'Pionnier', 'Sud-Ouest'],
+    location: 'Terrasson (24)',
+  },
+  {
+    slug: 'ziegler',
+    name: 'Ziegler',
+    category: 'transporteur',
+    description: 'Groupe international de transport et logistique, utilisateur du transport combiné.',
+    logo: '/logos/transporteurs/ziegler.jpg',
+    specialites: ['International', 'Logistique', 'Transport combiné'],
+  },
+
   /* ====== OPÉRATEURS DE TRANSPORT COMBINÉ ====== */
   {
     slug: 'ambrogio-intermodal',
@@ -194,8 +353,6 @@ export const ACTEURS: Acteur[] = [
     category: 'operateur',
     description: 'Filiale du groupe Novatrans, spécialisée dans le transport combiné pour les chargeurs et commissionnaires. Offre clé en main de report modal.',
     contact: 'Vincent BELLANGE (Dir. commercial)',
-    address: '42 Rue de Ruffi, 13003 Marseille',
-    phone: '+33 4 75 00 47 00',
     email: 'contact@novatrans-greenmodal.eu',
     website: 'novatrans-greenmodal.eu',
     logo: '/logos/greenmodal.png',

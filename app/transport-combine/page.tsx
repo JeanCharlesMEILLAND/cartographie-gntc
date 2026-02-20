@@ -3,26 +3,26 @@ import PageLayout from '@/components/Site/PageLayout';
 
 const SECTIONS = [
   {
-    title: 'D\u00e9finition',
-    desc: 'Qu\u2019est-ce que le transport combin\u00e9 ? Comprendre le processus en 3 \u00e9tapes, les UTI et le r\u00f4le de chaque acteur.',
+    title: 'Définition',
+    desc: 'Qu\'est-ce que le transport combiné ? Comprendre le processus en 3 étapes, les UTI et le rôle de chaque acteur.',
     href: '/transport-combine/definition',
     color: 'from-blue to-blue/70',
   },
   {
     title: 'Les flux en France',
-    desc: 'Cartographie des corridors de transport combin\u00e9 : axes Nord-Sud, transversaux, internationaux et fluviaux.',
+    desc: 'Cartographie des corridors de transport combiné : axes Nord-Sud, transversaux, internationaux et fluviaux.',
     href: '/transport-combine/flux',
     color: 'from-cyan to-cyan/70',
   },
   {
-    title: 'Durabilit\u00e9',
-    desc: 'Un mode de transport durable, \u00e9cologique et citoyen. Chiffres cl\u00e9s et calculateur d\u2019\u00e9missions CO\u2082.',
+    title: 'Durabilité',
+    desc: 'Un mode de transport durable, écologique et citoyen. Chiffres clés et calculateur d\'émissions CO₂.',
     href: '/transport-combine/durabilite',
     color: 'from-blue to-cyan',
   },
   {
     title: 'Les aides',
-    desc: 'Aide \u00e0 l\u2019exploitation, CEE, compensation de p\u00e9ages : toutes les aides au transport combin\u00e9.',
+    desc: 'Aide à l\'exploitation, CEE, compensation de péages : toutes les aides au transport combiné.',
     href: '/transport-combine/aides',
     color: 'from-cyan to-blue/70',
   },
@@ -31,10 +31,10 @@ const SECTIONS = [
 export default function TransportCombinePage() {
   return (
     <PageLayout
-      title="Le transport combin\u00e9"
+      title="Le transport combiné"
       subtitle="Le transport combin&eacute; allie la souplesse de la route &agrave; l&rsquo;efficacit&eacute; du ferroviaire et du fluvial pour le transport de marchandises."
       hero
-      breadcrumbs={[{ label: 'Transport combin\u00e9' }]}
+      breadcrumbs={[{ label: 'Transport combiné' }]}
     >
       <div className="grid sm:grid-cols-2 gap-6">
         {SECTIONS.map((s) => (

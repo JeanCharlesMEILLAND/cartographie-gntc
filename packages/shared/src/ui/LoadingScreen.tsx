@@ -10,9 +10,9 @@ interface LoadingTheme {
 
 const THEMES: Record<string, LoadingTheme> = {
   gntc: {
-    primary: '#587bbd',
-    secondary: '#7dc243',
-    accent: '#8b6db5',
+    primary: '#1a4d2e',
+    secondary: '#84cc16',
+    accent: '#8b6f47',
     gradientClass: 'gntc-gradient',
     gradientBgClass: 'gntc-gradient-bg',
   },

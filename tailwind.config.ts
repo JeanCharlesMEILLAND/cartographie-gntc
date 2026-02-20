@@ -10,15 +10,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#f5f6fa",
-        panel: "rgba(255,255,255,0.97)",
-        border: "rgba(88,123,189,0.15)",
-        blue: "#587bbd",
-        cyan: "#7dc243",
-        purple: "#8b6db5",
-        orange: "#e08a2e",
-        muted: "#8893a7",
-        text: "#2b2b2b",
+        bg: "#faf7f2",
+        panel: "rgba(255,253,248,0.97)",
+        border: "rgba(26,77,46,0.12)",
+        blue: "#1a4d2e",
+        cyan: "#84cc16",
+        purple: "#8b6f47",
+        orange: "#c4783e",
+        muted: "#8b8178",
+        text: "#2d2a26",
       },
       fontFamily: {
         display: ["var(--font-outfit)", "Arial", "sans-serif"],

@@ -15,7 +15,7 @@ function ActeurCard({ acteur, expanded, onToggle }: { acteur: Acteur; expanded: 
         ) : (
           <div
             className="w-12 h-12 rounded flex-shrink-0 flex items-center justify-center font-display font-bold text-sm"
-            style={{ background: (acteur.color || '#3b82f6') + '15', color: acteur.color || '#3b82f6' }}
+            style={{ background: (acteur.color || '#1a4d2e') + '15', color: acteur.color || '#1a4d2e' }}
           >
             {acteur.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
           </div>
@@ -24,7 +24,7 @@ function ActeurCard({ acteur, expanded, onToggle }: { acteur: Acteur; expanded: 
           <h3 className="font-display font-bold text-text">{acteur.name}</h3>
           <div className="text-xs text-muted mt-0.5">
             {meta.label}
-            {acteur.location ? ` \u00b7 ${acteur.location}` : ''}
+            {acteur.location ? ` · ${acteur.location}` : ''}
           </div>
           {!expanded && (
             <p className="text-xs text-muted leading-relaxed mt-2 line-clamp-2">{acteur.description}</p>

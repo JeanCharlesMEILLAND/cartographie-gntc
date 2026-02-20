@@ -2,45 +2,35 @@ import PageLayout from '@/components/Site/PageLayout';
 
 const AIDES = [
   {
-    title: 'Aide \u00e0 l\u2019exploitation du transport combin\u00e9',
-    amount: '47 M\u20ac/an',
-    desc: 'Subvention annuelle de l\u2019\u00c9tat visant \u00e0 compenser le diff\u00e9rentiel de co\u00fbt entre le transport combin\u00e9 et le tout-routier. Elle couvre une partie des co\u00fbts de transbordement et de traction ferroviaire.',
-    beneficiaires: 'Op\u00e9rateurs de transport combin\u00e9',
+    title: 'Aide à l\'exploitation du transport combiné',
+    amount: '47 M€/an',
+    desc: 'Subvention annuelle de l\'État visant à compenser le différentiel de coût entre le transport combiné et le tout-routier. Elle couvre une partie des coûts de transbordement et de traction ferroviaire.',
+    beneficiaires: 'Opérateurs de transport combiné',
     conditions: [
-      'Service r\u00e9gulier de transport combin\u00e9 rail-route ou fleuve-route',
-      'Maillon principal ferroviaire ou fluvial d\u2019au moins 100 km',
-      'Pr\u00e9/post-acheminement routier inf\u00e9rieur \u00e0 150 km',
+      'Service régulier de transport combiné rail-route ou fleuve-route',
+      'Maillon principal ferroviaire ou fluvial d\'au moins 100 km',
+      'Pré/post-acheminement routier inférieur à 150 km',
     ],
   },
   {
-    title: 'Certificats d\u2019\u00c9conomie d\u2019\u00c9nergie (CEE)',
+    title: 'Certificats d\'Économie d\'Énergie (CEE)',
     amount: 'Variable',
-    desc: 'Le report modal g\u00e9n\u00e8re des \u00e9conomies d\u2019\u00e9nergie valorisables via le dispositif CEE. Chaque tonne-km report\u00e9e de la route vers le rail ou le fluvial g\u00e9n\u00e8re des certificats monnayables.',
+    desc: 'Le report modal génère des économies d\'énergie valorisables via le dispositif CEE. Chaque tonne-km reportée de la route vers le rail ou le fluvial génère des certificats monnayables.',
     beneficiaires: 'Transporteurs et chargeurs',
     conditions: [
       'Report modal effectif de la route vers le rail ou le fluvial',
       'Justificatifs de transport (lettres de voiture, etc.)',
-      'Dossier CEE mont\u00e9 avec un partenaire agr\u00e9\u00e9 (ex: HELLIO)',
+      'Dossier CEE monté avec un partenaire agréé (ex: HELLIO)',
     ],
   },
   {
-    title: 'Compensation des p\u00e9ages ferroviaires',
-    amount: '~100 M\u20ac/an',
-    desc: 'L\u2019\u00c9tat compense une partie des p\u00e9ages ferroviaires (redevances d\u2019acc\u00e8s au r\u00e9seau) pour le fret, rendant le rail plus comp\u00e9titif face \u00e0 la route.',
-    beneficiaires: 'Entreprises ferroviaires de fret',
+    title: 'Dérogation 44 tonnes + 2 tonnes',
+    amount: 'Avantage opérationnel',
+    desc: 'Les véhicules de pré et post-acheminement du transport combiné bénéficient d\'une dérogation de poids à 44 tonnes (contre 40 tonnes en transport routier classique), rendant le combiné plus compétitif.',
+    beneficiaires: 'Transporteurs routiers en pré/post-acheminement',
     conditions: [
-      'Trains de fret circulant sur le r\u00e9seau ferr\u00e9 national',
-      'Compensation calcul\u00e9e sur la base des sillons-km',
-    ],
-  },
-  {
-    title: 'Plan France Relance / France 2030',
-    amount: 'Enveloppes sp\u00e9cifiques',
-    desc: 'Financements pour la modernisation des plateformes multimodales, l\u2019acquisition de mat\u00e9riel roulant et le d\u00e9veloppement de nouvelles liaisons.',
-    beneficiaires: 'Gestionnaires de plateformes, op\u00e9rateurs',
-    conditions: [
-      'Projets d\u2019investissement contribuant au report modal',
-      'Dossier de demande de subvention aupr\u00e8s de l\u2019ADEME ou DGITM',
+      'Pré ou post-acheminement d\'un transport combiné',
+      'Distance routière inférieure à 150 km',
     ],
   },
 ];
@@ -48,13 +38,32 @@ const AIDES = [
 export default function AidesPage() {
   return (
     <PageLayout
-      title="Les aides au transport combin\u00e9"
+      title="Les aides au transport combiné"
       subtitle="Plusieurs dispositifs publics soutiennent le d&eacute;veloppement du transport combin&eacute; en France."
       breadcrumbs={[
-        { label: 'Transport combin\u00e9', href: '/transport-combine' },
+        { label: 'Transport combiné', href: '/transport-combine' },
         { label: 'Aides' },
       ]}
     >
+      {/* Contexte légal */}
+      <section className="mb-10 bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+        <p className="text-sm text-muted leading-relaxed">
+          Conform&eacute;ment &agrave; la loi de programmation relative &agrave; la mise en &oelig;uvre du Grenelle
+          de l&rsquo;environnement, la France met en &oelig;uvre un r&eacute;gime d&rsquo;aides, approuv&eacute;
+          par l&rsquo;Union europ&eacute;enne, &agrave; l&rsquo;exploitation de services r&eacute;guliers de
+          transport combin&eacute;.
+        </p>
+        <p className="text-sm text-muted leading-relaxed">
+          Il s&rsquo;agit de verser une aide forfaitaire par unit&eacute; de transport intermodal &mdash; UTI
+          (conteneurs, caisses mobiles, semi-remorques, remorques) transbord&eacute;e dans un terminal terrestre
+          ou portuaire.
+        </p>
+        <p className="text-sm text-muted leading-relaxed">
+          Un Appel &agrave; manifestation d&rsquo;int&eacute;r&ecirc;t (AMI) pour recenser les trafics de
+          l&rsquo;ann&eacute;e est diffus&eacute; aux op&eacute;rateurs de transport combin&eacute;.
+        </p>
+      </section>
+
       <div className="space-y-8">
         {AIDES.map((aide) => (
           <div key={aide.title} className="bg-white rounded-xl border border-gray-100 p-6 sm:p-8">
