@@ -217,12 +217,11 @@ export default function CartePage() {
       <header className="absolute top-0 left-0 right-0 z-[1000] h-[50px] glass-panel flex items-center justify-between px-2 sm:px-4">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <a href="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <img src="/logo-gntc.jpg" alt="GNTC" className="h-8 sm:h-9 flex-shrink-0" />
+            <img src="/logo-tc.avif" alt="Transport Combiné" className="h-8 sm:h-9 flex-shrink-0 rounded" />
             <div className="min-w-0">
               <h1 className="text-xs sm:text-sm font-display font-bold leading-tight truncate gntc-gradient">
                 Transport Combin&eacute;
               </h1>
-              <p className="text-[10px] text-muted leading-tight hidden sm:block">OTC / GNTC</p>
             </div>
           </a>
         </div>
