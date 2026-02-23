@@ -250,44 +250,16 @@ export default function CartePage() {
             <span className="text-[10px] sm:text-xs">Trouver un transport</span>
           </button>
 
-          <button
-            onClick={toggleClock}
-            className={`flex items-center gap-1.5 text-xs transition-colors px-2 sm:px-3 py-1.5 rounded-md border flex-shrink-0 ${
-              showClock
-                ? 'text-cyan border-cyan/30 bg-cyan/10'
-                : 'text-blue hover:text-cyan border-border hover:border-blue/30'
-            }`}
-            title="Simulation horaire"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
-              <circle cx="7" cy="7" r="5.5" />
-              <path d="M7 4v3.5l2.5 1.5" />
-            </svg>
-            <span className="text-[9px] sm:text-xs"><span className="sm:hidden">Horaires</span><span className="hidden sm:inline">Simulation horaire</span></span>
-          </button>
-
-          {data && (
-            <button
-              onClick={() => exportSynthese(data)}
-              className="flex items-center gap-1.5 text-xs text-muted hover:text-cyan transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-cyan/30 flex-shrink-0"
-              title="Exporter les donn&eacute;es (CSV)"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              <span className="hidden sm:inline">Export</span>
-            </button>
-          )}
-
           <a
-            href="/admin"
-            className="flex items-center gap-1.5 text-xs text-muted hover:text-blue transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-blue/30 flex-shrink-0"
+            href="/inscription"
+            className="flex items-center gap-1.5 text-xs font-semibold text-white gntc-gradient-bg px-3 sm:px-4 py-2 rounded-lg shadow-sm hover:shadow-md hover:scale-[1.02] transition-all flex-shrink-0"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" strokeWidth="1.2" />
               <path d="M2.5 12.5C2.5 10 4.5 8 7 8C9.5 8 11.5 10 11.5 12.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+              <path d="M10 9V13M8 11H12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
             </svg>
-            <span className="hidden sm:inline">Admin</span>
+            <span className="text-[10px] sm:text-xs">Référencer mon entreprise</span>
           </a>
         </div>
       </header>
