@@ -261,6 +261,17 @@ export default function CartePage() {
             </svg>
             <span className="text-[10px] sm:text-xs">Référencer mon entreprise</span>
           </a>
+
+          <a
+            href="/admin"
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-gray-200/60 hover:border-blue/30 flex-shrink-0"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M2.5 12.5C2.5 10 4.5 8 7 8C9.5 8 11.5 10 11.5 12.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            </svg>
+            <span className="hidden sm:inline">Admin</span>
+          </a>
         </div>
       </header>
 

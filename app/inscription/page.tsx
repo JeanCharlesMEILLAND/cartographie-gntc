@@ -29,20 +29,26 @@ export default function InscriptionPage() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const subject = encodeURIComponent(`Demande de référencement – ${formData.company}`);
-    const body = encodeURIComponent(
-      `Entreprise : ${formData.company}\n` +
-      `Activité : ${formData.activity}\n` +
-      `Contact : ${formData.contact}\n` +
-      `Email : ${formData.email}\n` +
-      `Téléphone : ${formData.phone}\n` +
-      `Site web : ${formData.website}\n` +
-      `\nMessage :\n${formData.description}`
-    );
-    window.open(`mailto:secretariat@gntc.fr?subject=${subject}&body=${body}`, '_self');
-    setSubmitted(true);
+    setSending(true);
+    setError('');
+    try {
+      const res = await fetch('/api/registrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error('Erreur serveur');
+      setSubmitted(true);
+    } catch {
+      setError('Une erreur est survenue. Veuillez réessayer.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -215,12 +221,17 @@ export default function InscriptionPage() {
                 />
               </div>
 
+              {error && (
+                <div className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">{error}</div>
+              )}
+
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full sm:w-auto bg-gradient-to-br from-[#1a4d2e] to-[#84cc16] text-white font-semibold text-sm px-8 py-3.5 rounded-xl shadow-lg shadow-[#1a4d2e]/30 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                  disabled={sending}
+                  className="w-full sm:w-auto bg-gradient-to-br from-[#1a4d2e] to-[#84cc16] text-white font-semibold text-sm px-8 py-3.5 rounded-xl shadow-lg shadow-[#1a4d2e]/30 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none"
                 >
-                  Envoyer ma demande de référencement
+                  {sending ? 'Envoi en cours...' : 'Envoyer ma demande de référencement'}
                 </button>
               </div>
 

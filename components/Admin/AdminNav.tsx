@@ -103,7 +103,8 @@ export default function AdminNav() {
     { href: '/admin/operateurs', label: `Opérateurs${data ? ` (${data.operators.length})` : ''}`, icon: IconGroup },
     { href: '/admin/flux', label: `Flux${data ? ` (${data.services.length})` : ''}`, icon: IconTable },
     { href: '/admin/ports', label: 'Ports', icon: IconAnchor },
-    { href: '/admin/utilisateurs', label: 'Utilisateurs', icon: IconUserPlus },
+    { href: '/admin/inscriptions', label: 'Inscriptions', icon: IconUserPlus },
+    { href: '/admin/utilisateurs', label: 'Utilisateurs', icon: IconUser },
     { href: '/admin/historique', label: 'Historique', icon: IconClock },
   ];
 
