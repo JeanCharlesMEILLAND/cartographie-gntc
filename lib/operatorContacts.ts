@@ -57,17 +57,21 @@ const CONTACTS: Record<string, OperatorContact> = {
     phone: '+41 58 855 81 10',
     email: 'line1@hupac.com',
     website: 'www.hupac.com',
+    logo: '/logos/hupac.png',
   },
   'Cargo Beamer': {
     email: 'sales@cargobeamer.com',
     website: 'www.cargobeamer.com',
-    logo: '/logos/cargobeamer.png',
+    logo: '/logos/cargobeamer.svg',
   },
   'DB Cargo France': {
     website: 'www.dbcargo.com/fr',
     logo: '/logos/dbcargo.png',
   },
-  'Froidcombi': {},
+  'Froidcombi': {
+    website: 'froidcombi.fr',
+    logo: '/logos/froidcombi.png',
+  },
   'Transports Vigneron': {
     email: 'commercial@transports-vigneron.fr',
     phone: '+33 6 12 50 25 02',
@@ -104,7 +108,8 @@ const CONTACTS: Record<string, OperatorContact> = {
   },
   'Metrocargo italia srl': {
     phone: '+39 010 6520502',
-    website: 'www.mercitalialogistics.com',
+    website: 'www.metrocargoitalia.it',
+    logo: '/logos/metrocargo.png',
   },
 };
 
