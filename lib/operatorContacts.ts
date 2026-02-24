@@ -44,7 +44,7 @@ const CONTACTS: Record<string, OperatorContact> = {
     address: 'Levallois-Perret (siège)',
     phone: '+33 1 41 05 33 01',
     website: 'www.naviland-cargo.com',
-    logo: '/logos/naviland.png',
+    logo: '/logos/naviland.svg',
   },
   'VIIA': {
     email: 'info@viia.com',

@@ -413,7 +413,7 @@ export const ACTEURS: Acteur[] = [
     address: 'Levallois-Perret (siège)',
     phone: '+33 1 41 05 33 01',
     website: 'www.naviland-cargo.com',
-    logo: '/logos/naviland.png',
+    logo: '/logos/naviland.svg',
     color: '#587bbd',
     specialites: ['Rail-route', 'Réseau national', 'Conteneurs maritimes'],
     location: 'Levallois-Perret (92)',
