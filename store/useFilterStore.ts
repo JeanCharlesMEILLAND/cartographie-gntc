@@ -21,6 +21,9 @@ interface FilterState {
   // Operators with visible routes (after frequency filter)
   visibleOperators: Set<string>;
 
+  // Visible platforms (after all filters)
+  visiblePlatforms: { site: string; ville: string }[];
+
   // Operators serving the selected platform
   selectedPlatformOperators: Set<string> | null;
 
@@ -50,6 +53,7 @@ interface FilterState {
   setPanelCollapsed: (collapsed: boolean) => void;
   setAllOperators: (operators: string[]) => void;
   setVisibleOperators: (ops: Set<string>) => void;
+  setVisiblePlatforms: (platforms: { site: string; ville: string }[]) => void;
   toggleClock: () => void;
   setClockDay: (day: string) => void;
   setClockTime: (minutes: number) => void;
@@ -71,6 +75,7 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   showFranceBorder: true,
 
   visibleOperators: new Set<string>(),
+  visiblePlatforms: [],
   selectedPlatformOperators: null,
 
   tileStyle: 'osm-dark',
@@ -120,6 +125,7 @@ export const useFilterStore = create<FilterState>((set, get) => ({
     set({ allOperators: operators, activeOperators: new Set(operators) }),
 
   setVisibleOperators: (ops) => set({ visibleOperators: ops }),
+  setVisiblePlatforms: (platforms) => set({ visiblePlatforms: platforms }),
 
   toggleClock: () => set((s) => ({ showClock: !s.showClock, clockPlaying: false, clockLive: !s.showClock ? true : false })),
   setClockDay: (day) => set({ clockDay: day, clockLive: false }),

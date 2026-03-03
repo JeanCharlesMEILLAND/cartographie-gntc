@@ -8,6 +8,7 @@ import OperatorChips from './OperatorChips';
 import FrequencySlider from './FrequencySlider';
 // TileSelector supprimé — fond de carte fixe
 import LayerToggles from './LayerToggles';
+import PlatformList from './PlatformList';
 
 export default function FilterPanel() {
   const { panelCollapsed, setPanelCollapsed } = useFilterStore();
@@ -87,6 +88,10 @@ export default function FilterPanel() {
           <CountryFilter />
           <OperatorChips />
           <FrequencySlider />
+
+          <div className="border-t border-border pt-4">
+            <PlatformList />
+          </div>
 
           <div className="border-t border-border pt-4">
             <LayerToggles />
