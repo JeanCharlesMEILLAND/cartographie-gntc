@@ -43,7 +43,163 @@ function getRoutePoints(
   return getBezierPoints(route.fromLat, route.fromLon, route.toLat, route.toLon);
 }
 
-/** Interpolate a point at a given distance along the path */
+// ─── Edge-based corridor merging ───────────────────────────────────────
+// Break every route into micro-segments (edges between consecutive points),
+// merge all operators that share the same edge, then rebuild corridors
+// (chains of consecutive edges with the same operator set).
+
+function ptKey(pt: [number, number]): string {
+  return `${pt[0].toFixed(5)},${pt[1].toFixed(5)}`;
+}
+
+function makeEdgeKey(a: [number, number], b: [number, number]): string {
+  const ka = ptKey(a), kb = ptKey(b);
+  return ka < kb ? `${ka}|${kb}` : `${kb}|${ka}`;
+}
+
+interface EdgeInfo {
+  from: [number, number];
+  to: [number, number];
+  ops: Set<string>;
+  freq: number;
+  platforms: Set<string>;
+  routePairs: Set<string>;
+}
+
+interface Corridor {
+  points: [number, number][];
+  operators: string[];
+  freq: number;
+  platforms: Set<string>;
+  routePairs: Set<string>;
+}
+
+function buildCorridors(
+  routes: AggregatedRoute[],
+  railGeometries?: Record<string, [number, number][]>
+): Corridor[] {
+  // Step 1: Build edge map — each micro-segment gets all operators from all routes using it
+  const edgeMap = new Map<string, EdgeInfo>();
+
+  for (const route of routes) {
+    const points = getRoutePoints(route, railGeometries);
+    const pairKey1 = `${route.from}||${route.to}`;
+    const pairKey2 = `${route.to}||${route.from}`;
+
+    for (let p = 0; p < points.length - 1; p++) {
+      const key = makeEdgeKey(points[p], points[p + 1]);
+      const existing = edgeMap.get(key);
+      if (existing) {
+        route.operators.forEach(op => existing.ops.add(op));
+        existing.freq = Math.max(existing.freq, route.freq);
+        existing.platforms.add(route.from);
+        existing.platforms.add(route.to);
+        existing.routePairs.add(pairKey1);
+        existing.routePairs.add(pairKey2);
+      } else {
+        edgeMap.set(key, {
+          from: points[p],
+          to: points[p + 1],
+          ops: new Set(route.operators),
+          freq: route.freq,
+          platforms: new Set([route.from, route.to]),
+          routePairs: new Set([pairKey1, pairKey2]),
+        });
+      }
+    }
+  }
+
+  // Step 2: Group edges by their sorted operator set, then chain consecutive ones
+  const byOps = new Map<string, EdgeInfo[]>();
+  for (const edge of edgeMap.values()) {
+    const opsKey = Array.from(edge.ops).sort().join('||');
+    if (!byOps.has(opsKey)) byOps.set(opsKey, []);
+    byOps.get(opsKey)!.push(edge);
+  }
+
+  const corridors: Corridor[] = [];
+
+  for (const [opsKey, groupEdges] of byOps) {
+    const ops = opsKey.split('||');
+
+    // Build adjacency list for this operator group
+    const adj = new Map<string, { node: string; pt: [number, number]; idx: number }[]>();
+    for (let i = 0; i < groupEdges.length; i++) {
+      const e = groupEdges[i];
+      const fk = ptKey(e.from), tk = ptKey(e.to);
+      if (!adj.has(fk)) adj.set(fk, []);
+      adj.get(fk)!.push({ node: tk, pt: e.to, idx: i });
+      if (!adj.has(tk)) adj.set(tk, []);
+      adj.get(tk)!.push({ node: fk, pt: e.from, idx: i });
+    }
+
+    const visited = new Set<number>();
+
+    // For each unvisited edge, build a chain by extending in both directions
+    for (let i = 0; i < groupEdges.length; i++) {
+      if (visited.has(i)) continue;
+      visited.add(i);
+
+      const e = groupEdges[i];
+      const fk = ptKey(e.from), tk = ptKey(e.to);
+      let maxFreq = e.freq;
+      const allPlatforms = new Set(e.platforms);
+      const allRoutePairs = new Set(e.routePairs);
+
+      // Extend forward from 'to' end
+      const forward: [number, number][] = [];
+      let cur = tk;
+      while (true) {
+        const neighbors = (adj.get(cur) || []).filter(n => !visited.has(n.idx));
+        if (neighbors.length === 0) break;
+        const next = neighbors[0];
+        visited.add(next.idx);
+        const ne = groupEdges[next.idx];
+        maxFreq = Math.max(maxFreq, ne.freq);
+        ne.platforms.forEach(p => allPlatforms.add(p));
+        ne.routePairs.forEach(p => allRoutePairs.add(p));
+        forward.push(next.pt);
+        cur = next.node;
+      }
+
+      // Extend backward from 'from' end
+      const backward: [number, number][] = [];
+      cur = fk;
+      while (true) {
+        const neighbors = (adj.get(cur) || []).filter(n => !visited.has(n.idx));
+        if (neighbors.length === 0) break;
+        const next = neighbors[0];
+        visited.add(next.idx);
+        const ne = groupEdges[next.idx];
+        maxFreq = Math.max(maxFreq, ne.freq);
+        ne.platforms.forEach(p => allPlatforms.add(p));
+        ne.routePairs.forEach(p => allRoutePairs.add(p));
+        backward.push(next.pt);
+        cur = next.node;
+      }
+
+      const chainPts: [number, number][] = [
+        ...backward.reverse(),
+        e.from,
+        e.to,
+        ...forward,
+      ];
+
+      corridors.push({
+        points: chainPts,
+        operators: ops,
+        freq: maxFreq,
+        platforms: allPlatforms,
+        routePairs: allRoutePairs,
+      });
+    }
+  }
+
+  return corridors;
+}
+
+// ─── Path splitting for multicolor display ─────────────────────────────
+
 function interpolateAt(
   points: [number, number][],
   cumDist: number[],
@@ -64,13 +220,10 @@ function interpolateAt(
   return points[points.length - 1];
 }
 
-/** Split a path into colored segments for multiple operators.
- *  Each operator gets alternating solid-colored sub-polylines. */
 function splitPathForOperators(
   points: [number, number][],
   numOperators: number
 ): [number, number][][] {
-  // Compute cumulative distances (in geographic coords — units don't matter, just ratios)
   const cumDist = [0];
   for (let i = 1; i < points.length; i++) {
     const dlat = points[i][0] - points[i - 1][0];
@@ -80,35 +233,29 @@ function splitPathForOperators(
   const totalDist = cumDist[cumDist.length - 1];
   if (totalDist === 0) return [points.map(p => [...p] as [number, number])];
 
-  // Create enough segments so each operator appears multiple times
   const segsPerOp = 5;
   const totalSegs = numOperators * segsPerOp;
   const segLen = totalDist / totalSegs;
-
   const segments: [number, number][][] = [];
 
   for (let s = 0; s < totalSegs; s++) {
     const startDist = s * segLen;
     const endDist = (s + 1) * segLen;
     const seg: [number, number][] = [];
-
-    // Start point (interpolated)
     seg.push(interpolateAt(points, cumDist, startDist));
-
-    // Include all original points within this segment
     for (let i = 0; i < points.length; i++) {
       if (cumDist[i] > startDist && cumDist[i] < endDist) {
         seg.push(points[i]);
       }
     }
-
-    // End point (interpolated)
     seg.push(interpolateAt(points, cumDist, endDist));
     segments.push(seg);
   }
 
   return segments;
 }
+
+// ─── Component ─────────────────────────────────────────────────────────
 
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
   const { showRoutes, selectedPlatform } = useFilterStore();
@@ -128,34 +275,41 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
     return pairs;
   }, [searchActive, results, highlightedRouteIndex]);
 
+  // Build merged corridors once (recomputed only when routes/geometries change)
+  const corridors = useMemo(
+    () => buildCorridors(routes, railGeometries),
+    [routes, railGeometries]
+  );
+
   if (!showRoutes) return null;
 
   const elements: React.ReactNode[] = [];
 
-  for (let i = 0; i < routes.length; i++) {
-    const route = routes[i];
-    const routeKey = `${route.from}||${route.to}`;
+  for (let i = 0; i < corridors.length; i++) {
+    const corridor = corridors[i];
+    const { weight, opacity } = getRouteWeight(corridor.freq);
 
-    const isSearchMatch = searchPairs ? searchPairs.has(routeKey) : false;
+    // Search filtering
+    const isSearchMatch = searchPairs
+      ? [...corridor.routePairs].some(p => searchPairs.has(p))
+      : false;
     if (searchPairs && !isSearchMatch) continue;
 
-    const points = getRoutePoints(route, railGeometries);
-    const { weight, opacity } = getRouteWeight(route.freq);
-
+    // Selection state
     const isConnected = selectedPlatform
-      ? route.from === selectedPlatform || route.to === selectedPlatform
+      ? corridor.platforms.has(selectedPlatform)
       : false;
     const dimmed = selectedPlatform && !isConnected;
 
-    const ops = route.operators;
+    const ops = corridor.operators;
 
     if (ops.length <= 1) {
-      // Single operator: solid line
+      // Single operator corridor: solid color
       const color = getOperatorColor(ops[0] || 'unknown');
       elements.push(
         <Polyline
-          key={`${route.from}-${route.to}-${i}`}
-          positions={points}
+          key={`c${i}`}
+          positions={corridor.points}
           pathOptions={
             isSearchMatch
               ? { color, opacity: 1, weight: weight + 2 }
@@ -168,18 +322,17 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
         />
       );
     } else {
-      // Multi-operator: split path into solid colored segments
-      const segments = splitPathForOperators(points, ops.length);
+      // Multi-operator corridor: alternating colored segments
+      const segments = splitPathForOperators(corridor.points, ops.length);
       const multiWeight = Math.max(weight + 1, 4);
       const multiOpacity = Math.max(opacity, 0.85);
 
       for (let s = 0; s < segments.length; s++) {
         const opIndex = s % ops.length;
         const color = getOperatorColor(ops[opIndex]);
-
         elements.push(
           <Polyline
-            key={`${route.from}-${route.to}-${i}-s${s}`}
+            key={`c${i}-s${s}`}
             positions={segments[s]}
             pathOptions={
               isSearchMatch
