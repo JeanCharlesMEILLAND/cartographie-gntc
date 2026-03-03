@@ -24,7 +24,7 @@ const LAYERS: { key: LayerKey; label: string }[] = [
 
 export default function LayerToggles() {
   const store = useFilterStore();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   // Count active layers
   const activeCount = LAYERS.filter(({ key }) => store[key]).length;

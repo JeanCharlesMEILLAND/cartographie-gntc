@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import CountryFilter from './CountryFilter';
 import OperatorChips from './OperatorChips';
 import FrequencySlider from './FrequencySlider';
-import TileSelector from './TileSelector';
+// TileSelector supprimé — fond de carte fixe
 import LayerToggles from './LayerToggles';
 
 export default function FilterPanel() {
@@ -89,13 +89,8 @@ export default function FilterPanel() {
           <FrequencySlider />
 
           <div className="border-t border-border pt-4">
-            <h2 className="text-sm font-display font-semibold text-blue uppercase tracking-wider mb-3">
-              Carte
-            </h2>
-            <TileSelector />
+            <LayerToggles />
           </div>
-
-          <LayerToggles />
 
           {/* Spacer for mobile bottom safe area */}
           <div className="sm:hidden h-4" />

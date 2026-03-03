@@ -77,19 +77,17 @@ export default function MapInner({ platforms, routes, railGeometries, services, 
     <LeafletMap
       center={[46.6, 2.8]}
       zoom={6}
-      className={`w-full h-full ${tileStyle === 'none' ? 'bg-[#f0ede8]' : ''}`}
+      className="w-full h-full"
       preferCanvas={true}
       zoomControl={false}
     >
-      {tileStyle !== 'none' && (
-        <TileLayer
-          key={tileStyle}
-          url={tileUrl}
-          attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-          maxZoom={19}
-          className={DARK_TILES.has(tileStyle) ? 'dark-tiles' : undefined}
-        />
-      )}
+      <TileLayer
+        key={tileStyle}
+        url={tileUrl}
+        attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        maxZoom={19}
+        className={DARK_TILES.has(tileStyle) ? 'dark-tiles' : undefined}
+      />
       <ZoomControl position="bottomright" />
       <MapClickHandler />
       <MapZoomHandler />
