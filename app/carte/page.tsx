@@ -289,6 +289,19 @@ export default function CartePage() {
           )}
 
           <a
+            href="/inscription"
+            className="flex items-center gap-1.5 text-xs text-muted hover:text-cyan transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-cyan/30 flex-shrink-0"
+            title="Référencer votre activité"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M11 11L13 13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+              <path d="M10 9.5a5.5 5.5 0 0 0-6 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            </svg>
+            <span className="hidden sm:inline">Se référencer</span>
+          </a>
+
+          <a
             href="/admin"
             className="flex items-center gap-1.5 text-xs text-muted hover:text-blue transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-blue/30 flex-shrink-0"
           >
