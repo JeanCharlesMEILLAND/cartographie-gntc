@@ -105,7 +105,8 @@ interface TrunkInfo {
 
 function buildCorridors(
   routes: AggregatedRoute[],
-  railGeometries?: Record<string, [number, number][]>
+  railGeometries: Record<string, [number, number][]> | undefined,
+  activeOperators: Set<string>
 ): Corridor[] {
   // ── Step 1: Extract all platforms from route endpoints ──
   const platMap = new Map<string, { lat: number; lon: number }>();
@@ -139,6 +140,10 @@ function buildCorridors(
   const trunkMap = new Map<string, TrunkInfo>();
 
   for (const route of routes) {
+    // Only include operators that are currently active in the sidebar
+    const routeOps = route.operators.filter(op => activeOperators.has(op));
+    if (routeOps.length === 0) continue;
+
     const points = getRoutePoints(route, railGeometries);
     const originCluster = uf.find(route.from);
     const destCluster = uf.find(route.to);
@@ -201,7 +206,7 @@ function buildCorridors(
 
       const existing = trunkMap.get(trunkKey);
       if (existing) {
-        route.operators.forEach(op => existing.operators.add(op));
+        routeOps.forEach(op => existing.operators.add(op));
         existing.freq = Math.max(existing.freq, route.freq);
         existing.platforms.add(route.from);
         existing.platforms.add(route.to);
@@ -214,7 +219,7 @@ function buildCorridors(
       } else {
         trunkMap.set(trunkKey, {
           points: segPoints,
-          operators: new Set(route.operators),
+          operators: new Set(routeOps),
           freq: route.freq,
           platforms: new Set([route.from, route.to]),
           routePairs: new Set([pairKey1, pairKey2]),
@@ -293,7 +298,7 @@ function splitPathForOperators(
 // ─── Component ─────────────────────────────────────────────────────────
 
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
-  const { showRoutes, selectedPlatform } = useFilterStore();
+  const { showRoutes, selectedPlatform, activeOperators } = useFilterStore();
   const { results, highlightedRouteIndex } = useSearchStore();
 
   const searchActive = highlightedRouteIndex !== null && results.length > 0;
@@ -311,8 +316,8 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
   }, [searchActive, results, highlightedRouteIndex]);
 
   const corridors = useMemo(
-    () => buildCorridors(routes, railGeometries),
-    [routes, railGeometries]
+    () => buildCorridors(routes, railGeometries, activeOperators),
+    [routes, railGeometries, activeOperators]
   );
 
   if (!showRoutes) return null;
