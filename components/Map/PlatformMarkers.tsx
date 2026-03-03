@@ -131,6 +131,30 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
     }
   }
 
+  // --- Spider offset: nudge co-located platforms so they're all clickable ---
+  const spiderOffsets = useMemo(() => {
+    const offsets = new Map<string, [number, number]>();
+    // Group platforms by approximate position (within ~2km)
+    const grid = new Map<string, Platform[]>();
+    for (const p of platforms) {
+      const key = `${(p.lat * 100) | 0},${(p.lon * 100) | 0}`;
+      if (!grid.has(key)) grid.set(key, []);
+      grid.get(key)!.push(p);
+    }
+    for (const group of grid.values()) {
+      if (group.length <= 1) continue;
+      const step = 0.008; // ~0.9km offset between co-located platforms
+      for (let i = 0; i < group.length; i++) {
+        const angle = (2 * Math.PI * i) / group.length - Math.PI / 2;
+        offsets.set(group[i].site, [
+          Math.cos(angle) * step,
+          Math.sin(angle) * step,
+        ]);
+      }
+    }
+    return offsets;
+  }, [platforms]);
+
   // --- Label placement with collision avoidance ---
   const visiblePlatforms = platforms.filter((p) => !searchSites || searchSites.has(p.site));
 
@@ -182,6 +206,11 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
         const isSelected = platform.site === selectedPlatform;
         const dimmed = selectedPlatform && !isHighlighted;
 
+        // Apply spider offset for co-located platforms
+        const offset = spiderOffsets.get(platform.site);
+        const markerLat = platform.lat + (offset ? offset[0] : 0);
+        const markerLon = platform.lon + (offset ? offset[1] : 0);
+
         const placement = labelPlacements.get(platform.site);
         const showName = !!placement;
 
@@ -208,7 +237,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
         return (
           <span key={platform.site}>
             <CircleMarker
-              center={[platform.lat, platform.lon]}
+              center={[markerLat, markerLon]}
               radius={isPreview ? size + 2 : isSelected ? size + 3 : size}
               pathOptions={{
                 fillColor: isPreview ? '#7dc243' : (isFrance ? '#587bbd' : '#a78bfa'),
@@ -280,7 +309,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
             </CircleMarker>
             {showName && labelIcon && (
               <Marker
-                position={[platform.lat, platform.lon]}
+                position={[markerLat, markerLon]}
                 icon={labelIcon}
                 interactive={false}
               />
