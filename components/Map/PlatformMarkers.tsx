@@ -218,7 +218,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
           className: 'platform-label',
           html: `<span style="
             color: ${isSelected ? '#fff' : '#2b2b2b'};
-            background: ${isSelected ? '#587bbd' : 'rgba(255,255,255,0.9)'};
+            background: ${isSelected ? '#67978f' : 'rgba(255,255,255,0.9)'};
             padding: 1px 5px;
             border-radius: 3px;
             font-size: ${isBigHub || isSelected ? '10px' : isHub ? '9px' : '8px'};
@@ -226,7 +226,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
             white-space: nowrap;
             pointer-events: none;
             opacity: ${isHighlighted ? '1' : '0.25'};
-            border: 1px solid ${isSelected ? '#587bbd' : 'rgba(88,123,189,0.2)'};
+            border: 1px solid ${isSelected ? '#67978f' : 'rgba(103,151,143,0.2)'};
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             line-height: 1.4;
           ">${platform.site}</span>`,
@@ -240,8 +240,8 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
               center={[markerLat, markerLon]}
               radius={isPreview ? size + 2 : isSelected ? size + 3 : size}
               pathOptions={{
-                fillColor: isPreview ? '#7dc243' : (isFrance ? '#587bbd' : '#a78bfa'),
-                color: isPreview ? '#7dc243' : isSelected ? '#ffffff' : (isFrance ? '#587bbd' : '#a78bfa'),
+                fillColor: isPreview ? '#7dc243' : (isFrance ? '#67978f' : '#a78bfa'),
+                color: isPreview ? '#7dc243' : isSelected ? '#ffffff' : (isFrance ? '#67978f' : '#a78bfa'),
                 fillOpacity: isPreview ? 0.9 : dimmed ? 0.15 : 0.7,
                 weight: isPreview ? 3 : isSelected ? 3 : 2,
                 opacity: isPreview ? 1 : dimmed ? 0.2 : 1,
@@ -273,7 +273,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
                           <div className="text-[9px] opacity-60">trains/sem</div>
                         </div>
                         <div className="text-center">
-                          <div className="font-mono font-bold text-[13px]" style={{ color: '#587bbd' }}>{liaisons}</div>
+                          <div className="font-mono font-bold text-[13px]" style={{ color: '#67978f' }}>{liaisons}</div>
                           <div className="text-[9px] opacity-60">liaisons</div>
                         </div>
                         <div className="text-center">
