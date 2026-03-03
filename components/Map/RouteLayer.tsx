@@ -43,18 +43,41 @@ function getRoutePoints(
   return getBezierPoints(route.fromLat, route.fromLon, route.toLat, route.toLon);
 }
 
-// ─── Edge-based corridor merging ───────────────────────────────────────
-// Break every route into micro-segments (edges between consecutive points),
-// merge all operators that share the same edge, then rebuild corridors
-// (chains of consecutive edges with the same operator set).
+// ─── Grid-based corridor merging ────────────────────────────────────────
+// Snap all route points to a ~5km grid so routes on the same rail corridor
+// (even on parallel tracks) merge into a single visual line.
 
-// ~1km grid for corridor matching — routes within 1km are considered the same corridor
-function ptKey(pt: [number, number]): string {
-  return `${pt[0].toFixed(2)},${pt[1].toFixed(2)}`;
+const GRID = 0.05; // ~5.5km grid cells
+
+function snap(pt: [number, number]): [number, number] {
+  return [
+    Math.round(pt[0] / GRID) * GRID,
+    Math.round(pt[1] / GRID) * GRID,
+  ];
+}
+
+function gridKey(pt: [number, number]): string {
+  const s = snap(pt);
+  return `${s[0].toFixed(3)},${s[1].toFixed(3)}`;
+}
+
+/** Snap a full path to the grid, removing consecutive duplicates */
+function snapPath(points: [number, number][]): [number, number][] {
+  const result: [number, number][] = [];
+  let lastKey = '';
+  for (const pt of points) {
+    const snapped = snap(pt);
+    const key = `${snapped[0].toFixed(3)},${snapped[1].toFixed(3)}`;
+    if (key !== lastKey) {
+      result.push(snapped);
+      lastKey = key;
+    }
+  }
+  return result;
 }
 
 function makeEdgeKey(a: [number, number], b: [number, number]): string {
-  const ka = ptKey(a), kb = ptKey(b);
+  const ka = gridKey(a), kb = gridKey(b);
   return ka < kb ? `${ka}|${kb}` : `${kb}|${ka}`;
 }
 
@@ -79,17 +102,15 @@ function buildCorridors(
   routes: AggregatedRoute[],
   railGeometries?: Record<string, [number, number][]>
 ): Corridor[] {
-  // Step 1: Build edge map — each micro-segment gets all operators from all routes using it
   const edgeMap = new Map<string, EdgeInfo>();
 
   for (const route of routes) {
-    const points = getRoutePoints(route, railGeometries);
+    const rawPoints = getRoutePoints(route, railGeometries);
+    const points = snapPath(rawPoints);
     const pairKey1 = `${route.from}||${route.to}`;
     const pairKey2 = `${route.to}||${route.from}`;
 
     for (let p = 0; p < points.length - 1; p++) {
-      // Skip degenerate edges (both points in same grid cell)
-      if (ptKey(points[p]) === ptKey(points[p + 1])) continue;
       const key = makeEdgeKey(points[p], points[p + 1]);
       const existing = edgeMap.get(key);
       if (existing) {
@@ -112,7 +133,7 @@ function buildCorridors(
     }
   }
 
-  // Step 2: Group edges by their sorted operator set, then chain consecutive ones
+  // Group edges by operator set, then build chains
   const byOps = new Map<string, EdgeInfo[]>();
   for (const edge of edgeMap.values()) {
     const opsKey = Array.from(edge.ops).sort().join('||');
@@ -125,11 +146,10 @@ function buildCorridors(
   for (const [opsKey, groupEdges] of byOps) {
     const ops = opsKey.split('||');
 
-    // Build adjacency list for this operator group
     const adj = new Map<string, { node: string; pt: [number, number]; idx: number }[]>();
     for (let i = 0; i < groupEdges.length; i++) {
       const e = groupEdges[i];
-      const fk = ptKey(e.from), tk = ptKey(e.to);
+      const fk = gridKey(e.from), tk = gridKey(e.to);
       if (!adj.has(fk)) adj.set(fk, []);
       adj.get(fk)!.push({ node: tk, pt: e.to, idx: i });
       if (!adj.has(tk)) adj.set(tk, []);
@@ -138,18 +158,16 @@ function buildCorridors(
 
     const visited = new Set<number>();
 
-    // For each unvisited edge, build a chain by extending in both directions
     for (let i = 0; i < groupEdges.length; i++) {
       if (visited.has(i)) continue;
       visited.add(i);
 
       const e = groupEdges[i];
-      const fk = ptKey(e.from), tk = ptKey(e.to);
+      const fk = gridKey(e.from), tk = gridKey(e.to);
       let maxFreq = e.freq;
       const allPlatforms = new Set(e.platforms);
       const allRoutePairs = new Set(e.routePairs);
 
-      // Extend forward from 'to' end
       const forward: [number, number][] = [];
       let cur = tk;
       while (true) {
@@ -165,7 +183,6 @@ function buildCorridors(
         cur = next.node;
       }
 
-      // Extend backward from 'from' end
       const backward: [number, number][] = [];
       cur = fk;
       while (true) {
@@ -278,7 +295,6 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
     return pairs;
   }, [searchActive, results, highlightedRouteIndex]);
 
-  // Build merged corridors once (recomputed only when routes/geometries change)
   const corridors = useMemo(
     () => buildCorridors(routes, railGeometries),
     [routes, railGeometries]
@@ -292,13 +308,11 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
     const corridor = corridors[i];
     const { weight, opacity } = getRouteWeight(corridor.freq);
 
-    // Search filtering
     const isSearchMatch = searchPairs
       ? [...corridor.routePairs].some(p => searchPairs.has(p))
       : false;
     if (searchPairs && !isSearchMatch) continue;
 
-    // Selection state
     const isConnected = selectedPlatform
       ? corridor.platforms.has(selectedPlatform)
       : false;
@@ -307,7 +321,6 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
     const ops = corridor.operators;
 
     if (ops.length <= 1) {
-      // Single operator corridor: solid color
       const color = getOperatorColor(ops[0] || 'unknown');
       elements.push(
         <Polyline
@@ -325,7 +338,6 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
         />
       );
     } else {
-      // Multi-operator corridor: alternating colored segments
       const segments = splitPathForOperators(corridor.points, ops.length);
       const multiWeight = Math.max(weight + 1, 4);
       const multiOpacity = Math.max(opacity, 0.85);
