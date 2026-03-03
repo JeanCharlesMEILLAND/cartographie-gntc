@@ -43,11 +43,55 @@ function getRoutePoints(
   return getBezierPoints(route.fromLat, route.fromLon, route.toLat, route.toLon);
 }
 
+/** Offset a polyline perpendicular to its direction by `offsetDeg` degrees */
+function offsetPolyline(
+  points: [number, number][],
+  offsetDeg: number
+): [number, number][] {
+  if (points.length < 2 || offsetDeg === 0) return points;
+
+  const result: [number, number][] = [];
+
+  for (let i = 0; i < points.length; i++) {
+    let dy: number, dx: number;
+
+    if (i === 0) {
+      dy = points[1][0] - points[0][0];
+      dx = points[1][1] - points[0][1];
+    } else if (i === points.length - 1) {
+      dy = points[i][0] - points[i - 1][0];
+      dx = points[i][1] - points[i - 1][1];
+    } else {
+      dy = points[i + 1][0] - points[i - 1][0];
+      dx = points[i + 1][1] - points[i - 1][1];
+    }
+
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len === 0) {
+      result.push(points[i]);
+      continue;
+    }
+
+    // Perpendicular: rotate direction 90° → (-dx, dy) normalized
+    const perpLat = -dx / len;
+    const perpLon = dy / len;
+
+    result.push([
+      points[i][0] + perpLat * offsetDeg,
+      points[i][1] + perpLon * offsetDeg,
+    ]);
+  }
+
+  return result;
+}
+
+// Offset step in degrees (~0.6km per step — visible at zoom 6-10)
+const OFFSET_STEP = 0.006;
+
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
   const { showRoutes, selectedPlatform } = useFilterStore();
   const { results, highlightedRouteIndex } = useSearchStore();
 
-  // Build set of route pairs matching the search result
   const searchActive = highlightedRouteIndex !== null && results.length > 0;
   const searchPairs = useMemo(() => {
     if (!searchActive) return null;
@@ -70,7 +114,6 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
     const route = routes[i];
     const routeKey = `${route.from}||${route.to}`;
 
-    // In search mode: only show matching routes
     const isSearchMatch = searchPairs ? searchPairs.has(routeKey) : false;
     if (searchPairs && !isSearchMatch) continue;
 
@@ -82,70 +125,49 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
       : false;
     const dimmed = selectedPlatform && !isConnected;
 
-    if (route.operators.length <= 1) {
+    const ops = route.operators;
+
+    if (ops.length <= 1) {
       // Single operator: solid line
-      const color = getOperatorColor(route.operators[0] || 'unknown');
-
-      if (isSearchMatch) {
-        elements.push(
-          <Polyline
-            key={`${route.from}-${route.to}-${i}`}
-            positions={points}
-            pathOptions={{ color, opacity: 1, weight: weight + 2 }}
-          />
-        );
-      } else {
-        elements.push(
-          <Polyline
-            key={`${route.from}-${route.to}-${i}`}
-            positions={points}
-            pathOptions={{
-              color,
-              opacity: dimmed ? 0.08 : isConnected ? 1 : opacity,
-              weight: isConnected ? weight + 1.5 : dimmed ? 1 : weight,
-            }}
-          />
-        );
-      }
+      const color = getOperatorColor(ops[0] || 'unknown');
+      elements.push(
+        <Polyline
+          key={`${route.from}-${route.to}-${i}`}
+          positions={points}
+          pathOptions={
+            isSearchMatch
+              ? { color, opacity: 1, weight: weight + 2 }
+              : {
+                  color,
+                  opacity: dimmed ? 0.08 : isConnected ? 1 : opacity,
+                  weight: isConnected ? weight + 1.5 : dimmed ? 1 : weight,
+                }
+          }
+        />
+      );
     } else {
-      // Multi-operator: alternating dashes per operator
-      const ops = route.operators;
-      const segLen = Math.max(6, Math.round(12 / ops.length) * 2);
-      const totalPattern = segLen * ops.length;
-
+      // Multi-operator: parallel offset lines
       for (let j = 0; j < ops.length; j++) {
         const color = getOperatorColor(ops[j]);
-        const dashOffset = j * segLen;
+        const offset = (j - (ops.length - 1) / 2) * OFFSET_STEP;
+        const offsetPoints = offsetPolyline(points, offset);
+        const lineWeight = Math.max(2, weight - 0.5);
 
-        if (isSearchMatch) {
-          elements.push(
-            <Polyline
-              key={`${route.from}-${route.to}-${i}-op${j}`}
-              positions={points}
-              pathOptions={{
-                color,
-                opacity: 1,
-                weight: weight + 2,
-                dashArray: `${segLen} ${totalPattern - segLen}`,
-                dashOffset: `${dashOffset}`,
-              }}
-            />
-          );
-        } else {
-          elements.push(
-            <Polyline
-              key={`${route.from}-${route.to}-${i}-op${j}`}
-              positions={points}
-              pathOptions={{
-                color,
-                opacity: dimmed ? 0.08 : isConnected ? 1 : opacity,
-                weight: isConnected ? weight + 1.5 : dimmed ? 1 : weight,
-                dashArray: `${segLen} ${totalPattern - segLen}`,
-                dashOffset: `${dashOffset}`,
-              }}
-            />
-          );
-        }
+        elements.push(
+          <Polyline
+            key={`${route.from}-${route.to}-${i}-op${j}`}
+            positions={offsetPoints}
+            pathOptions={
+              isSearchMatch
+                ? { color, opacity: 1, weight: lineWeight + 1.5 }
+                : {
+                    color,
+                    opacity: dimmed ? 0.08 : isConnected ? 1 : opacity,
+                    weight: isConnected ? lineWeight + 1 : dimmed ? 1 : lineWeight,
+                  }
+            }
+          />
+        );
       }
     }
   }
