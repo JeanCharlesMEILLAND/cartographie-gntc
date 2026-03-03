@@ -48,8 +48,9 @@ function getRoutePoints(
 // merge all operators that share the same edge, then rebuild corridors
 // (chains of consecutive edges with the same operator set).
 
+// ~1km grid for corridor matching — routes within 1km are considered the same corridor
 function ptKey(pt: [number, number]): string {
-  return `${pt[0].toFixed(5)},${pt[1].toFixed(5)}`;
+  return `${pt[0].toFixed(2)},${pt[1].toFixed(2)}`;
 }
 
 function makeEdgeKey(a: [number, number], b: [number, number]): string {
@@ -87,6 +88,8 @@ function buildCorridors(
     const pairKey2 = `${route.to}||${route.from}`;
 
     for (let p = 0; p < points.length - 1; p++) {
+      // Skip degenerate edges (both points in same grid cell)
+      if (ptKey(points[p]) === ptKey(points[p + 1])) continue;
       const key = makeEdgeKey(points[p], points[p + 1]);
       const existing = edgeMap.get(key);
       if (existing) {
