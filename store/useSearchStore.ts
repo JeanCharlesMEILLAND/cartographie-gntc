@@ -36,6 +36,9 @@ interface SearchState {
   highlightedRouteIndex: number | null;
   roadRouting: RoadRouting | null;
 
+  // Map zoom target (set when user selects a city to zoom to)
+  mapZoomTarget: { lat: number; lon: number; zoom: number } | null;
+
   // Actions
   setSearchOpen: (open: boolean) => void;
   setDepartureQuery: (q: string) => void;
@@ -49,6 +52,7 @@ interface SearchState {
   setSearching: (s: boolean) => void;
   setHighlightedRouteIndex: (i: number | null) => void;
   setRoadRouting: (r: RoadRouting | null) => void;
+  setMapZoomTarget: (t: { lat: number; lon: number; zoom: number } | null) => void;
   clearSearch: () => void;
 }
 
@@ -65,6 +69,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   searching: false,
   highlightedRouteIndex: null,
   roadRouting: null,
+  mapZoomTarget: null,
 
   setSearchOpen: (open) => {
     if (!open) {
@@ -102,6 +107,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   setSearching: (s) => set({ searching: s }),
   setHighlightedRouteIndex: (i) => set({ highlightedRouteIndex: i }),
   setRoadRouting: (r) => set({ roadRouting: r }),
+  setMapZoomTarget: (t) => set({ mapZoomTarget: t }),
   clearSearch: () =>
     set({
       departureQuery: '',

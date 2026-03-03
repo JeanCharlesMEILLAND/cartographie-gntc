@@ -5,6 +5,7 @@ import { useFilterStore } from '@/store/useFilterStore';
 const TILES = [
   { value: 'osm', label: 'OSM France' },
   { value: 'osm-dark', label: 'OSM France Sombre' },
+  { value: 'none', label: 'Aucun (fond neutre)' },
 ];
 
 export default function TileSelector() {

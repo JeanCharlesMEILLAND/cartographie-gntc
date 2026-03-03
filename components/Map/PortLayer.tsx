@@ -50,7 +50,9 @@ export default function PortLayer() {
           <CircleMarker
             key={`port-${p['osmId'] || p['CdPort'] || i}`}
             center={[coords[1], coords[0]]}
-            radius={6}
+            radius={7}
+            pane="portPane"
+            bubblingMouseEvents={true}
             pathOptions={{
               fillColor,
               color: '#FFD54F',

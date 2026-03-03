@@ -86,7 +86,7 @@ export default function InfoCard({ platforms, routes, services }: InfoCardProps)
         showClock ? 'bottom-[90px] sm:bottom-4' : 'bottom-4',
         searchOpen
           ? 'sm:right-auto sm:left-4 sm:w-[380px]'
-          : 'sm:left-auto sm:right-4 sm:w-[380px]'
+          : 'sm:left-auto sm:right-[76px] sm:w-[380px]'
       )}
       style={{
         maxHeight: `calc(100dvh - ${topReserve + bottomPx}px)`,

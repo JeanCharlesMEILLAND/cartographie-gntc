@@ -1,7 +1,9 @@
 'use client';
 
-import { MapContainer as LeafletMap, TileLayer, ZoomControl, useMapEvents } from 'react-leaflet';
+import { useEffect } from 'react';
+import { MapContainer as LeafletMap, TileLayer, ZoomControl, useMapEvents, useMap } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
+import { useSearchStore } from '@/store/useSearchStore';
 import { Platform, AggregatedRoute, Service } from '@/lib/types';
 
 function MapClickHandler() {
@@ -9,6 +11,32 @@ function MapClickHandler() {
   useMapEvents({
     click: () => setSelectedPlatform(null),
   });
+  return null;
+}
+
+function CustomPanes() {
+  const map = useMap();
+  useEffect(() => {
+    if (!map.getPane('portPane')) {
+      const pane = map.createPane('portPane');
+      pane.style.zIndex = '350'; // Below markerPane (600) so platforms stay clickable
+    }
+  }, [map]);
+  return null;
+}
+
+function MapZoomHandler() {
+  const map = useMap();
+  const mapZoomTarget = useSearchStore((s) => s.mapZoomTarget);
+  const setMapZoomTarget = useSearchStore((s) => s.setMapZoomTarget);
+
+  useEffect(() => {
+    if (mapZoomTarget) {
+      map.flyTo([mapZoomTarget.lat, mapZoomTarget.lon], mapZoomTarget.zoom, { duration: 1.2 });
+      setMapZoomTarget(null);
+    }
+  }, [mapZoomTarget, map, setMapZoomTarget]);
+
   return null;
 }
 import FranceBorder from './FranceBorder';
@@ -49,19 +77,23 @@ export default function MapInner({ platforms, routes, railGeometries, services, 
     <LeafletMap
       center={[46.6, 2.8]}
       zoom={6}
-      className="w-full h-full"
+      className={`w-full h-full ${tileStyle === 'none' ? 'bg-[#f0ede8]' : ''}`}
       preferCanvas={true}
       zoomControl={false}
     >
-      <TileLayer
-        key={tileStyle}
-        url={tileUrl}
-        attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-        maxZoom={19}
-        className={DARK_TILES.has(tileStyle) ? 'dark-tiles' : undefined}
-      />
+      {tileStyle !== 'none' && (
+        <TileLayer
+          key={tileStyle}
+          url={tileUrl}
+          attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+          maxZoom={19}
+          className={DARK_TILES.has(tileStyle) ? 'dark-tiles' : undefined}
+        />
+      )}
       <ZoomControl position="bottomright" />
       <MapClickHandler />
+      <MapZoomHandler />
+      <CustomPanes />
       <FranceBorder />
       <RouteLayer routes={routes} railGeometries={railGeometries} />
       <WaterwayLayer />

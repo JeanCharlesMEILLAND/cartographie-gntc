@@ -124,15 +124,15 @@ function PlatformToggle({
   const [showPlatforms, setShowPlatforms] = useState(false);
 
   return showPlatforms ? (
-    <div className="mt-1.5">
+    <div className="mt-1">
       <button
         onClick={() => setShowPlatforms(false)}
-        className="text-[10px] text-muted hover:text-text transition-colors mb-0.5 flex items-center gap-1"
+        className="text-[9px] text-muted/60 hover:text-muted transition-colors mb-0.5 flex items-center gap-1"
       >
-        <svg width="8" height="8" viewBox="0 0 8 8" fill="none" className="rotate-90">
+        <svg width="7" height="7" viewBox="0 0 8 8" fill="none" className="rotate-90">
           <path d="M2 3L4 5L6 3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        Masquer les plateformes
+        Masquer
       </button>
       <PlatformPicker
         city={city}
@@ -144,12 +144,12 @@ function PlatformToggle({
   ) : (
     <button
       onClick={() => setShowPlatforms(true)}
-      className="mt-1.5 w-full text-left text-[10px] text-muted hover:text-blue transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md border border-border/50 hover:border-blue/30"
+      className="mt-0.5 text-[9px] text-muted/50 hover:text-muted transition-colors flex items-center gap-1 pl-1"
     >
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="flex-shrink-0">
-        <path d="M3 5L5 7L7 5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+      <svg width="8" height="8" viewBox="0 0 10 10" fill="none" className="flex-shrink-0">
+        <path d="M3 4L5 6L7 4" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      Voir les {city.platforms.length} plateformes disponibles autour
+      {city.platforms.length} plateformes · affiner (optionnel)
     </button>
   );
 }
@@ -224,6 +224,8 @@ function CityInput({
 
   const showSuggestions = focused && !selectedCity && (suggestions.length > 0 || loading);
 
+  const setMapZoomTarget = useSearchStore((s) => s.setMapZoomTarget);
+
   const handleCitySelect = useCallback(
     (city: CitySuggestion) => {
       onCitySelect(city);
@@ -233,8 +235,10 @@ function CityInput({
       setFocused(false);
       setSelectedIndex(-1);
       setSuggestions([]);
+      // Zoom map to the selected city
+      setMapZoomTarget({ lat: city.lat, lon: city.lon, zoom: 9 });
     },
-    [onChange, onCitySelect, onPlatformsChange]
+    [onChange, onCitySelect, onPlatformsChange, setMapZoomTarget]
   );
 
   const handleClearCity = () => {
@@ -471,14 +475,16 @@ function RouteCard({
   isHighlighted,
   onHighlight,
   roadRouting,
+  autoExpand,
 }: {
   route: FoundRoute;
   index: number;
   isHighlighted: boolean;
   onHighlight: (i: number | null) => void;
   roadRouting?: RoadRouting | null;
+  autoExpand?: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(autoExpand ?? false);
 
   // Calculate pre/post routing distances
   const firstLeg = route.legs[0];
@@ -691,9 +697,19 @@ function RouteCard({
           e.stopPropagation();
           setExpanded(!expanded);
         }}
-        className="w-full text-[10px] text-muted hover:text-blue py-1 border-t border-border transition-colors"
+        className={`w-full text-[11px] py-1.5 border-t border-border transition-colors flex items-center justify-center gap-1.5 ${
+          expanded
+            ? 'text-muted hover:text-text'
+            : 'text-cyan font-medium hover:text-cyan/80 bg-cyan/5'
+        }`}
       >
-        {expanded ? 'Masquer les horaires' : 'Voir les horaires'}
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
+          <rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" strokeWidth="1" />
+          <line x1="4" y1="4" x2="10" y2="4" stroke="currentColor" strokeWidth="0.8" />
+          <line x1="4" y1="6.5" x2="10" y2="6.5" stroke="currentColor" strokeWidth="0.8" />
+          <line x1="4" y1="9" x2="8" y2="9" stroke="currentColor" strokeWidth="0.8" />
+        </svg>
+        {expanded ? 'Masquer les horaires' : 'Voir les horaires détaillés'}
       </button>
 
       {/* Expanded detail */}
@@ -1095,6 +1111,7 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
               isHighlighted={highlightedRouteIndex === i}
               onHighlight={setHighlightedRouteIndex}
               roadRouting={roadRouting}
+              autoExpand={results.length === 1 && i === 0}
             />
           ))}
         </div>

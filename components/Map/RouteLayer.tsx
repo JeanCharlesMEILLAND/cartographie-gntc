@@ -13,14 +13,34 @@ interface RouteLayerProps {
   railGeometries?: Record<string, [number, number][]>;
 }
 
-function getRouteStyle(freq: number, operator: string) {
-  const color = getOperatorColor(operator);
+function getRouteWeight(freq: number) {
+  if (freq > 30) return { weight: 5, opacity: 0.9 };
+  if (freq > 15) return { weight: 4, opacity: 0.85 };
+  if (freq > 8) return { weight: 3.5, opacity: 0.75 };
+  if (freq > 3) return { weight: 2.5, opacity: 0.65 };
+  return { weight: 2, opacity: 0.5 };
+}
 
-  if (freq > 30) return { weight: 5, color, opacity: 0.9 };
-  if (freq > 15) return { weight: 4, color, opacity: 0.85 };
-  if (freq > 8) return { weight: 3.5, color, opacity: 0.75 };
-  if (freq > 3) return { weight: 2.5, color, opacity: 0.65 };
-  return { weight: 2, color, opacity: 0.5 };
+function getRoutePoints(
+  route: AggregatedRoute,
+  railGeometries?: Record<string, [number, number][]>
+): [number, number][] {
+  const key1 = `${route.from}||${route.to}`;
+  const key2 = `${route.to}||${route.from}`;
+  const railPoints = railGeometries?.[key1] || railGeometries?.[key2];
+
+  if (railPoints && railPoints.length > 0) {
+    const points = [...railPoints] as [number, number][];
+    points[0] = [route.fromLat, route.fromLon];
+    points[points.length - 1] = [route.toLat, route.toLon];
+    if (!railGeometries?.[key1] && railGeometries?.[key2]) {
+      points[0] = [route.toLat, route.toLon];
+      points[points.length - 1] = [route.fromLat, route.fromLon];
+    }
+    return points;
+  }
+
+  return getBezierPoints(route.fromLat, route.fromLon, route.toLat, route.toLon);
 }
 
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
@@ -35,7 +55,6 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
     const route = results[highlightedRouteIndex!];
     if (route) {
       for (const leg of route.legs) {
-        // Add both directions since AggregatedRoute can have from/to in either order
         pairs.add(`${leg.from}||${leg.to}`);
         pairs.add(`${leg.to}||${leg.from}`);
       }
@@ -45,74 +64,91 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
 
   if (!showRoutes) return null;
 
-  return (
-    <>
-      {routes.map((route, i) => {
-        const routeKey = `${route.from}||${route.to}`;
+  const elements: React.ReactNode[] = [];
 
-        // In search mode: only show matching routes
-        const isSearchMatch = searchPairs ? searchPairs.has(routeKey) : false;
-        if (searchPairs && !isSearchMatch) return null;
+  for (let i = 0; i < routes.length; i++) {
+    const route = routes[i];
+    const routeKey = `${route.from}||${route.to}`;
 
-        // Try rail geometry first (both key orders)
-        const key1 = `${route.from}||${route.to}`;
-        const key2 = `${route.to}||${route.from}`;
-        const railPoints = railGeometries?.[key1] || railGeometries?.[key2];
+    // In search mode: only show matching routes
+    const isSearchMatch = searchPairs ? searchPairs.has(routeKey) : false;
+    if (searchPairs && !isSearchMatch) continue;
 
-        let points: [number, number][];
-        if (railPoints && railPoints.length > 0) {
-          points = [...railPoints];
-          points[0] = [route.fromLat, route.fromLon];
-          points[points.length - 1] = [route.toLat, route.toLon];
-          if (!railGeometries?.[key1] && railGeometries?.[key2]) {
-            points[0] = [route.toLat, route.toLon];
-            points[points.length - 1] = [route.fromLat, route.fromLon];
-          }
-        } else {
-          points = getBezierPoints(
-            route.fromLat,
-            route.fromLon,
-            route.toLat,
-            route.toLon
-          );
-        }
+    const points = getRoutePoints(route, railGeometries);
+    const { weight, opacity } = getRouteWeight(route.freq);
 
-        const mainOp = route.operators[0] || 'unknown';
-        const style = getRouteStyle(route.freq, mainOp);
+    const isConnected = selectedPlatform
+      ? route.from === selectedPlatform || route.to === selectedPlatform
+      : false;
+    const dimmed = selectedPlatform && !isConnected;
 
-        // In search mode: boost the matched route
-        if (isSearchMatch) {
-          return (
-            <Polyline
-              key={`${route.from}-${route.to}-${i}`}
-              positions={points}
-              pathOptions={{
-                ...style,
-                opacity: 1,
-                weight: style.weight + 2,
-              }}
-            />
-          );
-        }
+    if (route.operators.length <= 1) {
+      // Single operator: solid line
+      const color = getOperatorColor(route.operators[0] || 'unknown');
 
-        // Normal mode: highlight connected routes when a platform is selected
-        const isConnected = selectedPlatform
-          ? route.from === selectedPlatform || route.to === selectedPlatform
-          : false;
-        const dimmed = selectedPlatform && !isConnected;
-
-        return (
+      if (isSearchMatch) {
+        elements.push(
+          <Polyline
+            key={`${route.from}-${route.to}-${i}`}
+            positions={points}
+            pathOptions={{ color, opacity: 1, weight: weight + 2 }}
+          />
+        );
+      } else {
+        elements.push(
           <Polyline
             key={`${route.from}-${route.to}-${i}`}
             positions={points}
             pathOptions={{
-              ...style,
-              opacity: dimmed ? 0.08 : isConnected ? 1 : style.opacity,
-              weight: isConnected ? style.weight + 1.5 : dimmed ? 1 : style.weight,
+              color,
+              opacity: dimmed ? 0.08 : isConnected ? 1 : opacity,
+              weight: isConnected ? weight + 1.5 : dimmed ? 1 : weight,
             }}
           />
         );
-      })}
-    </>
-  );
+      }
+    } else {
+      // Multi-operator: alternating dashes per operator
+      const ops = route.operators;
+      const segLen = Math.max(6, Math.round(12 / ops.length) * 2);
+      const totalPattern = segLen * ops.length;
+
+      for (let j = 0; j < ops.length; j++) {
+        const color = getOperatorColor(ops[j]);
+        const dashOffset = j * segLen;
+
+        if (isSearchMatch) {
+          elements.push(
+            <Polyline
+              key={`${route.from}-${route.to}-${i}-op${j}`}
+              positions={points}
+              pathOptions={{
+                color,
+                opacity: 1,
+                weight: weight + 2,
+                dashArray: `${segLen} ${totalPattern - segLen}`,
+                dashOffset: `${dashOffset}`,
+              }}
+            />
+          );
+        } else {
+          elements.push(
+            <Polyline
+              key={`${route.from}-${route.to}-${i}-op${j}`}
+              positions={points}
+              pathOptions={{
+                color,
+                opacity: dimmed ? 0.08 : isConnected ? 1 : opacity,
+                weight: isConnected ? weight + 1.5 : dimmed ? 1 : weight,
+                dashArray: `${segLen} ${totalPattern - segLen}`,
+                dashOffset: `${dashOffset}`,
+              }}
+            />
+          );
+        }
+      }
+    }
+  }
+
+  return <>{elements}</>;
 }

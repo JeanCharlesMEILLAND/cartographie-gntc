@@ -52,8 +52,37 @@ export async function fetchRoadRoute(
   }
 }
 
-/** Geocode a city name using Nominatim (OpenStreetMap) */
+/** Geocode a city name using api-adresse.data.gouv.fr (France) with Nominatim fallback (international) */
 export async function geocodeCity(query: string): Promise<{ lat: number; lon: number } | null> {
+  // 1. Try French government API first (covers all French communes, even tiny ones)
+  try {
+    const encoded = encodeURIComponent(query);
+    const res = await fetch(
+      `https://api-adresse.data.gouv.fr/search/?q=${encoded}&type=municipality&limit=1`
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data.features && data.features.length > 0) {
+        const [lon, lat] = data.features[0].geometry.coordinates;
+        return { lat, lon };
+      }
+    }
+    // If no municipality match, try without type filter (catches lieu-dit, street, etc.)
+    const res2 = await fetch(
+      `https://api-adresse.data.gouv.fr/search/?q=${encoded}&limit=1`
+    );
+    if (res2.ok) {
+      const data2 = await res2.json();
+      if (data2.features && data2.features.length > 0) {
+        const [lon, lat] = data2.features[0].geometry.coordinates;
+        return { lat, lon };
+      }
+    }
+  } catch {
+    // api-adresse.data.gouv.fr failed, fall through to Nominatim
+  }
+
+  // 2. Fallback: Nominatim for international cities (BE, LU, DE, IT, ES, NL, CH)
   try {
     const encoded = encodeURIComponent(query);
     const res = await fetch(
