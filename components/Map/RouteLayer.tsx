@@ -43,8 +43,8 @@ function getRoutePoints(
   return getBezierPoints(route.fromLat, route.fromLon, route.toLat, route.toLon);
 }
 
-// Segment length per operator in pixels (visible at all zoom levels)
-const SEG_LEN = 24;
+// Segment length per operator in pixels — must be large enough to see color alternation
+const SEG_LEN = 60;
 
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
   const { showRoutes, selectedPlatform } = useFilterStore();
@@ -107,6 +107,9 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
       // Multi-operator: single fused multicolor line
       // Each operator gets alternating colored segments via dashArray + dashOffset
       const totalPattern = SEG_LEN * ops.length;
+      // Make multi-op lines thicker so the color alternation is clearly visible
+      const multiWeight = Math.max(weight + 1, 4);
+      const multiOpacity = Math.max(opacity, 0.85);
 
       for (let j = 0; j < ops.length; j++) {
         const color = getOperatorColor(ops[j]);
@@ -121,14 +124,14 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
                 ? {
                     color,
                     opacity: 1,
-                    weight: weight + 2,
+                    weight: multiWeight + 2,
                     dashArray: `${SEG_LEN} ${totalPattern - SEG_LEN}`,
                     dashOffset: `${dashOffset}`,
                   }
                 : {
                     color,
-                    opacity: dimmed ? 0.08 : isConnected ? 1 : opacity,
-                    weight: isConnected ? weight + 1.5 : dimmed ? 1 : weight,
+                    opacity: dimmed ? 0.08 : isConnected ? 1 : multiOpacity,
+                    weight: isConnected ? multiWeight + 1.5 : dimmed ? 1 : multiWeight,
                     dashArray: `${SEG_LEN} ${totalPattern - SEG_LEN}`,
                     dashOffset: `${dashOffset}`,
                   }
