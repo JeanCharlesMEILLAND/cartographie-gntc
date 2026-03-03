@@ -43,61 +43,36 @@ function getRoutePoints(
   return getBezierPoints(route.fromLat, route.fromLon, route.toLat, route.toLon);
 }
 
-// ─── Platform-based trunk detection ────────────────────────────────────
-// Instead of snapping coordinates to an arbitrary grid, we identify shared
-// TRUNKS by detecting which known platforms each route passes near.
-// Two routes sharing the same trunk (e.g. Lyon→Avignon) merge into one
-// multicolored corridor with smooth original rail geometry.
+// ─── Grid-based corridor merging with original geometry ────────────────
+// Routes on the same physical rail corridor merge into one visual line.
+// A ~5km grid is used ONLY for matching; the rendered polyline uses
+// the original smooth BRouter geometry.
 
-/** Approximate distance in km (equirectangular — accurate enough for France) */
-function approxDist(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const cosLat = Math.cos(((lat1 + lat2) / 2) * Math.PI / 180);
-  const dLon = (lon2 - lon1) * Math.PI / 180 * cosLat;
-  return R * Math.sqrt(dLat * dLat + dLon * dLon);
+const GRID = 0.05; // ~5.5 km — merges parallel tracks in the same corridor
+
+function gridCell(pt: [number, number]): string {
+  const gLat = Math.round(pt[0] / GRID) * GRID;
+  const gLon = Math.round(pt[1] / GRID) * GRID;
+  return `${gLat.toFixed(3)},${gLon.toFixed(3)}`;
 }
 
-// ── Union-Find for clustering nearby platforms into "metro areas" ──
-
-class UnionFind {
-  private parent = new Map<string, string>();
-
-  find(x: string): string {
-    if (!this.parent.has(x)) this.parent.set(x, x);
-    let root = x;
-    while (this.parent.get(root) !== root) root = this.parent.get(root)!;
-    let cur = x;
-    while (cur !== root) {
-      const next = this.parent.get(cur)!;
-      this.parent.set(cur, root);
-      cur = next;
-    }
-    return root;
-  }
-
-  union(a: string, b: string) {
-    this.parent.set(this.find(a), this.find(b));
-  }
+function orderedKey(a: string, b: string): string {
+  return a < b ? `${a}|${b}` : `${b}|${a}`;
 }
 
-// ── Thresholds ──
-
-const CLUSTER_RADIUS = 15; // km — merge platforms in the same metro area
-const WAYPOINT_RADIUS = 8; // km — route must pass within this of a platform
-const ENDPOINT_MARGIN = 3; // skip first/last N geometry points (avoid false positives near endpoints)
-
-interface Corridor {
-  points: [number, number][];
-  operators: string[];
+interface EdgeInfo {
+  loCell: string;
+  hiCell: string;
+  points: [number, number][]; // original BRouter geometry, loCell→hiCell direction
+  ops: Set<string>;
   freq: number;
   platforms: Set<string>;
   routePairs: Set<string>;
 }
 
-interface TrunkInfo {
+interface Corridor {
   points: [number, number][];
-  operators: Set<string>;
+  operators: string[];
   freq: number;
   platforms: Set<string>;
   routePairs: Set<string>;
@@ -108,134 +83,159 @@ function buildCorridors(
   railGeometries: Record<string, [number, number][]> | undefined,
   activeOperators: Set<string>
 ): Corridor[] {
-  // ── Step 1: Extract all platforms from route endpoints ──
-  const platMap = new Map<string, { lat: number; lon: number }>();
-  for (const r of routes) {
-    platMap.set(r.from, { lat: r.fromLat, lon: r.fromLon });
-    platMap.set(r.to, { lat: r.toLat, lon: r.toLon });
-  }
-  const platList = Array.from(platMap.entries()).map(([name, pos]) => ({
-    name, lat: pos.lat, lon: pos.lon,
-  }));
-
-  // ── Step 2: Cluster nearby platforms (e.g. Lyon-Vénissieux + Lyon-Guillotière) ──
-  const uf = new UnionFind();
-  for (let i = 0; i < platList.length; i++) {
-    for (let j = i + 1; j < platList.length; j++) {
-      if (approxDist(platList[i].lat, platList[i].lon, platList[j].lat, platList[j].lon) < CLUSTER_RADIUS) {
-        uf.union(platList[i].name, platList[j].name);
-      }
-    }
-  }
-
-  // Build cluster → members map (for proximity detection)
-  const clusterMembers = new Map<string, typeof platList>();
-  for (const p of platList) {
-    const c = uf.find(p.name);
-    if (!clusterMembers.has(c)) clusterMembers.set(c, []);
-    clusterMembers.get(c)!.push(p);
-  }
-
-  // ── Step 3 & 4: For each route, find waypoints and split into trunks ──
-  const trunkMap = new Map<string, TrunkInfo>();
+  const edgeMap = new Map<string, EdgeInfo>();
 
   for (const route of routes) {
-    // Only include operators that are currently active in the sidebar
     const routeOps = route.operators.filter(op => activeOperators.has(op));
     if (routeOps.length === 0) continue;
 
-    const points = getRoutePoints(route, railGeometries);
-    const originCluster = uf.find(route.from);
-    const destCluster = uf.find(route.to);
+    const rawPoints = getRoutePoints(route, railGeometries);
     const pairKey1 = `${route.from}||${route.to}`;
     const pairKey2 = `${route.to}||${route.from}`;
 
-    // Find intermediate platform clusters this route's geometry passes near
-    const waypoints: { cluster: string; pointIndex: number }[] = [];
+    // Walk through raw geometry, detect grid-cell transitions
+    let lastCell = gridCell(rawPoints[0]);
+    let segStart = 0;
 
-    for (const [clusterId, members] of clusterMembers) {
-      if (clusterId === originCluster || clusterId === destCluster) continue;
+    for (let i = 1; i < rawPoints.length; i++) {
+      const cell = gridCell(rawPoints[i]);
+      if (cell !== lastCell) {
+        const ek = orderedKey(lastCell, cell);
+        const lo = lastCell < cell ? lastCell : cell;
+        const hi = lastCell < cell ? cell : lastCell;
 
-      let minDist = Infinity;
-      let minIdx = -1;
-      for (const member of members) {
-        for (let i = ENDPOINT_MARGIN; i < points.length - ENDPOINT_MARGIN; i++) {
-          const d = approxDist(points[i][0], points[i][1], member.lat, member.lon);
-          if (d < minDist) {
-            minDist = d;
-            minIdx = i;
+        // Extract original sub-path, canonical direction lo→hi
+        let seg = rawPoints.slice(segStart, i + 1);
+        if (lastCell > cell) seg = [...seg].reverse();
+
+        const existing = edgeMap.get(ek);
+        if (existing) {
+          routeOps.forEach(op => existing.ops.add(op));
+          existing.freq = Math.max(existing.freq, route.freq);
+          existing.platforms.add(route.from);
+          existing.platforms.add(route.to);
+          existing.routePairs.add(pairKey1);
+          existing.routePairs.add(pairKey2);
+          if (seg.length > existing.points.length) {
+            existing.points = seg;
           }
+        } else {
+          edgeMap.set(ek, {
+            loCell: lo,
+            hiCell: hi,
+            points: seg,
+            ops: new Set(routeOps),
+            freq: route.freq,
+            platforms: new Set([route.from, route.to]),
+            routePairs: new Set([pairKey1, pairKey2]),
+          });
         }
-      }
 
-      if (minDist < WAYPOINT_RADIUS) {
-        waypoints.push({ cluster: clusterId, pointIndex: minIdx });
-      }
-    }
-
-    // Sort by position along the route
-    waypoints.sort((a, b) => a.pointIndex - b.pointIndex);
-
-    // Remove waypoints too close together (within 5 geometry points)
-    const filtered: typeof waypoints = [];
-    for (const wp of waypoints) {
-      if (filtered.length === 0 || wp.pointIndex - filtered[filtered.length - 1].pointIndex > 5) {
-        filtered.push(wp);
-      }
-    }
-
-    // Build stop list: origin → [intermediate waypoints] → destination
-    const stops = [
-      { cluster: originCluster, pointIndex: 0 },
-      ...filtered,
-      { cluster: destCluster, pointIndex: points.length - 1 },
-    ];
-
-    // Create trunk segments between consecutive stops
-    for (let s = 0; s < stops.length - 1; s++) {
-      const fromStop = stops[s];
-      const toStop = stops[s + 1];
-
-      // Ordered key so A→B and B→A match the same trunk
-      const trunkKey = fromStop.cluster < toStop.cluster
-        ? `${fromStop.cluster}||${toStop.cluster}`
-        : `${toStop.cluster}||${fromStop.cluster}`;
-
-      const segPoints = points.slice(fromStop.pointIndex, toStop.pointIndex + 1);
-      if (segPoints.length < 2) continue;
-
-      const existing = trunkMap.get(trunkKey);
-      if (existing) {
-        routeOps.forEach(op => existing.operators.add(op));
-        existing.freq = Math.max(existing.freq, route.freq);
-        existing.platforms.add(route.from);
-        existing.platforms.add(route.to);
-        existing.routePairs.add(pairKey1);
-        existing.routePairs.add(pairKey2);
-        // Keep the geometry with more detail
-        if (segPoints.length > existing.points.length) {
-          existing.points = segPoints;
-        }
-      } else {
-        trunkMap.set(trunkKey, {
-          points: segPoints,
-          operators: new Set(routeOps),
-          freq: route.freq,
-          platforms: new Set([route.from, route.to]),
-          routePairs: new Set([pairKey1, pairKey2]),
-        });
+        segStart = i;
+        lastCell = cell;
       }
     }
   }
 
-  // ── Step 5: Convert to corridors ──
-  return Array.from(trunkMap.values()).map(trunk => ({
-    points: trunk.points,
-    operators: Array.from(trunk.operators),
-    freq: trunk.freq,
-    platforms: trunk.platforms,
-    routePairs: trunk.routePairs,
-  }));
+  // ── Group edges by operator set, then chain into corridors ──
+
+  const byOps = new Map<string, EdgeInfo[]>();
+  for (const edge of edgeMap.values()) {
+    const opsKey = Array.from(edge.ops).sort().join('||');
+    if (!byOps.has(opsKey)) byOps.set(opsKey, []);
+    byOps.get(opsKey)!.push(edge);
+  }
+
+  const corridors: Corridor[] = [];
+
+  for (const [opsKey, groupEdges] of byOps) {
+    const ops = opsKey.split('||');
+
+    // Adjacency: cell → [{ neighborCell, edgeIdx }]
+    const adj = new Map<string, { neighborCell: string; edgeIdx: number }[]>();
+    for (let i = 0; i < groupEdges.length; i++) {
+      const e = groupEdges[i];
+      if (!adj.has(e.loCell)) adj.set(e.loCell, []);
+      adj.get(e.loCell)!.push({ neighborCell: e.hiCell, edgeIdx: i });
+      if (!adj.has(e.hiCell)) adj.set(e.hiCell, []);
+      adj.get(e.hiCell)!.push({ neighborCell: e.loCell, edgeIdx: i });
+    }
+
+    const visited = new Set<number>();
+
+    for (let startIdx = 0; startIdx < groupEdges.length; startIdx++) {
+      if (visited.has(startIdx)) continue;
+      visited.add(startIdx);
+
+      const se = groupEdges[startIdx];
+      let maxFreq = se.freq;
+      const allPlatforms = new Set(se.platforms);
+      const allRoutePairs = new Set(se.routePairs);
+
+      // Chain links: ordered list of { edgeIdx, fromCell, toCell }
+      type Link = { edgeIdx: number; fromCell: string; toCell: string };
+      const chain: Link[] = [
+        { edgeIdx: startIdx, fromCell: se.loCell, toCell: se.hiCell },
+      ];
+
+      // Extend forward from hiCell
+      let cur = se.hiCell;
+      while (true) {
+        const neighbors = (adj.get(cur) || []).filter(n => !visited.has(n.edgeIdx));
+        if (neighbors.length === 0) break;
+        const next = neighbors[0];
+        visited.add(next.edgeIdx);
+        const ne = groupEdges[next.edgeIdx];
+        maxFreq = Math.max(maxFreq, ne.freq);
+        ne.platforms.forEach(p => allPlatforms.add(p));
+        ne.routePairs.forEach(p => allRoutePairs.add(p));
+        chain.push({ edgeIdx: next.edgeIdx, fromCell: cur, toCell: next.neighborCell });
+        cur = next.neighborCell;
+      }
+
+      // Extend backward from loCell
+      cur = se.loCell;
+      while (true) {
+        const neighbors = (adj.get(cur) || []).filter(n => !visited.has(n.edgeIdx));
+        if (neighbors.length === 0) break;
+        const next = neighbors[0];
+        visited.add(next.edgeIdx);
+        const ne = groupEdges[next.edgeIdx];
+        maxFreq = Math.max(maxFreq, ne.freq);
+        ne.platforms.forEach(p => allPlatforms.add(p));
+        ne.routePairs.forEach(p => allRoutePairs.add(p));
+        // Prepend: traversal goes from next.neighborCell → cur
+        chain.unshift({ edgeIdx: next.edgeIdx, fromCell: next.neighborCell, toCell: cur });
+        cur = next.neighborCell;
+      }
+
+      // ── Assemble corridor geometry from original BRouter sub-paths ──
+      const corridorPoints: [number, number][] = [];
+      for (const link of chain) {
+        const e = groupEdges[link.edgeIdx];
+        // Geometry stored in loCell→hiCell direction.
+        // Reverse if traversal goes hiCell→loCell.
+        const needReverse = link.fromCell === e.hiCell;
+        const pts = needReverse ? [...e.points].reverse() : e.points;
+
+        if (corridorPoints.length > 0) {
+          corridorPoints.push(...pts.slice(1)); // skip junction duplicate
+        } else {
+          corridorPoints.push(...pts);
+        }
+      }
+
+      corridors.push({
+        points: corridorPoints,
+        operators: ops,
+        freq: maxFreq,
+        platforms: allPlatforms,
+        routePairs: allRoutePairs,
+      });
+    }
+  }
+
+  return corridors;
 }
 
 // ─── Path splitting for multicolor display ─────────────────────────────
