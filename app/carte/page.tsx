@@ -13,7 +13,6 @@ import SearchPanel from '@/components/Search/SearchPanel';
 import TimeControl from '@/components/Clock/TimeControl';
 import { useSearchStore } from '@/store/useSearchStore';
 import { dayTimeToMinutes, getTrainProgress } from '@/lib/trainClock';
-import { exportSynthese } from '@/lib/exportCsv';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { LoadingScreen } from '@cartographie/shared/ui';
 import ChatWidget from '@/components/Chat/ChatWidget';
@@ -38,7 +37,6 @@ export default function CartePage() {
     setVisiblePlatforms,
     setSelectedPlatformOperators,
     showClock,
-    toggleClock,
     clockDay,
     clockTime,
   } = useFilterStore();
@@ -223,18 +221,6 @@ export default function CartePage() {
     <div className="h-screen w-screen overflow-hidden relative carte-scope">
       {/* Carte header */}
       <header className="absolute top-0 left-0 right-0 z-[1000] h-[50px] glass-panel flex items-center justify-between px-2 sm:px-4">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <a href="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <img src="/logo-gntc.jpg" alt="GNTC" className="h-8 sm:h-9 flex-shrink-0" />
-            <div className="min-w-0">
-              <h1 className="text-xs sm:text-sm font-display font-bold leading-tight truncate gntc-gradient">
-                Transport Combin&eacute;
-              </h1>
-              <p className="text-[10px] text-muted leading-tight hidden sm:block">OTC / GNTC</p>
-            </div>
-          </a>
-        </div>
-
         <KPIBar
           platformCount={kpiPlatformCount}
           routeCount={kpiRoutes.length}
@@ -258,35 +244,6 @@ export default function CartePage() {
             </svg>
             <span className="text-[10px] sm:text-xs">Trouver un transport</span>
           </button>
-
-          <button
-            onClick={toggleClock}
-            className={`flex items-center gap-1.5 text-xs transition-colors px-2 sm:px-3 py-1.5 rounded-md border flex-shrink-0 ${
-              showClock
-                ? 'text-cyan border-cyan/30 bg-cyan/10'
-                : 'text-blue hover:text-cyan border-border hover:border-blue/30'
-            }`}
-            title="Simulation horaire"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
-              <circle cx="7" cy="7" r="5.5" />
-              <path d="M7 4v3.5l2.5 1.5" />
-            </svg>
-            <span className="text-[9px] sm:text-xs"><span className="sm:hidden">Horaires</span><span className="hidden sm:inline">Simulation horaire</span></span>
-          </button>
-
-          {data && (
-            <button
-              onClick={() => exportSynthese(data)}
-              className="flex items-center gap-1.5 text-xs text-muted hover:text-cyan transition-colors px-2 sm:px-3 py-1.5 rounded-md border border-border hover:border-cyan/30 flex-shrink-0"
-              title="Exporter les donn&eacute;es (CSV)"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              <span className="hidden sm:inline">Export</span>
-            </button>
-          )}
 
           <a
             href="/inscription"
