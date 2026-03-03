@@ -43,8 +43,72 @@ function getRoutePoints(
   return getBezierPoints(route.fromLat, route.fromLon, route.toLat, route.toLon);
 }
 
-// Segment length per operator in pixels — must be large enough to see color alternation
-const SEG_LEN = 60;
+/** Interpolate a point at a given distance along the path */
+function interpolateAt(
+  points: [number, number][],
+  cumDist: number[],
+  target: number
+): [number, number] {
+  if (target <= 0) return points[0];
+  const total = cumDist[cumDist.length - 1];
+  if (target >= total) return points[points.length - 1];
+  for (let i = 1; i < cumDist.length; i++) {
+    if (cumDist[i] >= target) {
+      const t = (target - cumDist[i - 1]) / (cumDist[i] - cumDist[i - 1]);
+      return [
+        points[i - 1][0] + t * (points[i][0] - points[i - 1][0]),
+        points[i - 1][1] + t * (points[i][1] - points[i - 1][1]),
+      ];
+    }
+  }
+  return points[points.length - 1];
+}
+
+/** Split a path into colored segments for multiple operators.
+ *  Each operator gets alternating solid-colored sub-polylines. */
+function splitPathForOperators(
+  points: [number, number][],
+  numOperators: number
+): [number, number][][] {
+  // Compute cumulative distances (in geographic coords — units don't matter, just ratios)
+  const cumDist = [0];
+  for (let i = 1; i < points.length; i++) {
+    const dlat = points[i][0] - points[i - 1][0];
+    const dlon = points[i][1] - points[i - 1][1];
+    cumDist.push(cumDist[i - 1] + Math.sqrt(dlat * dlat + dlon * dlon));
+  }
+  const totalDist = cumDist[cumDist.length - 1];
+  if (totalDist === 0) return [points.map(p => [...p] as [number, number])];
+
+  // Create enough segments so each operator appears multiple times
+  const segsPerOp = 5;
+  const totalSegs = numOperators * segsPerOp;
+  const segLen = totalDist / totalSegs;
+
+  const segments: [number, number][][] = [];
+
+  for (let s = 0; s < totalSegs; s++) {
+    const startDist = s * segLen;
+    const endDist = (s + 1) * segLen;
+    const seg: [number, number][] = [];
+
+    // Start point (interpolated)
+    seg.push(interpolateAt(points, cumDist, startDist));
+
+    // Include all original points within this segment
+    for (let i = 0; i < points.length; i++) {
+      if (cumDist[i] > startDist && cumDist[i] < endDist) {
+        seg.push(points[i]);
+      }
+    }
+
+    // End point (interpolated)
+    seg.push(interpolateAt(points, cumDist, endDist));
+    segments.push(seg);
+  }
+
+  return segments;
+}
 
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
   const { showRoutes, selectedPlatform } = useFilterStore();
@@ -104,36 +168,26 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
         />
       );
     } else {
-      // Multi-operator: single fused multicolor line
-      // Each operator gets alternating colored segments via dashArray + dashOffset
-      const totalPattern = SEG_LEN * ops.length;
-      // Make multi-op lines thicker so the color alternation is clearly visible
+      // Multi-operator: split path into solid colored segments
+      const segments = splitPathForOperators(points, ops.length);
       const multiWeight = Math.max(weight + 1, 4);
       const multiOpacity = Math.max(opacity, 0.85);
 
-      for (let j = 0; j < ops.length; j++) {
-        const color = getOperatorColor(ops[j]);
-        const dashOffset = j * SEG_LEN;
+      for (let s = 0; s < segments.length; s++) {
+        const opIndex = s % ops.length;
+        const color = getOperatorColor(ops[opIndex]);
 
         elements.push(
           <Polyline
-            key={`${route.from}-${route.to}-${i}-op${j}`}
-            positions={points}
+            key={`${route.from}-${route.to}-${i}-s${s}`}
+            positions={segments[s]}
             pathOptions={
               isSearchMatch
-                ? {
-                    color,
-                    opacity: 1,
-                    weight: multiWeight + 2,
-                    dashArray: `${SEG_LEN} ${totalPattern - SEG_LEN}`,
-                    dashOffset: `${dashOffset}`,
-                  }
+                ? { color, opacity: 1, weight: multiWeight + 2 }
                 : {
                     color,
                     opacity: dimmed ? 0.08 : isConnected ? 1 : multiOpacity,
                     weight: isConnected ? multiWeight + 1.5 : dimmed ? 1 : multiWeight,
-                    dashArray: `${SEG_LEN} ${totalPattern - SEG_LEN}`,
-                    dashOffset: `${dashOffset}`,
                   }
             }
           />
