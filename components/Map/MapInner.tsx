@@ -80,14 +80,17 @@ export default function MapInner({ platforms, routes, railGeometries, services, 
       className="w-full h-full"
       preferCanvas={true}
       zoomControl={false}
+      style={tileStyle === 'none' ? { background: '#f0f0f0' } : undefined}
     >
-      <TileLayer
-        key={tileStyle}
-        url={tileUrl}
-        attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-        maxZoom={19}
-        className={DARK_TILES.has(tileStyle) ? 'dark-tiles' : undefined}
-      />
+      {tileStyle !== 'none' && (
+        <TileLayer
+          key={tileStyle}
+          url={tileUrl}
+          attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+          maxZoom={19}
+          className={DARK_TILES.has(tileStyle) ? 'dark-tiles' : undefined}
+        />
+      )}
       <ZoomControl position="bottomright" />
       <MapClickHandler />
       <MapZoomHandler />

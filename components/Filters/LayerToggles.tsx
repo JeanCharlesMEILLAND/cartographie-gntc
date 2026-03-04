@@ -22,6 +22,15 @@ const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showPorts', label: 'Ports de fret' },
 ];
 
+const TILE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'carto-dark', label: 'Sombre' },
+  { value: 'carto-light', label: 'Clair' },
+  { value: 'voyager', label: 'Voyager' },
+  { value: 'osm', label: 'OSM' },
+  { value: 'topo', label: 'Topo' },
+  { value: 'none', label: 'Aucun' },
+];
+
 export default function LayerToggles() {
   const store = useFilterStore();
   const [open, setOpen] = useState(true);
@@ -52,41 +61,63 @@ export default function LayerToggles() {
 
       {/* Accordion content */}
       {open && (
-        <div className="mt-1 space-y-0.5">
-          {LAYERS.map(({ key, label }) => {
-            const color = LAYER_COLORS[key];
-            return (
-              <button
-                key={key}
-                onClick={() => store.toggleLayer(key)}
-                className="flex items-center gap-1.5 w-full text-left hover:bg-blue/5 rounded px-2 py-0.5 transition-colors"
-              >
-                <div
-                  className={clsx(
-                    'w-3 h-3 rounded-sm border transition-colors flex items-center justify-center flex-shrink-0',
-                    store[key]
-                      ? 'border-transparent'
-                      : 'border-muted'
-                  )}
-                  style={store[key] ? { backgroundColor: color } : undefined}
+        <div className="mt-1 space-y-2">
+          <div className="space-y-0.5">
+            {LAYERS.map(({ key, label }) => {
+              const color = LAYER_COLORS[key];
+              return (
+                <button
+                  key={key}
+                  onClick={() => store.toggleLayer(key)}
+                  className="flex items-center gap-1.5 w-full text-left hover:bg-blue/5 rounded px-2 py-0.5 transition-colors"
                 >
-                  {store[key] && (
-                    <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
-                      <path d="M2 5L4 7L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                  <div
+                    className={clsx(
+                      'w-3 h-3 rounded-sm border transition-colors flex items-center justify-center flex-shrink-0',
+                      store[key]
+                        ? 'border-transparent'
+                        : 'border-muted'
+                    )}
+                    style={store[key] ? { backgroundColor: color } : undefined}
+                  >
+                    {store[key] && (
+                      <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 5L4 7L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </div>
+                  <span
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: color, opacity: store[key] ? 1 : 0.4 }}
+                  />
+                  <span className={clsx('text-[11px]', store[key] ? 'text-text' : 'text-muted')}>
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tile style selector */}
+          <div className="pt-1 border-t border-border/50">
+            <span className="text-[10px] text-muted uppercase tracking-wider px-2">Fond de carte</span>
+            <div className="flex flex-wrap gap-1 mt-1 px-1">
+              {TILE_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => store.setTileStyle(value)}
+                  className={clsx(
+                    'text-[10px] px-2 py-0.5 rounded transition-colors',
+                    store.tileStyle === value
+                      ? 'bg-cyan/20 text-cyan font-medium'
+                      : 'text-muted hover:text-text hover:bg-blue/5'
                   )}
-                </div>
-                {/* Color indicator dot */}
-                <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: color, opacity: store[key] ? 1 : 0.4 }}
-                />
-                <span className={clsx('text-[11px]', store[key] ? 'text-text' : 'text-muted')}>
+                >
                   {label}
-                </span>
-              </button>
-            );
-          })}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
