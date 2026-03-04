@@ -22,14 +22,6 @@ const LAYERS: { key: LayerKey; label: string }[] = [
   { key: 'showPorts', label: 'Ports de fret' },
 ];
 
-const TILE_OPTIONS: { value: string; label: string }[] = [
-  { value: 'carto-dark', label: 'Sombre' },
-  { value: 'carto-light', label: 'Clair' },
-  { value: 'voyager', label: 'Voyager' },
-  { value: 'osm', label: 'OSM' },
-  { value: 'topo', label: 'Topo' },
-  { value: 'none', label: 'Aucun' },
-];
 
 export default function LayerToggles() {
   const store = useFilterStore();
@@ -98,26 +90,6 @@ export default function LayerToggles() {
             })}
           </div>
 
-          {/* Tile style selector */}
-          <div className="pt-1 border-t border-border/50">
-            <span className="text-[10px] text-muted uppercase tracking-wider px-2">Fond de carte</span>
-            <div className="flex flex-wrap gap-1 mt-1 px-1">
-              {TILE_OPTIONS.map(({ value, label }) => (
-                <button
-                  key={value}
-                  onClick={() => store.setTileStyle(value)}
-                  className={clsx(
-                    'text-[10px] px-2 py-0.5 rounded transition-colors',
-                    store.tileStyle === value
-                      ? 'bg-cyan/20 text-cyan font-medium'
-                      : 'text-muted hover:text-text hover:bg-blue/5'
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       )}
     </div>
