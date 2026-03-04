@@ -144,12 +144,12 @@ function PlatformToggle({
   ) : (
     <button
       onClick={() => setShowPlatforms(true)}
-      className="mt-0.5 text-[9px] text-muted/50 hover:text-muted transition-colors flex items-center gap-1 pl-1"
+      className="mt-0.5 text-[9px] text-muted/40 hover:text-muted/70 transition-colors flex items-center gap-0.5 pl-1"
     >
-      <svg width="8" height="8" viewBox="0 0 10 10" fill="none" className="flex-shrink-0">
+      <svg width="6" height="6" viewBox="0 0 10 10" fill="none" className="flex-shrink-0">
         <path d="M3 4L5 6L7 4" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      {city.platforms.length} plateformes · affiner (optionnel)
+      Affiner les plateformes
     </button>
   );
 }
@@ -273,13 +273,7 @@ function CityInput({
       {/* State A: City selected — show chip */}
       {selectedCity ? (
         <div className="w-full text-xs bg-white border border-blue/30 rounded-md px-3 py-2 text-text flex items-center justify-between">
-          <span className="truncate">
-            <span className="font-medium">{selectedCity.city}</span>
-            <span className="text-muted ml-1.5 text-[10px]">
-              {selectedCity.platforms.length} plateforme
-              {selectedCity.platforms.length > 1 ? 's' : ''}
-            </span>
-          </span>
+          <span className="truncate font-medium">{selectedCity.city}</span>
           <button
             onClick={handleClearCity}
             className="text-muted hover:text-text ml-2 flex-shrink-0 p-0.5"
