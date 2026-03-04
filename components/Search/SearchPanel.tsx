@@ -357,10 +357,6 @@ function CityInput({
                         Direct
                       </span>
                     )}
-                    <span className="text-[10px] text-muted">
-                      {city.platforms.length} plateforme
-                      {city.platforms.length > 1 ? 's' : ''}
-                    </span>
                     {city.distance !== null && (
                       <span className="text-[10px] font-mono text-cyan">
                         {city.distance} km
@@ -379,7 +375,7 @@ function CityInput({
       )}
 
       {/* Platform picker — hidden by default, toggle via button */}
-      {selectedCity && selectedCity.platforms.length > 1 && (
+      {selectedCity && selectedCity.platforms.length >= 1 && (
         <PlatformToggle
           city={selectedCity}
           routes={routes}
