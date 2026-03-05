@@ -144,7 +144,7 @@ function PlatformToggle({
   ) : (
     <button
       onClick={() => setShowPlatforms(true)}
-      className="mt-1.5 w-full text-[10px] text-muted/50 hover:text-muted/80 transition-colors flex items-center justify-center gap-1 py-1 rounded border border-dashed border-muted/20 hover:border-muted/40"
+      className="mt-1.5 w-full text-[10px] font-medium text-white gntc-gradient-bg hover:opacity-90 transition-all flex items-center justify-center gap-1.5 py-1.5 rounded-md shadow-sm hover:shadow"
     >
       <svg width="10" height="10" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
         <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1" />
