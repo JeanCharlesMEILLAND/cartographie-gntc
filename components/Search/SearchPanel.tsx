@@ -124,10 +124,10 @@ function PlatformToggle({
   const [showPlatforms, setShowPlatforms] = useState(false);
 
   return showPlatforms ? (
-    <div className="mt-1">
+    <div className="mt-1.5">
       <button
         onClick={() => setShowPlatforms(false)}
-        className="text-[9px] text-muted/60 hover:text-muted transition-colors mb-0.5 flex items-center gap-1"
+        className="text-[9px] text-muted/60 hover:text-muted transition-colors mb-1 flex items-center gap-1"
       >
         <svg width="7" height="7" viewBox="0 0 8 8" fill="none" className="rotate-90">
           <path d="M2 3L4 5L6 3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
@@ -144,12 +144,13 @@ function PlatformToggle({
   ) : (
     <button
       onClick={() => setShowPlatforms(true)}
-      className="mt-0.5 text-[9px] text-muted/40 hover:text-muted/70 transition-colors flex items-center gap-0.5 pl-1"
+      className="mt-1.5 w-full text-[10px] text-muted/50 hover:text-muted/80 transition-colors flex items-center justify-center gap-1 py-1 rounded border border-dashed border-muted/20 hover:border-muted/40"
     >
-      <svg width="6" height="6" viewBox="0 0 10 10" fill="none" className="flex-shrink-0">
-        <path d="M3 4L5 6L7 4" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+      <svg width="10" height="10" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
+        <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1" />
+        <path d="M7 4.5V9.5M4.5 7H9.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
       </svg>
-      Affiner les plateformes
+      Voir les plateformes proches (optionnel)
     </button>
   );
 }
