@@ -294,7 +294,8 @@ export async function findCitySuggestionsAsync(
     return filterActive(cities).slice(0, maxResults);
   }
 
-  // 2. Geocode fallback — group nearby platforms by ville within 50km
+  // 2. Geocode fallback — return the typed city as a single suggestion
+  //    with all nearby platforms attached (user can optionally expand them)
   const coords = await geocodeCity(query);
   if (!coords) return [];
 
@@ -303,21 +304,32 @@ export async function findCitySuggestionsAsync(
     ? platforms.filter((p) => activeSites.has(p.site))
     : platforms;
 
-  const nearby = searchPlatforms
+  let nearby = searchPlatforms
     .map((p) => ({ platform: p, dist: haversineKm(coords.lat, coords.lon, p.lat, p.lon) }))
     .filter((s) => s.dist <= 100)
     .sort((a, b) => a.dist - b.dist);
 
   if (nearby.length === 0) {
-    // Widen to 200km if nothing within 100km
-    const wider = searchPlatforms
+    nearby = searchPlatforms
       .map((p) => ({ platform: p, dist: haversineKm(coords.lat, coords.lon, p.lat, p.lon) }))
       .filter((s) => s.dist <= 200)
       .sort((a, b) => a.dist - b.dist);
-    return groupNearbyByCity(wider, maxResults);
   }
 
-  return groupNearbyByCity(nearby, maxResults);
+  if (nearby.length === 0) return [];
+
+  // Return the queried city as a single suggestion with nearby platforms
+  const capitalizedQuery = query.charAt(0).toUpperCase() + query.slice(1).toLowerCase();
+  return [{
+    city: capitalizedQuery,
+    lat: coords.lat,
+    lon: coords.lon,
+    pays: nearby[0].platform.pays || '',
+    departement: nearby[0].platform.departement || '',
+    platforms: nearby.map((n) => n.platform),
+    bestScore: 100,
+    distance: null,
+  }];
 }
 
 function groupNearbyByCity(
