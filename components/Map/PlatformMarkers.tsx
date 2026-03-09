@@ -368,17 +368,17 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
         const clusterIcon = L.divIcon({
           className: '',
           html: `<div style="
-            width: 40px; height: 40px;
+            width: 28px; height: 28px;
             border-radius: 50%;
             background: ${dimmed ? 'rgba(125,194,67,0.3)' : '#7dc243'};
-            border: 3px solid rgba(255,255,255,${dimmed ? '0.3' : '0.9'});
-            color: white; font-weight: 700; font-size: 15px;
+            border: 2px solid rgba(255,255,255,${dimmed ? '0.3' : '0.9'});
+            color: white; font-weight: 700; font-size: 12px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
             cursor: pointer;
           ">${clusterVisible.length}</div>`,
-          iconSize: [40, 40],
-          iconAnchor: [20, 20],
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
         });
 
         const sortedCluster = [...clusterVisible].sort(
@@ -388,7 +388,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
         return (
           <span key={`hub-${cluster.key}`}>
             <Marker position={[cluster.lat, cluster.lon]} icon={clusterIcon}>
-              <Tooltip direction="top" offset={[0, -24]} opacity={0.95}>
+              <Tooltip direction="top" offset={[0, -18]} opacity={0.95}>
                 <div className="text-xs">
                   <strong>Hub {cluster.ville}</strong>
                   <div className="text-[10px] opacity-70">
@@ -479,7 +479,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
                     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
                   ">Hub ${cluster.ville}</span>`,
                   iconSize: [0, 0],
-                  iconAnchor: [0, 28],
+                  iconAnchor: [0, 22],
                 })}
                 interactive={false}
               />
