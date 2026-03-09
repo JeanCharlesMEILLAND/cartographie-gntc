@@ -13,12 +13,8 @@ interface RouteLayerProps {
   railGeometries?: Record<string, [number, number][]>;
 }
 
-function getRouteWeight(freq: number) {
-  if (freq > 30) return { weight: 5, opacity: 0.9 };
-  if (freq > 15) return { weight: 4, opacity: 0.85 };
-  if (freq > 8) return { weight: 3.5, opacity: 0.75 };
-  if (freq > 3) return { weight: 2.5, opacity: 0.65 };
-  return { weight: 2, opacity: 0.5 };
+function getRouteWeight(_freq: number) {
+  return { weight: 3.5, opacity: 0.8 };
 }
 
 function getRoutePoints(

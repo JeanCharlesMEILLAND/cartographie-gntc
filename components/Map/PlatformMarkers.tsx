@@ -1,6 +1,6 @@
 'use client';
 
-import { CircleMarker, Tooltip, Marker, useMapEvents, useMap } from 'react-leaflet';
+import { CircleMarker, Tooltip, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
 import { useSearchStore } from '@/store/useSearchStore';
 import { Platform, AggregatedRoute } from '@/lib/types';
@@ -26,6 +26,7 @@ function estimateLabelWidth(text: string, fontSize: number): number {
 
 const LABEL_H = 16;
 const GAP = 3;
+const HUB_CLUSTER_ZOOM = 10;
 
 // Candidate offsets: [anchorX, anchorY] relative to the marker pixel position
 // We try above, right, below-right, below, left, above-left, etc.
@@ -155,11 +156,42 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
     return offsets;
   }, [platforms]);
 
+  // --- Hub clusters: group co-located platforms for low-zoom display ---
+  const hubClusters = useMemo(() => {
+    const grid = new Map<string, Platform[]>();
+    for (const p of platforms) {
+      const key = `${(p.lat * 100) | 0},${(p.lon * 100) | 0}`;
+      if (!grid.has(key)) grid.set(key, []);
+      grid.get(key)!.push(p);
+    }
+    return Array.from(grid.entries())
+      .filter(([, group]) => group.length >= 2)
+      .map(([key, group]) => {
+        const lat = group.reduce((s, p) => s + p.lat, 0) / group.length;
+        const lon = group.reduce((s, p) => s + p.lon, 0) / group.length;
+        const vc = new Map<string, number>();
+        for (const p of group) vc.set(p.ville || '', (vc.get(p.ville || '') || 0) + 1);
+        const ville = [...vc.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || 'Hub';
+        return { key, lat, lon, ville, platforms: group };
+      });
+  }, [platforms]);
+
+  const clusteredSites = useMemo(() => {
+    const s = new Set<string>();
+    for (const c of hubClusters) for (const p of c.platforms) s.add(p.site);
+    return s;
+  }, [hubClusters]);
+
+  const showClusters = zoom < HUB_CLUSTER_ZOOM;
+
   // --- Label placement with collision avoidance ---
   const visiblePlatforms = platforms.filter((p) => !searchSites || searchSites.has(p.site));
+  const renderPlatforms = showClusters
+    ? visiblePlatforms.filter(p => !clusteredSites.has(p.site))
+    : visiblePlatforms;
 
   // Sort by priority (selected > preview > highest volume first)
-  const sorted = [...visiblePlatforms].sort((a, b) => {
+  const sorted = [...renderPlatforms].sort((a, b) => {
     const aPri = (a.site === selectedPlatform ? 1e6 : 0) + (previewSites?.has(a.site) ? 5e5 : 0);
     const bPri = (b.site === selectedPlatform ? 1e6 : 0) + (previewSites?.has(b.site) ? 5e5 : 0);
     return (bPri + (platformVolumes.get(b.site) || 0)) - (aPri + (platformVolumes.get(a.site) || 0));
@@ -195,7 +227,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
 
   return (
     <>
-      {visiblePlatforms.map((platform) => {
+      {renderPlatforms.map((platform) => {
         const volume = platformVolumes.get(platform.site) || 0;
         const size = getMarkerSize(volume);
         const isFrance = platform.pays?.toLowerCase() === 'france';
@@ -311,6 +343,144 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
               <Marker
                 position={[markerLat, markerLon]}
                 icon={labelIcon}
+                interactive={false}
+              />
+            )}
+          </span>
+        );
+      })}
+
+      {/* Hub cluster markers at low zoom */}
+      {showClusters && hubClusters.map((cluster) => {
+        const clusterVisible = cluster.platforms.filter(p =>
+          !searchSites || searchSites.has(p.site)
+        );
+        if (clusterVisible.length === 0) return null;
+
+        const totalVolume = clusterVisible.reduce(
+          (s, p) => s + (platformVolumes.get(p.site) || 0), 0
+        );
+        const isAnyConnected = selectedPlatform
+          ? cluster.platforms.some(p => connectedSites.has(p.site))
+          : false;
+        const dimmed = selectedPlatform && !isAnyConnected;
+
+        const clusterIcon = L.divIcon({
+          className: '',
+          html: `<div style="
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: ${dimmed ? 'rgba(125,194,67,0.3)' : '#7dc243'};
+            border: 3px solid rgba(255,255,255,${dimmed ? '0.3' : '0.9'});
+            color: white; font-weight: 700; font-size: 15px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            cursor: pointer;
+          ">${clusterVisible.length}</div>`,
+          iconSize: [40, 40],
+          iconAnchor: [20, 20],
+        });
+
+        const sortedCluster = [...clusterVisible].sort(
+          (a, b) => (platformVolumes.get(b.site) || 0) - (platformVolumes.get(a.site) || 0)
+        );
+
+        return (
+          <span key={`hub-${cluster.key}`}>
+            <Marker position={[cluster.lat, cluster.lon]} icon={clusterIcon}>
+              <Tooltip direction="top" offset={[0, -24]} opacity={0.95}>
+                <div className="text-xs">
+                  <strong>Hub {cluster.ville}</strong>
+                  <div className="text-[10px] opacity-70">
+                    {clusterVisible.length} plateformes · {totalVolume} trains/sem
+                  </div>
+                </div>
+              </Tooltip>
+              <Popup maxWidth={300} minWidth={240}>
+                <div style={{ fontFamily: 'inherit' }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>
+                    Hub {cluster.ville}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#888', marginBottom: 10 }}>
+                    {clusterVisible.length} plateformes · {totalVolume} trains/sem
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {sortedCluster.map((p) => {
+                      const vol = platformVolumes.get(p.site) || 0;
+                      const ops = platformMeta.ops.get(p.site);
+                      const opList = ops ? [...ops] : [];
+                      const liaisons = platformMeta.liaisons.get(p.site) || 0;
+                      return (
+                        <div
+                          key={p.site}
+                          onClick={() => {
+                            setSelectedPlatform(p.site);
+                            leafletMap.closePopup();
+                          }}
+                          style={{
+                            padding: '6px 8px',
+                            borderRadius: 4,
+                            cursor: 'pointer',
+                            border: '1px solid #e5e5e5',
+                            transition: 'background 0.15s',
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#f0f7ff'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          <div style={{ fontWeight: 600, fontSize: 12 }}>{p.site}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
+                            <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#38d9f5' }}>
+                              {vol} t/s
+                            </span>
+                            <span style={{ fontSize: 10, color: '#888' }}>
+                              {liaisons} liaison{liaisons > 1 ? 's' : ''}
+                            </span>
+                            <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
+                              {opList.slice(0, 5).map((op) => (
+                                <span
+                                  key={op}
+                                  style={{
+                                    width: 8, height: 8, borderRadius: '50%',
+                                    display: 'inline-block',
+                                    backgroundColor: getOperatorColor(op),
+                                  }}
+                                  title={op}
+                                />
+                              ))}
+                              {opList.length > 5 && (
+                                <span style={{ fontSize: 9, color: '#888' }}>+{opList.length - 5}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+
+            {/* Hub label */}
+            {zoom >= 7 && (
+              <Marker
+                position={[cluster.lat, cluster.lon]}
+                icon={L.divIcon({
+                  className: '',
+                  html: `<span style="
+                    color: #2b2b2b;
+                    background: rgba(255,255,255,0.92);
+                    padding: 1px 6px;
+                    border-radius: 3px;
+                    font-size: 10px;
+                    font-weight: 700;
+                    white-space: nowrap;
+                    pointer-events: none;
+                    border: 1px solid rgba(125,194,67,0.3);
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                  ">Hub ${cluster.ville}</span>`,
+                  iconSize: [0, 0],
+                  iconAnchor: [0, 28],
+                })}
                 interactive={false}
               />
             )}
