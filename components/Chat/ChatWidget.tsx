@@ -251,6 +251,30 @@ export default function ChatWidget({ platforms, services }: ChatWidgetProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  // Draggable position (offset from default bottom-4 right-4)
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number; moved: boolean } | null>(null);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y, moved: false };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragRef.current.moved = true;
+    setPos({ x: dragRef.current.origX + dx, y: dragRef.current.origY + dy });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    const wasDrag = dragRef.current?.moved;
+    dragRef.current = null;
+    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    if (!wasDrag) setOpen((o) => !o);
+  };
+
   const { setSearchOpen, setDepartureQuery, setArrivalQuery } = useSearchStore();
 
   useEffect(() => {
@@ -477,14 +501,37 @@ export default function ChatWidget({ platforms, services }: ChatWidgetProps) {
       {/* Chat Panel */}
       {open && (
         <div
-          className="fixed bottom-20 right-4 z-[1100] w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-120px)] flex flex-col rounded-2xl shadow-2xl overflow-hidden animate-in"
-          style={{ border: `1px solid ${IAK.orange}30` }}
+          className="fixed z-[1100] w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-120px)] flex flex-col rounded-2xl shadow-2xl overflow-hidden animate-in"
+          style={{
+            border: `1px solid ${IAK.orange}30`,
+            bottom: `calc(80px - ${pos.y}px)`,
+            right: `calc(16px - ${pos.x}px)`,
+          }}
         >
-          {/* Header */}
+          {/* Header — draggable */}
           <div
-            className="flex items-center gap-3 px-4 py-3 text-white flex-shrink-0"
+            className="flex items-center gap-3 px-4 py-3 text-white flex-shrink-0 cursor-grab active:cursor-grabbing select-none"
             style={{ background: IAK.gradient }}
+            onPointerDown={(e) => {
+              if ((e.target as HTMLElement).closest('button')) return;
+              handlePointerDown(e);
+            }}
+            onPointerMove={handlePointerMove}
+            onPointerUp={(e) => {
+              if (!dragRef.current) return;
+              dragRef.current = null;
+              (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+            }}
           >
+            {/* Grip indicator */}
+            <svg width="6" height="14" viewBox="0 0 6 14" fill="none" className="flex-shrink-0 opacity-40">
+              <circle cx="1.5" cy="2" r="1" fill="currentColor" />
+              <circle cx="4.5" cy="2" r="1" fill="currentColor" />
+              <circle cx="1.5" cy="7" r="1" fill="currentColor" />
+              <circle cx="4.5" cy="7" r="1" fill="currentColor" />
+              <circle cx="1.5" cy="12" r="1" fill="currentColor" />
+              <circle cx="4.5" cy="12" r="1" fill="currentColor" />
+            </svg>
             <img
               src="/logos/iaklefer-logo.svg"
               alt="IA k LEFER"
@@ -653,12 +700,18 @@ export default function ChatWidget({ platforms, services }: ChatWidgetProps) {
         </div>
       )}
 
-      {/* Floating Bubble */}
+      {/* Floating Bubble (draggable) */}
       <button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-4 right-4 z-[1100] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 hover:shadow-xl"
-        style={{ background: open ? IAK.navy : IAK.gradient }}
-        title="Assistant IA k LEFER"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        className="fixed z-[1100] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-shadow hover:shadow-xl cursor-grab active:cursor-grabbing touch-none select-none"
+        style={{
+          background: open ? IAK.navy : IAK.gradient,
+          bottom: `calc(16px - ${pos.y}px)`,
+          right: `calc(16px - ${pos.x}px)`,
+        }}
+        title="Assistant IA k LEFER — glisser pour déplacer"
       >
         {open ? (
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
