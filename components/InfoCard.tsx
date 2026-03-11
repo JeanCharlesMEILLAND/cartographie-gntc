@@ -214,7 +214,7 @@ export default function InfoCard({ platforms, routes, services }: InfoCardProps)
                           >
                             <path d="M2 1L6 4L2 7Z" />
                           </svg>
-                          <span className="text-text truncate">{d.dest}</span>
+                          <span className="text-text truncate">vers {d.dest}</span>
                         </div>
                         <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
                           <span className="font-mono text-cyan">{d.freq}/s</span>
