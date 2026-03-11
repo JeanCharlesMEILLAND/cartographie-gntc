@@ -30,6 +30,7 @@ export default function InfoCard({ platforms, routes, services }: InfoCardProps)
   const { selectedPlatform, setSelectedPlatform, showClock } = useFilterStore();
   const searchOpen = useSearchStore((s) => s.searchOpen);
   const [expandedDest, setExpandedDest] = useState<string | null>(null);
+  const [contactModal, setContactModal] = useState<string | null>(null);
 
   if (!selectedPlatform) return null;
 
@@ -170,29 +171,22 @@ export default function InfoCard({ platforms, routes, services }: InfoCardProps)
                 <span className="text-[10px] font-mono text-muted">{total} t/sem</span>
               </div>
 
-              {/* Contact info */}
-              {hasContact(op) && (() => {
-                const c = getOperatorContact(op)!;
-                return (
-                  <div className="ml-4 flex flex-wrap items-center gap-1.5 text-[10px]">
-                    {c.email && (
-                      <a href={`mailto:${c.email}`} className="text-blue hover:text-cyan transition-colors" title={c.email}>
-                        email
-                      </a>
-                    )}
-                    {c.phone && (
-                      <a href={`tel:${c.phone.replace(/\s/g, '')}`} className="text-blue hover:text-cyan transition-colors" title={c.phone}>
-                        tel
-                      </a>
-                    )}
-                    {c.website && (
-                      <a href={`https://${c.website}`} target="_blank" rel="noopener noreferrer" className="text-blue hover:text-cyan transition-colors" title={c.website}>
-                        web
-                      </a>
-                    )}
-                  </div>
-                );
-              })()}
+              {/* Contact info button */}
+              {hasContact(op) && (
+                <div className="ml-4">
+                  <button
+                    onClick={() => setContactModal(contactModal === op ? null : op)}
+                    className="inline-flex items-center gap-1 text-[10px] text-blue hover:text-cyan transition-colors"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1" />
+                      <path d="M6 5.5V8.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+                      <circle cx="6" cy="4" r="0.6" fill="currentColor" />
+                    </svg>
+                    Fiche contact
+                  </button>
+                </div>
+              )}
 
               {/* Destinations for this operator */}
               <div className="ml-4 space-y-0.5">
@@ -275,6 +269,122 @@ export default function InfoCard({ platforms, routes, services }: InfoCardProps)
           );
         })}
       </div>
+
+      {/* Operator contact modal */}
+      {contactModal && hasContact(contactModal) && (() => {
+        const c = getOperatorContact(contactModal)!;
+        const logo = getOperatorLogo(contactModal);
+        const color = getOperatorColor(contactModal);
+        return (
+          <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setContactModal(null)} />
+            <div className="relative glass-panel rounded-xl w-full max-w-sm overflow-hidden shadow-2xl">
+              {/* Header with logo */}
+              <div className="p-4 border-b border-border">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {logo ? (
+                      <img src={logo} alt="" className="w-10 h-10 rounded-lg object-contain flex-shrink-0 bg-white/10 p-1" />
+                    ) : (
+                      <div
+                        className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center"
+                        style={{ backgroundColor: color + '20', border: `2px solid ${color}` }}
+                      >
+                        <span className="text-sm font-bold" style={{ color }}>{contactModal[0]}</span>
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="text-sm font-display font-bold text-text">{contactModal}</h3>
+                      <p className="text-[10px] text-muted">Source : gntc.fr/plan-de-transport</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setContactModal(null)}
+                    className="text-muted hover:text-text transition-colors p-1.5 rounded-md hover:bg-white/5"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Contact details */}
+              <div className="p-4 space-y-3">
+                {c.contact && (
+                  <div className="flex items-start gap-2.5">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0 mt-0.5 text-muted">
+                      <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" strokeWidth="1.2" />
+                      <path d="M2.5 12.5C2.5 10 4.5 8 7 8C9.5 8 11.5 10 11.5 12.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                    </svg>
+                    <div>
+                      <div className="text-[10px] text-muted uppercase tracking-wider">Contact</div>
+                      <div className="text-xs text-text font-medium">{c.contact}</div>
+                    </div>
+                  </div>
+                )}
+
+                {c.address && (
+                  <div className="flex items-start gap-2.5">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0 mt-0.5 text-muted">
+                      <path d="M7 1.5C4.5 1.5 2.5 3.5 2.5 6C2.5 9.5 7 12.5 7 12.5C7 12.5 11.5 9.5 11.5 6C11.5 3.5 9.5 1.5 7 1.5Z" stroke="currentColor" strokeWidth="1.2" />
+                      <circle cx="7" cy="6" r="1.5" stroke="currentColor" strokeWidth="1" />
+                    </svg>
+                    <div>
+                      <div className="text-[10px] text-muted uppercase tracking-wider">Adresse</div>
+                      <div className="text-xs text-text">{c.address}</div>
+                    </div>
+                  </div>
+                )}
+
+                {c.email && (
+                  <div className="flex items-start gap-2.5">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0 mt-0.5 text-muted">
+                      <rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+                      <path d="M1.5 4.5L7 8L12.5 4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                    </svg>
+                    <div>
+                      <div className="text-[10px] text-muted uppercase tracking-wider">Email</div>
+                      <a href={`mailto:${c.email}`} className="text-xs text-blue hover:text-cyan transition-colors break-all">
+                        {c.email}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {c.phone && (
+                  <div className="flex items-start gap-2.5">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0 mt-0.5 text-muted">
+                      <path d="M2.5 2H5L6.5 5L4.5 6.5C5.4 8.3 5.7 8.6 7.5 9.5L9 7.5L12 9V11.5C12 12.05 11.55 12.5 11 12.5C5.5 12 2 8.5 1.5 3C1.5 2.45 1.95 2 2.5 2Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div>
+                      <div className="text-[10px] text-muted uppercase tracking-wider">Téléphone</div>
+                      <a href={`tel:${c.phone.replace(/[\s().]/g, '')}`} className="text-xs text-blue hover:text-cyan transition-colors">
+                        {c.phone}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {c.website && (
+                  <div className="flex items-start gap-2.5">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0 mt-0.5 text-muted">
+                      <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.2" />
+                      <path d="M2 7H12M7 2C5.5 4 5.5 10 7 12M7 2C8.5 4 8.5 10 7 12" stroke="currentColor" strokeWidth="1.2" />
+                    </svg>
+                    <div>
+                      <div className="text-[10px] text-muted uppercase tracking-wider">Site web</div>
+                      <a href={`https://${c.website}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue hover:text-cyan transition-colors">
+                        {c.website}
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
