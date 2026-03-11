@@ -34,6 +34,10 @@ const HUB_NAME_OVERRIDES: Record<string, string> = {
   'Fenouillet': 'Toulouse',
   'Bègles': 'Bordeaux',
   'Antwerp': 'Anvers',
+  'Bonneuil-sur-Marne': 'Valanton/Bonneuil',
+  'Bonneuil-sur-marne': 'Valanton/Bonneuil',
+  'Bonneuil': 'Valanton/Bonneuil',
+  'Valenton': 'Valanton/Bonneuil',
 };
 
 // Forced hub groups: platforms matching these patterns merge into one hub
