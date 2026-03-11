@@ -28,6 +28,23 @@ const LABEL_H = 16;
 const GAP = 3;
 const HUB_CLUSTER_ZOOM = 10;
 
+// Hub name overrides: maps ville → displayed hub name
+const HUB_NAME_OVERRIDES: Record<string, string> = {
+  'Marck': 'Calais',
+  'Fenouillet': 'Toulouse',
+  'Bègles': 'Bordeaux',
+  'Antwerp': 'Anvers',
+};
+
+// Forced hub groups: platforms matching these patterns merge into one hub
+const FORCED_HUB_GROUPS: { name: string; match: (site: string) => boolean }[] = [
+  {
+    name: 'Marseille',
+    match: (site) =>
+      /^(Marseille|Fos|EUROFOS|Port de Marseille|Terminal.*(Miramas|Provence))/i.test(site),
+  },
+];
+
 // Candidate offsets: [anchorX, anchorY] relative to the marker pixel position
 // We try above, right, below-right, below, left, above-left, etc.
 const OFFSETS: [number, number][] = [
@@ -158,28 +175,63 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
 
   // --- Hub clusters: group co-located platforms for low-zoom display ---
   const hubClusters = useMemo(() => {
+    // Step 1: Identify platforms belonging to forced hubs
+    const forcedPlatforms = new Map<string, Platform[]>();
+    const forcedSites = new Set<string>();
+
+    for (const hub of FORCED_HUB_GROUPS) {
+      const matching = platforms.filter(p => hub.match(p.site));
+      if (matching.length >= 1) {
+        forcedPlatforms.set(hub.name, matching);
+        for (const p of matching) forcedSites.add(p.site);
+      }
+    }
+
+    // Step 2: Normal grid-based clustering (excluding forced hub platforms)
     const grid = new Map<string, Platform[]>();
     for (const p of platforms) {
+      if (forcedSites.has(p.site)) continue;
       const key = `${(p.lat * 100) | 0},${(p.lon * 100) | 0}`;
       if (!grid.has(key)) grid.set(key, []);
       grid.get(key)!.push(p);
     }
-    return Array.from(grid.entries())
+
+    const normalClusters = Array.from(grid.entries())
       .filter(([, group]) => group.length >= 2)
       .map(([key, group]) => {
         const lat = group.reduce((s, p) => s + p.lat, 0) / group.length;
         const lon = group.reduce((s, p) => s + p.lon, 0) / group.length;
         const vc = new Map<string, number>();
         for (const p of group) vc.set(p.ville || '', (vc.get(p.ville || '') || 0) + 1);
-        const ville = [...vc.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || 'Hub';
+        let ville = [...vc.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || 'Hub';
+        // Apply name overrides
+        if (HUB_NAME_OVERRIDES[ville]) ville = HUB_NAME_OVERRIDES[ville];
         return { key, lat, lon, ville, platforms: group };
       });
+
+    // Step 3: Create forced hub entries
+    const forcedClusters = Array.from(forcedPlatforms.entries()).map(([name, group]) => {
+      const lat = group.reduce((s, p) => s + p.lat, 0) / group.length;
+      const lon = group.reduce((s, p) => s + p.lon, 0) / group.length;
+      return { key: `forced-${name}`, lat, lon, ville: name, platforms: group };
+    });
+
+    return [...normalClusters, ...forcedClusters];
   }, [platforms]);
 
   const clusteredSites = useMemo(() => {
     const s = new Set<string>();
     for (const c of hubClusters) for (const p of c.platforms) s.add(p.site);
     return s;
+  }, [hubClusters]);
+
+  // Map each platform site to its hub name (for "vers X" labels)
+  const siteToHub = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const c of hubClusters) {
+      for (const p of c.platforms) m.set(p.site, c.ville);
+    }
+    return m;
   }, [hubClusters]);
 
   const showClusters = zoom < HUB_CLUSTER_ZOOM;
@@ -396,7 +448,7 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
                   </div>
                 </div>
               </Tooltip>
-              <Popup maxWidth={300} minWidth={240}>
+              <Popup maxWidth={320} minWidth={260}>
                 <div style={{ fontFamily: 'inherit' }}>
                   <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>
                     Hub {cluster.ville}
@@ -404,6 +456,43 @@ export default function PlatformMarkers({ platforms, routes }: PlatformMarkersPr
                   <div style={{ fontSize: 11, color: '#888', marginBottom: 10 }}>
                     {clusterVisible.length} plateformes · {totalVolume} trains/sem
                   </div>
+
+                  {/* Destinations "vers X" */}
+                  {(() => {
+                    const hubSites = new Set(cluster.platforms.map(p => p.site));
+                    const destFreq = new Map<string, number>();
+                    for (const p of cluster.platforms) {
+                      for (const r of routes) {
+                        let dest: string | null = null;
+                        if (r.from === p.site && !hubSites.has(r.to)) dest = r.to;
+                        if (r.to === p.site && !hubSites.has(r.from)) dest = r.from;
+                        if (dest) {
+                          const hubName = siteToHub.get(dest) || dest.split(' - ')[0].split(' (')[0].trim();
+                          destFreq.set(hubName, (destFreq.get(hubName) || 0) + r.freq);
+                        }
+                      }
+                    }
+                    const sortedDests = [...destFreq.entries()].sort((a, b) => b[1] - a[1]);
+                    if (sortedDests.length === 0) return null;
+                    return (
+                      <div style={{ marginBottom: 10, padding: '6px 8px', background: 'rgba(103,151,143,0.08)', borderRadius: 6 }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: '#67978f', marginBottom: 4 }}>
+                          Destinations
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 8px' }}>
+                          {sortedDests.slice(0, 12).map(([name, freq]) => (
+                            <span key={name} style={{ fontSize: 10, color: '#555', whiteSpace: 'nowrap' }}>
+                              vers {name} <span style={{ fontFamily: 'monospace', fontSize: 9, color: '#38d9f5' }}>({freq}/s)</span>
+                            </span>
+                          ))}
+                          {sortedDests.length > 12 && (
+                            <span style={{ fontSize: 9, color: '#888' }}>+{sortedDests.length - 12} autres</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {sortedCluster.map((p) => {
                       const vol = platformVolumes.get(p.site) || 0;

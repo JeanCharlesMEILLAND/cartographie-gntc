@@ -9,6 +9,7 @@ import FrequencySlider from './FrequencySlider';
 // TileSelector supprimé — fond de carte fixe
 import LayerToggles from './LayerToggles';
 import PlatformList from './PlatformList';
+import ContactsModal from './ContactsModal';
 
 export default function FilterPanel() {
   const { panelCollapsed, setPanelCollapsed } = useFilterStore();
@@ -95,6 +96,10 @@ export default function FilterPanel() {
 
           <div className="border-t border-border pt-4">
             <LayerToggles />
+          </div>
+
+          <div className="border-t border-border pt-4">
+            <ContactsModal />
           </div>
 
           {/* Spacer for mobile bottom safe area */}
