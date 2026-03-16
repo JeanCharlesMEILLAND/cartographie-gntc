@@ -8,8 +8,12 @@ import { Platform, AggregatedRoute, Service } from '@/lib/types';
 
 function MapClickHandler() {
   const setSelectedPlatform = useFilterStore((s) => s.setSelectedPlatform);
+  const setSelectedCorridor = useFilterStore((s) => s.setSelectedCorridor);
   useMapEvents({
-    click: () => setSelectedPlatform(null),
+    click: () => {
+      setSelectedPlatform(null);
+      setSelectedCorridor(null);
+    },
   });
   return null;
 }

@@ -30,6 +30,13 @@ interface FilterState {
   // Selected platform for InfoCard
   selectedPlatform: string | null;
 
+  // Selected corridor (route click)
+  selectedCorridor: {
+    operators: string[];
+    platforms: string[];
+    freq: number;
+  } | null;
+
   // Filter panel collapsed
   panelCollapsed: boolean;
 
@@ -49,6 +56,7 @@ interface FilterState {
   toggleLayer: (layer: 'showRoutes' | 'showPlatforms' | 'showLabels' | 'showWaterways' | 'showPorts' | 'showFranceBorder') => void;
   setTileStyle: (style: string) => void;
   setSelectedPlatform: (name: string | null) => void;
+  setSelectedCorridor: (corridor: { operators: string[]; platforms: string[]; freq: number } | null) => void;
   setSelectedPlatformOperators: (ops: Set<string> | null) => void;
   setPanelCollapsed: (collapsed: boolean) => void;
   setAllOperators: (operators: string[]) => void;
@@ -81,6 +89,7 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   tileStyle: 'osm-dark',
 
   selectedPlatform: null,
+  selectedCorridor: null,
   panelCollapsed: false,
 
   showClock: false,
@@ -115,7 +124,8 @@ export const useFilterStore = create<FilterState>((set, get) => ({
 
   setTileStyle: (style) => set({ tileStyle: style }),
 
-  setSelectedPlatform: (name) => set({ selectedPlatform: name }),
+  setSelectedPlatform: (name) => set({ selectedPlatform: name, selectedCorridor: null }),
+  setSelectedCorridor: (corridor) => set({ selectedCorridor: corridor, selectedPlatform: null }),
 
   setSelectedPlatformOperators: (ops) => set({ selectedPlatformOperators: ops }),
 

@@ -294,7 +294,7 @@ function splitPathForOperators(
 // ─── Component ─────────────────────────────────────────────────────────
 
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
-  const { showRoutes, selectedPlatform, activeOperators } = useFilterStore();
+  const { showRoutes, selectedPlatform, activeOperators, setSelectedCorridor } = useFilterStore();
   const { results, highlightedRouteIndex } = useSearchStore();
 
   const searchActive = highlightedRouteIndex !== null && results.length > 0;
@@ -336,6 +336,14 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
 
     const ops = corridor.operators;
 
+    const handleClick = () => {
+      setSelectedCorridor({
+        operators: ops,
+        platforms: Array.from(corridor.platforms),
+        freq: corridor.freq,
+      });
+    };
+
     if (ops.length <= 1) {
       const color = getOperatorColor(ops[0] || 'unknown');
       elements.push(
@@ -351,6 +359,7 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
                   weight: isConnected ? weight + 1.5 : dimmed ? 1 : weight,
                 }
           }
+          eventHandlers={{ click: handleClick }}
         />
       );
     } else {
@@ -374,6 +383,7 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
                     weight: isConnected ? multiWeight + 1.5 : dimmed ? 1 : multiWeight,
                   }
             }
+            eventHandlers={{ click: handleClick }}
           />
         );
       }

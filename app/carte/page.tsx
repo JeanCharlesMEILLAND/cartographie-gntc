@@ -8,6 +8,7 @@ import FilterPanel from '@/components/Filters/FilterPanel';
 import KPIBar from '@/components/Dashboard/KPIBar';
 import CO2Badge from '@/components/Dashboard/CO2Badge';
 import InfoCard from '@/components/InfoCard';
+import RouteInfoCard from '@/components/RouteInfoCard';
 import Legend from '@/components/Legend';
 import SearchPanel from '@/components/Search/SearchPanel';
 import TimeControl from '@/components/Clock/TimeControl';
@@ -16,6 +17,7 @@ import { dayTimeToMinutes, getTrainProgress } from '@/lib/trainClock';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { LoadingScreen } from '@cartographie/shared/ui';
 import ChatWidget from '@/components/Chat/ChatWidget';
+import { trackPageView } from '@/lib/analytics';
 
 export default function CartePage() {
   const [data, setData] = useState<TransportData | null>(null);
@@ -40,6 +42,9 @@ export default function CartePage() {
     clockDay,
     clockTime,
   } = useFilterStore();
+
+  // Track page view
+  useEffect(() => { trackPageView(); }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -300,6 +305,7 @@ export default function CartePage() {
       <SearchPanel platforms={data?.platforms || []} services={data?.services || []} routes={filteredRoutes} />
 
       <InfoCard platforms={data?.platforms || []} routes={filteredRoutes} services={data?.services || []} />
+      <RouteInfoCard routes={filteredRoutes} services={data?.services || []} />
 
       <TimeControl trainCount={clockTrainCount} />
 
