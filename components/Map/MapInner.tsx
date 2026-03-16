@@ -11,6 +11,8 @@ function MapClickHandler() {
   const setSelectedCorridor = useFilterStore((s) => s.setSelectedCorridor);
   useMapEvents({
     click: () => {
+      // Skip if a corridor polyline was just clicked (canvas events don't bubble properly)
+      if (wasCorridorClicked()) return;
       setSelectedPlatform(null);
       setSelectedCorridor(null);
     },
@@ -44,7 +46,7 @@ function MapZoomHandler() {
   return null;
 }
 import FranceBorder from './FranceBorder';
-import RouteLayer from './RouteLayer';
+import RouteLayer, { wasCorridorClicked } from './RouteLayer';
 import TrainMarkers from './TrainMarkers';
 import WaterwayLayer from './WaterwayLayer';
 import PortLayer from './PortLayer';

@@ -294,6 +294,12 @@ function splitPathForOperators(
 
 // ─── Component ─────────────────────────────────────────────────────────
 
+// Flag to prevent map click from clearing corridor immediately after polyline click
+let _corridorClickedAt = 0;
+export function wasCorridorClicked() {
+  return Date.now() - _corridorClickedAt < 300;
+}
+
 export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) {
   const { showRoutes, selectedPlatform, activeOperators, setSelectedCorridor } = useFilterStore();
   const { results, highlightedRouteIndex } = useSearchStore();
@@ -337,8 +343,8 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
 
     const ops = corridor.operators;
 
-    const handleClick = (e: L.LeafletMouseEvent) => {
-      L.DomEvent.stopPropagation(e.originalEvent);
+    const handleClick = () => {
+      _corridorClickedAt = Date.now();
       setSelectedCorridor({
         operators: ops,
         platforms: Array.from(corridor.platforms),
@@ -390,6 +396,16 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
         );
       }
     }
+
+    // Invisible wide polyline for easier click detection (fat finger area)
+    elements.push(
+      <Polyline
+        key={`c${i}-hit`}
+        positions={corridor.points}
+        pathOptions={{ color: '#000', opacity: 0, weight: 20, interactive: true }}
+        eventHandlers={{ click: handleClick }}
+      />
+    );
   }
 
   return <>{elements}</>;
