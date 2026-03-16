@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import L from 'leaflet';
 import { Polyline } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
 import { useSearchStore } from '@/store/useSearchStore';
@@ -336,7 +337,8 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
 
     const ops = corridor.operators;
 
-    const handleClick = () => {
+    const handleClick = (e: L.LeafletMouseEvent) => {
+      L.DomEvent.stopPropagation(e.originalEvent);
       setSelectedCorridor({
         operators: ops,
         platforms: Array.from(corridor.platforms),
