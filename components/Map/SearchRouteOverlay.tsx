@@ -1,7 +1,8 @@
 'use client';
 
-import { Fragment } from 'react';
-import { Polyline, CircleMarker, Tooltip } from 'react-leaflet';
+import { Fragment, useMemo } from 'react';
+import L from 'leaflet';
+import { Polyline, CircleMarker, Marker, Tooltip } from 'react-leaflet';
 import { useSearchStore } from '@/store/useSearchStore';
 import { getBezierPoints } from '@cartographie/shared/utils';
 import { getOperatorColor } from '@/lib/colors';
@@ -43,7 +44,38 @@ function getPoints(
 const ROAD_COLOR = '#F59E0B'; // amber/orange for road segments
 const ROAD_MIN_DISTANCE = 5; // km — don't show road segment if < 5km
 
+/** Find midpoint of a polyline path */
+function getMidpoint(positions: [number, number][]): [number, number] {
+  if (positions.length === 0) return [0, 0];
+  if (positions.length === 1) return positions[0];
+  const mid = Math.floor(positions.length / 2);
+  return positions[mid];
+}
+
+/** Truck icon for road segments */
+function createTruckIcon() {
+  return L.divIcon({
+    className: '',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    html: `<div style="
+      width:28px;height:28px;
+      background:#F59E0B;
+      border:2px solid #fff;
+      border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 2px 6px rgba(0,0,0,0.3);
+    "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 3h15v13H1z"/>
+      <path d="M16 8h4l3 3v5h-7V8z"/>
+      <circle cx="5.5" cy="18.5" r="2.5"/>
+      <circle cx="18.5" cy="18.5" r="2.5"/>
+    </svg></div>`,
+  });
+}
+
 export default function SearchRouteOverlay({ railGeometries }: SearchRouteOverlayProps) {
+  const truckIcon = useMemo(() => createTruckIcon(), []);
   const { results, highlightedRouteIndex, roadRouting } = useSearchStore();
 
   if (highlightedRouteIndex === null || !results[highlightedRouteIndex]) return null;
@@ -95,6 +127,8 @@ export default function SearchRouteOverlay({ railGeometries }: SearchRouteOverla
                 lineJoin: 'round',
               }}
             />
+            {/* Truck icon at midpoint */}
+            <Marker position={getMidpoint(prePositions)} icon={truckIcon} interactive={false} />
             {/* Origin city marker */}
             <CircleMarker
               center={[roadRouting.originLat, roadRouting.originLon]}
@@ -215,6 +249,8 @@ export default function SearchRouteOverlay({ railGeometries }: SearchRouteOverla
                 lineJoin: 'round',
               }}
             />
+            {/* Truck icon at midpoint */}
+            <Marker position={getMidpoint(postPositions)} icon={truckIcon} interactive={false} />
             {/* Destination city marker */}
             <CircleMarker
               center={[roadRouting.destLat, roadRouting.destLon]}
