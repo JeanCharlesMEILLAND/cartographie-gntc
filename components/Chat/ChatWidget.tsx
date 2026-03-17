@@ -53,7 +53,7 @@ function parseTransportQuery(text: string): { from: string; to: string } | null 
     .toLowerCase()
     .trim();
 
-  // Patterns: "de X à Y", "de X vers Y", "de X a Y", "X → Y", "X - Y", "depuis X jusqu'à Y", "entre X et Y"
+  // Patterns: "de X à Y", "Paris Lyon", "Paris à Lyon", etc.
   const patterns = [
     /(?:transporter|envoyer|expedier|acheminer|livrer|faire\s+partir).*?(?:de|depuis)\s+(.+?)\s+(?:a|à|vers|jusqu'a|jusqu'à|direction)\s+(.+?)(?:\s*[?.!]|$)/,
     /(?:de|depuis)\s+(.+?)\s+(?:a|à|vers|jusqu'a|jusqu'à|direction)\s+(.+?)(?:\s*[?.!]|$)/,
@@ -61,6 +61,12 @@ function parseTransportQuery(text: string): { from: string; to: string } | null 
     /(?:^|\s)([a-zà-ÿ\s-]+?)\s*(?:→|->|=>)\s*([a-zà-ÿ\s-]+)/,
     /(?:trajet|liaison|itineraire|route|solution).*?(.+?)\s+(?:a|à|vers)\s+(.+?)(?:\s*[?.!]|$)/,
     /(?:comment).*?(?:de|depuis)\s+(.+?)\s+(?:a|à|vers)\s+(.+?)(?:\s*[?.!]|$)/,
+    // "Paris à Lyon", "Paris vers Lyon" (without "de")
+    /^(.+?)\s+(?:a|à|vers|direction)\s+(.+?)(?:\s*[?.!]|$)/,
+    // "trajet Paris Lyon", "liaison Paris Lyon"
+    /(?:trajet|liaison|itineraire|route|transport)\s+([a-zà-ÿ\s-]+?)\s{1,3}([a-zà-ÿ\s-]+?)(?:\s*[?.!]|$)/,
+    // Last resort: "Paris Lyon" (two words, no prepositions)
+    /^([a-zà-ÿ][\wà-ÿ-]{1,20})\s{1,3}([a-zà-ÿ][\wà-ÿ-]{1,20})\s*$/,
   ];
 
   for (const pattern of patterns) {

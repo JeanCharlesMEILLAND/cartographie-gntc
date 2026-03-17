@@ -1081,32 +1081,73 @@ export default function SearchPanel({ platforms, services, routes }: SearchPanel
       )}
 
       {/* Results — only shown when there are results */}
-      {results.length > 0 && (
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-muted uppercase tracking-wider">
-              {results.length} solution{results.length > 1 ? 's' : ''} disponible{results.length > 1 ? 's' : ''}
-            </span>
-            <button
-              onClick={() => { clearSearch(); setFormCollapsed(false); setRoadRouting(null); setTypedDepCity(''); setTypedArrCity(''); }}
-              className="text-[10px] text-muted hover:text-orange transition-colors"
-            >
-              Effacer
-            </button>
+      {results.length > 0 && (() => {
+        const directResults = results.filter((r) => r.type === 'direct');
+        const transferResults = results.filter((r) => r.type === 'transfer');
+        return (
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-muted uppercase tracking-wider">
+                {results.length} solution{results.length > 1 ? 's' : ''} disponible{results.length > 1 ? 's' : ''}
+              </span>
+              <button
+                onClick={() => { clearSearch(); setFormCollapsed(false); setRoadRouting(null); setTypedDepCity(''); setTypedArrCity(''); }}
+                className="text-[10px] text-muted hover:text-orange transition-colors"
+              >
+                Effacer
+              </button>
+            </div>
+
+            {/* Direct routes section */}
+            {directResults.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-green-500/20 text-green-400">Direct</span>
+                  <span className="text-[10px] text-muted">{directResults.length} liaison{directResults.length > 1 ? 's' : ''} sans correspondance</span>
+                </div>
+                {directResults.map((route) => {
+                  const origIndex = results.indexOf(route);
+                  return (
+                    <RouteCard
+                      key={origIndex}
+                      route={route}
+                      index={origIndex}
+                      isHighlighted={highlightedRouteIndex === origIndex}
+                      onHighlight={setHighlightedRouteIndex}
+                      roadRouting={roadRouting}
+                      autoExpand={results.length === 1}
+                    />
+                  );
+                })}
+              </>
+            )}
+
+            {/* Transfer routes section */}
+            {transferResults.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 pt-2 border-t border-border mt-1">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-orange-500/20 text-orange-400">Corresp.</span>
+                  <span className="text-[10px] text-muted">{transferResults.length} avec changement de train</span>
+                </div>
+                {transferResults.map((route) => {
+                  const origIndex = results.indexOf(route);
+                  return (
+                    <RouteCard
+                      key={origIndex}
+                      route={route}
+                      index={origIndex}
+                      isHighlighted={highlightedRouteIndex === origIndex}
+                      onHighlight={setHighlightedRouteIndex}
+                      roadRouting={roadRouting}
+                      autoExpand={results.length === 1}
+                    />
+                  );
+                })}
+              </>
+            )}
           </div>
-          {results.map((route, i) => (
-            <RouteCard
-              key={i}
-              route={route}
-              index={i}
-              isHighlighted={highlightedRouteIndex === i}
-              onHighlight={setHighlightedRouteIndex}
-              roadRouting={roadRouting}
-              autoExpand={results.length === 1 && i === 0}
-            />
-          ))}
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
