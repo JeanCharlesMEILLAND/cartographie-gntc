@@ -638,8 +638,16 @@ export function findRoutes(
     return totalDist / directDist;
   };
 
+  // Filter out transfer routes with absurd detours (e.g. Paris → Marseille → Lyon)
+  // Max detour ratio: 1.8 = route can be at most 80% longer than direct distance
+  const MAX_DETOUR_RATIO = 1.8;
+  const filtered = results.filter((r) => {
+    if (r.type === 'direct') return true;
+    return getDetourRatio(r) <= MAX_DETOUR_RATIO;
+  });
+
   // Sort: direct first, then by detour ratio (lower = better), then by frequency
-  results.sort((a, b) => {
+  filtered.sort((a, b) => {
     if (a.type !== b.type) return a.type === 'direct' ? -1 : 1;
     if (a.type === 'transfer' && b.type === 'transfer') {
       const detourA = getDetourRatio(a);
@@ -652,7 +660,7 @@ export function findRoutes(
 
   // Deduplicate: keep best route per unique path
   const seen = new Set<string>();
-  return results.filter((r) => {
+  return filtered.filter((r) => {
     const key = r.legs.map((l) => `${l.from}-${l.to}-${l.operator}`).join('|');
     if (seen.has(key)) return false;
     seen.add(key);
