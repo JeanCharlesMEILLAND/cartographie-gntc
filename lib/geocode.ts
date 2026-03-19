@@ -107,9 +107,16 @@ export const GEOCODE_DICT: Record<string, [number, number]> = {
   "Bari Ferruccio": [41.12, 16.87],
   "Borgo San Dalmazzo": [44.33, 7.49],
   "Domodossola - CargoBeamer": [46.12, 8.29],
+  "Dourges": [50.44, 2.97],
+  "Milan Segrate": [45.49, 9.29],
   "Manopello": [42.26, 14.06],
   "Pomezia": [41.67, 12.5],
   "Vicenza": [45.55, 11.55],
+  "Bonneuil-sur-Marne": [48.77, 2.49],
+  "Clermont Ferrand La combaude": [45.78, 3.08],
+  "ANVERS MAIN HUB": [51.26, 4.35],
+  "ROTTERDAM": [51.92, 4.48],
+  "Le Boulou Autoroute ferroviaire": [42.52, 2.83],
 };
 
 export function geocodePlatform(name: string): [number, number] | null {
