@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getBezierPoints } from '@cartographie/shared/utils';
+import { getBezierPoints } from '@/lib/bezier';
 
 describe('getBezierPoints', () => {
   const fromLat = 48.856;

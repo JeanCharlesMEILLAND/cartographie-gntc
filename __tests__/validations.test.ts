@@ -7,7 +7,7 @@ import {
   updateOperatorSchema,
   railGeometrySchema,
   transportDataSchema,
-} from '@cartographie/shared/utils';
+} from '@/lib/validations';
 
 describe('createUserSchema', () => {
   it('accepts valid user data', () => {
