@@ -252,15 +252,79 @@ function buildCorridors(
     }
   }
 
+  // ── Step 4.5: Merge geographically overlapping trunks ──
+  // Different routes on the same physical rail line may have slightly different
+  // geometries (BRouter variations), creating separate trunks that should be merged.
+  const trunkList = Array.from(trunkMap.entries());
+  const merged = new Set<string>();
+
+  for (let i = 0; i < trunkList.length; i++) {
+    if (merged.has(trunkList[i][0])) continue;
+    const [keyA, trunkA] = trunkList[i];
+
+    // Sample midpoint of trunk A
+    const midA = trunkA.points[Math.floor(trunkA.points.length / 2)];
+    const lenA = approxDist(
+      trunkA.points[0][0], trunkA.points[0][1],
+      trunkA.points[trunkA.points.length - 1][0], trunkA.points[trunkA.points.length - 1][1]
+    );
+    if (lenA < 20) continue; // Skip very short trunks
+
+    for (let j = i + 1; j < trunkList.length; j++) {
+      if (merged.has(trunkList[j][0])) continue;
+      const [keyB, trunkB] = trunkList[j];
+
+      // Quick check: midpoints must be close
+      const midB = trunkB.points[Math.floor(trunkB.points.length / 2)];
+      if (approxDist(midA[0], midA[1], midB[0], midB[1]) > 40) continue;
+
+      // Check if trunks overlap: sample 5 points from each and check mutual proximity
+      const samplesA = [0, 0.25, 0.5, 0.75, 1].map(f =>
+        trunkA.points[Math.min(Math.floor(f * (trunkA.points.length - 1)), trunkA.points.length - 1)]
+      );
+      const samplesB = [0, 0.25, 0.5, 0.75, 1].map(f =>
+        trunkB.points[Math.min(Math.floor(f * (trunkB.points.length - 1)), trunkB.points.length - 1)]
+      );
+
+      // Each sample from A must be within 20km of some point in B, and vice versa
+      const aCloseToB = samplesA.filter(pa =>
+        samplesB.some(pb => approxDist(pa[0], pa[1], pb[0], pb[1]) < 20)
+      ).length;
+      const bCloseToA = samplesB.filter(pb =>
+        samplesA.some(pa => approxDist(pa[0], pa[1], pb[0], pb[1]) < 20)
+      ).length;
+
+      // Both trunks must have ≥80% of samples near the other
+      if (aCloseToB >= 4 && bCloseToA >= 4) {
+        // Merge B into A
+        trunkB.operators.forEach(op => {
+          trunkA.operators.add(op);
+          if (!trunkA.operatorPlatforms.has(op)) trunkA.operatorPlatforms.set(op, new Set());
+          const bPlats = trunkB.operatorPlatforms.get(op);
+          if (bPlats) bPlats.forEach(p => trunkA.operatorPlatforms.get(op)!.add(p));
+        });
+        trunkA.freq = Math.max(trunkA.freq, trunkB.freq);
+        trunkB.platforms.forEach(p => trunkA.platforms.add(p));
+        trunkB.routePairs.forEach(p => trunkA.routePairs.add(p));
+        if (trunkB.points.length > trunkA.points.length) {
+          trunkA.points = trunkB.points;
+        }
+        merged.add(keyB);
+      }
+    }
+  }
+
   // ── Step 5: Convert to corridors ──
-  return Array.from(trunkMap.values()).map(trunk => ({
-    points: trunk.points,
-    operators: Array.from(trunk.operators),
-    freq: trunk.freq,
-    platforms: trunk.platforms,
-    routePairs: trunk.routePairs,
-    operatorPlatforms: trunk.operatorPlatforms,
-  }));
+  return trunkList
+    .filter(([key]) => !merged.has(key))
+    .map(([, trunk]) => ({
+      points: trunk.points,
+      operators: Array.from(trunk.operators),
+      freq: trunk.freq,
+      platforms: trunk.platforms,
+      routePairs: trunk.routePairs,
+      operatorPlatforms: trunk.operatorPlatforms,
+    }));
 }
 
 // ─── Path splitting for multicolor display ─────────────────────────────
