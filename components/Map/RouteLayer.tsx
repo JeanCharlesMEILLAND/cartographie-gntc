@@ -55,6 +55,19 @@ function approxDist(lat1: number, lon1: number, lat2: number, lon2: number): num
   return R * Math.sqrt(dLat * dLat + dLon * dLon);
 }
 
+/** Distance from a point to a line segment (km) — robust for sparse geometries */
+function pointToSegmentDist(
+  px: number, py: number,
+  ax: number, ay: number,
+  bx: number, by: number
+): number {
+  const dx = bx - ax, dy = by - ay;
+  const len2 = dx * dx + dy * dy;
+  if (len2 === 0) return approxDist(px, py, ax, ay);
+  const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / len2));
+  return approxDist(px, py, ax + t * dx, ay + t * dy);
+}
+
 // ── Union-Find for clustering nearby platforms into "metro areas" ──
 
 class UnionFind {
@@ -81,7 +94,7 @@ class UnionFind {
 // ── Thresholds ──
 
 const CLUSTER_RADIUS = 15; // km — merge platforms in the same metro area
-const WAYPOINT_RADIUS = 20; // km — route must pass within this of a platform
+const WAYPOINT_RADIUS = 15; // km — route must pass within this of a platform (uses point-to-segment distance)
 const ENDPOINT_MARGIN = 3; // skip first/last N geometry points (avoid false positives near endpoints)
 
 interface Corridor {
@@ -158,8 +171,12 @@ function buildCorridors(
       let minDist = Infinity;
       let minIdx = -1;
       for (const member of members) {
-        for (let i = ENDPOINT_MARGIN; i < points.length - ENDPOINT_MARGIN; i++) {
-          const d = approxDist(points[i][0], points[i][1], member.lat, member.lon);
+        for (let i = ENDPOINT_MARGIN; i < points.length - ENDPOINT_MARGIN - 1; i++) {
+          const d = pointToSegmentDist(
+            member.lat, member.lon,
+            points[i][0], points[i][1],
+            points[i + 1][0], points[i + 1][1]
+          );
           if (d < minDist) {
             minDist = d;
             minIdx = i;
