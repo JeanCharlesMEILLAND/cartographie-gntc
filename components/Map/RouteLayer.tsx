@@ -90,6 +90,7 @@ interface Corridor {
   freq: number;
   platforms: Set<string>;
   routePairs: Set<string>;
+  operatorPlatforms: Map<string, Set<string>>;
 }
 
 interface TrunkInfo {
@@ -98,6 +99,7 @@ interface TrunkInfo {
   freq: number;
   platforms: Set<string>;
   routePairs: Set<string>;
+  operatorPlatforms: Map<string, Set<string>>; // operator → set of platforms it serves on this trunk
 }
 
 function buildCorridors(
@@ -203,7 +205,12 @@ function buildCorridors(
 
       const existing = trunkMap.get(trunkKey);
       if (existing) {
-        routeOps.forEach(op => existing.operators.add(op));
+        routeOps.forEach(op => {
+          existing.operators.add(op);
+          if (!existing.operatorPlatforms.has(op)) existing.operatorPlatforms.set(op, new Set());
+          existing.operatorPlatforms.get(op)!.add(route.from);
+          existing.operatorPlatforms.get(op)!.add(route.to);
+        });
         existing.freq = Math.max(existing.freq, route.freq);
         existing.platforms.add(route.from);
         existing.platforms.add(route.to);
@@ -214,12 +221,15 @@ function buildCorridors(
           existing.points = segPoints;
         }
       } else {
+        const opPlats = new Map<string, Set<string>>();
+        routeOps.forEach(op => opPlats.set(op, new Set([route.from, route.to])));
         trunkMap.set(trunkKey, {
           points: segPoints,
           operators: new Set(routeOps),
           freq: route.freq,
           platforms: new Set([route.from, route.to]),
           routePairs: new Set([pairKey1, pairKey2]),
+          operatorPlatforms: opPlats,
         });
       }
     }
@@ -232,6 +242,7 @@ function buildCorridors(
     freq: trunk.freq,
     platforms: trunk.platforms,
     routePairs: trunk.routePairs,
+    operatorPlatforms: trunk.operatorPlatforms,
   }));
 }
 
@@ -341,7 +352,14 @@ export default function RouteLayer({ routes, railGeometries }: RouteLayerProps) 
       : false;
     const dimmed = selectedPlatform && !isConnected;
 
-    const ops = corridor.operators;
+    // When a platform is selected, only show operators that actually serve it
+    const ops = (selectedPlatform && isConnected)
+      ? corridor.operators.filter(op => {
+          const plats = corridor.operatorPlatforms.get(op);
+          return plats ? plats.has(selectedPlatform) : false;
+        })
+      : corridor.operators;
+    if (ops.length === 0) continue;
 
     const handleClick = () => {
       _corridorClickedAt = Date.now();
