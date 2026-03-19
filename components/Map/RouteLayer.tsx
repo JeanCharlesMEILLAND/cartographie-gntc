@@ -81,7 +81,7 @@ class UnionFind {
 // ── Thresholds ──
 
 const CLUSTER_RADIUS = 15; // km — merge platforms in the same metro area
-const WAYPOINT_RADIUS = 8; // km — route must pass within this of a platform
+const WAYPOINT_RADIUS = 20; // km — route must pass within this of a platform
 const ENDPOINT_MARGIN = 3; // skip first/last N geometry points (avoid false positives near endpoints)
 
 interface Corridor {
