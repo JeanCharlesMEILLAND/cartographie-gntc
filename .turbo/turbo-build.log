@@ -1,0 +1,21 @@
+
+> transport-combine@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+thread '<unnamed>' panicked at C:\Users\Administrator\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.11.0\src\registry.rs:170:10:
+The global thread pool has not been initialized.: ThreadPoolBuildError { kind: IOError(Os { code: 1455, kind: Uncategorized, message: "The paging file is too small for this operation to complete." }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+thread '<unnamed>' panicked at C:\Users\Administrator\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.11.0\src\registry.rs:170:10:
+The global thread pool has not been initialized.: ThreadPoolBuildError { kind: GlobalPoolAlreadyInitialized }
+Next.js build worker exited with code: 3221226505 and signal: null
+npm error Lifecycle script `build` failed with error:
+npm error code 3221226505
+npm error path C:\Users\jcmei\OneDrive\Bureau\Cartographie\apps\transport-combine
+npm error workspace transport-combine@0.1.0
+npm error location C:\Users\jcmei\OneDrive\Bureau\Cartographie\apps\transport-combine
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next build
