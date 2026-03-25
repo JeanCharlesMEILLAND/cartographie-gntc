@@ -295,7 +295,22 @@ function buildCorridors(
       ).length;
 
       // Both trunks must have ≥80% of samples near the other
-      if (aCloseToB >= 4 && bCloseToA >= 4) {
+      // AND endpoints must match: each endpoint of A must be near an endpoint of B
+      // (prevents false merges like Tours→Paris and Le Mans→Paris)
+      const endA0 = trunkA.points[0];
+      const endA1 = trunkA.points[trunkA.points.length - 1];
+      const endB0 = trunkB.points[0];
+      const endB1 = trunkB.points[trunkB.points.length - 1];
+      const endA0near = Math.min(
+        approxDist(endA0[0], endA0[1], endB0[0], endB0[1]),
+        approxDist(endA0[0], endA0[1], endB1[0], endB1[1])
+      ) < 50;
+      const endA1near = Math.min(
+        approxDist(endA1[0], endA1[1], endB0[0], endB0[1]),
+        approxDist(endA1[0], endA1[1], endB1[0], endB1[1])
+      ) < 50;
+
+      if (aCloseToB >= 4 && bCloseToA >= 4 && endA0near && endA1near) {
         // Merge B into A
         trunkB.operators.forEach(op => {
           trunkA.operators.add(op);
